@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db, storage } from '../../firebase';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { uploadBuilderProject, clearMessages } from '../../store/slices/buildersSlice';
+import type { AppDispatch, RootState } from '../../store/store';
 import { Upload } from 'lucide-react';
 
 const ProjectUpload = () => {
@@ -9,11 +9,12 @@ const ProjectUpload = () => {
     const [description, setDescription] = useState('');
     const [location, setLocation] = useState('');
     const [image, setImage] = useState<File | null>(null);
-    const [uploading, setUploading] = useState(false);
-    const [message, setMessage] = useState({ type: '', text: '' });
     const [preview, setPreview] = useState<string | null>(null);
 
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const dispatch = useDispatch<AppDispatch>();
+    const { loading, error, successMessage } = useSelector((state: RootState) => state.builders);
+
+    const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
             setImage(file);
@@ -21,40 +22,22 @@ const ProjectUpload = () => {
         }
     };
 
-    const handleUpload = async (e: React.FormEvent) => {
+    const handleUpload = async (e: FormEvent) => {
         e.preventDefault();
-        if (!image) {
-            setMessage({ type: 'error', text: 'Please select a main project image.' });
-            return;
-        }
+        if (!image) return;
 
-        setUploading(true);
-        setMessage({ type: '', text: '' });
+        dispatch(clearMessages());
+        const result = await dispatch(uploadBuilderProject({
+            data: { title, description, location },
+            file: image
+        }));
 
-        try {
-            const storageRef = ref(storage, `builder_projects/${Date.now()}_${image.name}`);
-            const snapshot = await uploadBytes(storageRef, image);
-            const downloadURL = await getDownloadURL(snapshot.ref);
-
-            await addDoc(collection(db, 'builder_projects'), {
-                title,
-                description,
-                location,
-                imageUrl: downloadURL,
-                createdAt: serverTimestamp(),
-            });
-
-            setMessage({ type: 'success', text: 'Project uploaded successfully!' });
+        if (uploadBuilderProject.fulfilled.match(result)) {
             setTitle('');
             setDescription('');
             setLocation('');
             setImage(null);
             setPreview(null);
-        } catch (error) {
-            console.error("Error uploading project: ", error);
-            setMessage({ type: 'error', text: 'Failed to upload project. Please try again.' });
-        } finally {
-            setUploading(false);
         }
     };
 
@@ -62,15 +45,15 @@ const ProjectUpload = () => {
         <div style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
             <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1.5rem', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.5rem' }}>Upload New Project</h3>
 
-            {message.text && (
-                <div style={{
-                    padding: '1rem',
-                    marginBottom: '1rem',
-                    borderRadius: '4px',
-                    backgroundColor: message.type === 'success' ? '#dcfce7' : '#fee2e2',
-                    color: message.type === 'success' ? '#166534' : '#991b1b'
-                }}>
-                    {message.text}
+            {successMessage && (
+                <div style={{ padding: '1rem', marginBottom: '1rem', borderRadius: '4px', backgroundColor: '#dcfce7', color: '#166534' }}>
+                    {successMessage}
+                </div>
+            )}
+
+            {error && (
+                <div style={{ padding: '1rem', marginBottom: '1rem', borderRadius: '4px', backgroundColor: '#fee2e2', color: '#991b1b' }}>
+                    {error}
                 </div>
             )}
 
@@ -133,21 +116,22 @@ const ProjectUpload = () => {
 
                 <button
                     type="submit"
-                    disabled={uploading}
+                    disabled={loading || !image}
                     style={{
                         gridColumn: '1 / -1',
                         marginTop: '1rem',
                         padding: '0.75rem',
-                        backgroundColor: uploading ? '#93c5fd' : '#ea580c',
+                        backgroundColor: (loading || !image) ? '#ea580c' : '#ea580c',
+                        opacity: (loading || !image) ? 0.7 : 1,
                         color: 'white',
                         border: 'none',
                         borderRadius: '4px',
-                        cursor: uploading ? 'not-allowed' : 'pointer',
+                        cursor: (loading || !image) ? 'not-allowed' : 'pointer',
                         fontWeight: 'bold',
                         fontSize: '1rem'
                     }}
                 >
-                    {uploading ? 'Uploading...' : 'Publish Project'}
+                    {loading ? 'Uploading...' : 'Publish Project'}
                 </button>
             </form>
         </div>

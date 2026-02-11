@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../store/slices/authSlice';
-import { RootState, AppDispatch } from '../store/store';
+import type { RootState, AppDispatch } from '../store/store';
 
 const Login = () => {
     const [email, setEmail] = useState('');

@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { authService } from '../../services/api';
 
 interface User {
@@ -54,7 +54,7 @@ const authSlice = createSlice({
                 state.loading = true;
                 state.error = null;
             })
-            .addCase(loginUser.fulfilled, (state, action: PayloadAction<{ user: User; token: string }>) => {
+            .addCase(loginUser.fulfilled, (state, action: { payload: { user: User; token: string } }) => {
                 state.loading = false;
                 state.user = action.payload.user;
                 state.token = action.payload.token;

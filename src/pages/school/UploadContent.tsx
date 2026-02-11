@@ -1,34 +1,26 @@
-import React, { useState } from 'react';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { useState, type FormEvent } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { uploadSchoolContent, clearMessages } from '../../store/slices/schoolSlice';
+import type { AppDispatch, RootState } from '../../store/store';
 
 const UploadContent = () => {
     const [title, setTitle] = useState('');
     const [body, setBody] = useState('');
     const [category, setCategory] = useState('announcement');
-    const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState({ type: '', text: '' });
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const dispatch = useDispatch<AppDispatch>();
+    const { loading, error, successMessage } = useSelector((state: RootState) => state.school);
+
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        setLoading(true);
-        setMessage({ type: '', text: '' });
+        dispatch(clearMessages());
 
-        try {
-            await addDoc(collection(db, 'school_content'), {
-                title,
-                body,
-                category,
-                createdAt: serverTimestamp(),
-            });
-            setMessage({ type: 'success', text: 'Content uploaded successfully!' });
+        await dispatch(uploadSchoolContent({ title, body, category }));
+
+        // Reset form on success would be handled by a useEffect ideally or check result here
+        if (!error) {
             setTitle('');
             setBody('');
-        } catch (error) {
-            console.error("Error adding document: ", error);
-            setMessage({ type: 'error', text: 'Error uploading content. Please try again.' });
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -36,15 +28,15 @@ const UploadContent = () => {
         <div style={{ maxWidth: '600px', margin: '0 auto', padding: '2rem', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
             <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1.5rem', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.5rem' }}>Upload New Content</h3>
 
-            {message.text && (
-                <div style={{
-                    padding: '1rem',
-                    marginBottom: '1rem',
-                    borderRadius: '4px',
-                    backgroundColor: message.type === 'success' ? '#dcfce7' : '#fee2e2',
-                    color: message.type === 'success' ? '#166534' : '#991b1b'
-                }}>
-                    {message.text}
+            {successMessage && (
+                <div style={{ padding: '1rem', marginBottom: '1rem', borderRadius: '4px', backgroundColor: '#dcfce7', color: '#166534' }}>
+                    {successMessage}
+                </div>
+            )}
+
+            {error && (
+                <div style={{ padding: '1rem', marginBottom: '1rem', borderRadius: '4px', backgroundColor: '#fee2e2', color: '#991b1b' }}>
+                    {error}
                 </div>
             )}
 

@@ -1,17 +1,18 @@
-import React, { useState } from 'react';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db, storage } from '../../firebase';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { uploadSchoolImage, clearMessages } from '../../store/slices/schoolSlice';
+import type { AppDispatch, RootState } from '../../store/store';
 import { Upload } from 'lucide-react';
 
 const UploadImage = () => {
     const [image, setImage] = useState<File | null>(null);
     const [caption, setCaption] = useState('');
-    const [uploading, setUploading] = useState(false);
-    const [message, setMessage] = useState({ type: '', text: '' });
     const [preview, setPreview] = useState<string | null>(null);
 
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const dispatch = useDispatch<AppDispatch>();
+    const { loading, error, successMessage } = useSelector((state: RootState) => state.school);
+
+    const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
             setImage(file);
@@ -19,36 +20,19 @@ const UploadImage = () => {
         }
     };
 
-    const handleUpload = async (e: React.FormEvent) => {
+    const handleUpload = async (e: FormEvent) => {
         e.preventDefault();
-        if (!image) {
-            setMessage({ type: 'error', text: 'Please select an image first.' });
-            return;
-        }
+        if (!image) return;
 
-        setUploading(true);
-        setMessage({ type: '', text: '' });
+        dispatch(clearMessages());
+        // Note: We need to handle File object properly in serializable state if needed, 
+        // but for AsyncThunk payload it's fine as long as we don't put it directly in slice state.
+        const result = await dispatch(uploadSchoolImage({ file, caption }));
 
-        try {
-            const storageRef = ref(storage, `school_images/${Date.now()}_${image.name}`);
-            const snapshot = await uploadBytes(storageRef, image);
-            const downloadURL = await getDownloadURL(snapshot.ref);
-
-            await addDoc(collection(db, 'school_images'), {
-                url: downloadURL,
-                caption,
-                uploadedAt: serverTimestamp(),
-            });
-
-            setMessage({ type: 'success', text: 'Image uploaded successfully!' });
+        if (uploadSchoolImage.fulfilled.match(result)) {
             setImage(null);
             setCaption('');
             setPreview(null);
-        } catch (error) {
-            console.error("Error uploading image: ", error);
-            setMessage({ type: 'error', text: 'Failed to upload image. Please try again.' });
-        } finally {
-            setUploading(false);
         }
     };
 
@@ -56,15 +40,15 @@ const UploadImage = () => {
         <div style={{ maxWidth: '600px', margin: '0 auto', padding: '2rem', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
             <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1.5rem', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.5rem' }}>Upload Image</h3>
 
-            {message.text && (
-                <div style={{
-                    padding: '1rem',
-                    marginBottom: '1rem',
-                    borderRadius: '4px',
-                    backgroundColor: message.type === 'success' ? '#dcfce7' : '#fee2e2',
-                    color: message.type === 'success' ? '#166534' : '#991b1b'
-                }}>
-                    {message.text}
+            {successMessage && (
+                <div style={{ padding: '1rem', marginBottom: '1rem', borderRadius: '4px', backgroundColor: '#dcfce7', color: '#166534' }}>
+                    {successMessage}
+                </div>
+            )}
+
+            {error && (
+                <div style={{ padding: '1rem', marginBottom: '1rem', borderRadius: '4px', backgroundColor: '#fee2e2', color: '#991b1b' }}>
+                    {error}
                 </div>
             )}
 
@@ -99,19 +83,19 @@ const UploadImage = () => {
 
                 <button
                     type="submit"
-                    disabled={uploading}
+                    disabled={loading || !image}
                     style={{
                         marginTop: '1rem',
                         padding: '0.75rem',
-                        backgroundColor: uploading ? '#93c5fd' : '#2563eb',
+                        backgroundColor: (loading || !image) ? '#93c5fd' : '#2563eb',
                         color: 'white',
                         border: 'none',
                         borderRadius: '4px',
-                        cursor: uploading ? 'not-allowed' : 'pointer',
+                        cursor: (loading || !image) ? 'not-allowed' : 'pointer',
                         fontWeight: '500'
                     }}
                 >
-                    {uploading ? 'Uploading...' : 'Upload Image'}
+                    {loading ? 'Uploading...' : 'Upload Image'}
                 </button>
             </form>
         </div>

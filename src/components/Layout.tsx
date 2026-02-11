@@ -1,8 +1,8 @@
-import React from 'react';
+
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logoutUser } from '../store/slices/authSlice';
-import { AppDispatch } from '../store/store';
+import type { AppDispatch } from '../store/store';
 import { LayoutDashboard, Camera, FolderOpen, LogOut, ChevronRight, School, Hammer } from 'lucide-react';
 
 const Layout = () => {
