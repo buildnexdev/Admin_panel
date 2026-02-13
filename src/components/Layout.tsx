@@ -1,19 +1,9 @@
 
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { logoutUser } from '../store/slices/authSlice';
-import type { AppDispatch } from '../store/store';
-import { LayoutDashboard, Camera, FolderOpen, LogOut, ChevronRight, School, Hammer } from 'lucide-react';
+import { Link, Outlet, useLocation } from 'react-router-dom';
+import { LayoutDashboard, Camera, FolderOpen, School, Hammer } from 'lucide-react';
 
 const Layout = () => {
-    const dispatch = useDispatch<AppDispatch>();
-    const navigate = useNavigate();
     const location = useLocation();
-
-    const handleLogout = async () => {
-        await dispatch(logoutUser());
-        navigate('/login');
-    };
 
     const navItems = [
         { name: 'Dashboard', path: '/', icon: <LayoutDashboard size={20} /> },
@@ -25,7 +15,18 @@ const Layout = () => {
     return (
         <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f9fafb' }}>
             {/* Sidebar */}
-            <aside style={{ width: '250px', backgroundColor: '#1f2937', color: 'white', padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
+            <aside style={{
+                width: '250px',
+                backgroundColor: '#1f2937',
+                color: 'white',
+                padding: '1.5rem',
+                display: 'flex',
+                flexDirection: 'column',
+                position: 'sticky',
+                top: 0,
+                height: '100vh',
+                overflowY: 'auto'
+            }}>
                 <div style={{ marginBottom: '2rem', fontSize: '1.5rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <FolderOpen size={28} />
                     <span>Admin Panel</span>
@@ -33,7 +34,7 @@ const Layout = () => {
 
                 <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     {navItems.map((item) => {
-                        const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+                        const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
                         return (
                             <Link
                                 key={item.path}
@@ -53,31 +54,10 @@ const Layout = () => {
                             >
                                 {item.icon}
                                 <span>{item.name}</span>
-                                {isActive && <ChevronRight size={16} style={{ marginLeft: 'auto' }} />}
                             </Link>
                         );
                     })}
                 </nav>
-
-                <button
-                    onClick={handleLogout}
-                    style={{
-                        marginTop: 'auto',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.75rem',
-                        padding: '0.75rem 1rem',
-                        backgroundColor: 'transparent',
-                        border: 'none',
-                        color: '#ef4444',
-                        cursor: 'pointer',
-                        fontSize: '1rem',
-                        transition: 'color 0.2s',
-                    }}
-                >
-                    <LogOut size={20} />
-                    <span>Logout</span>
-                </button>
             </aside>
 
             {/* Main Content */}

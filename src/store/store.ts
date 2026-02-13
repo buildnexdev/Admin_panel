@@ -1,8 +1,8 @@
 import { configureStore } from '@reduxjs/toolkit';
-import authReducer from './slices/authSlice';
 import schoolReducer from './slices/schoolSlice';
 import photoReducer from './slices/photoSlice';
 import buildersReducer from './slices/buildersSlice';
+import authReducer from './slices/authSlice';
 
 export const store = configureStore({
     reducer: {

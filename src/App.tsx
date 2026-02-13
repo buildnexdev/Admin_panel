@@ -1,51 +1,75 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import type { RootState } from './store/store';
-import Login from './pages/Login';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
-import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
+
+import Login from './pages/Login';
 
 // School
 import SchoolDashboard from './pages/school/SchoolDashboard';
 import UploadContent from './pages/school/UploadContent';
 import UploadImage from './pages/school/UploadImage';
+import SchoolProtectedRoute from './components/SchoolProtectedRoute';
 
 // Photography
 import PhotoDashboard from './pages/photography/PhotoDashboard';
 import UploadGallery from './pages/photography/UploadGallery';
+import PhotoProtectedRoute from './components/PhotoProtectedRoute';
 
 // Builders
 import BuildersDashboard from './pages/builders/BuildersDashboard';
 import ProjectUpload from './pages/builders/ProjectUpload';
+import HomeBannerUpload from './pages/builders/HomeBannerUpload';
+import BuildersProtectedRoute from './components/BuildersProtectedRoute';
+
 
 function App() {
-  const { token } = useSelector((state: RootState) => state.auth);
-
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={token ? <Navigate to="/" replace /> : <Login />} />
-
-        <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+        {/* Main layout - All pages including login are within the layout */}
+        <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />
 
+          {/* Unified login route */}
+          <Route path="login" element={<Login />} />
+
+          {/* School routes */}
           <Route path="school" element={<SchoolDashboard />}>
-            <Route path="upload-content" element={<UploadContent />} />
-            <Route path="upload-image" element={<UploadImage />} />
+            <Route path="upload-content" element={
+              <SchoolProtectedRoute>
+                <UploadContent />
+              </SchoolProtectedRoute>
+            } />
+            <Route path="upload-image" element={
+              <SchoolProtectedRoute>
+                <UploadImage />
+              </SchoolProtectedRoute>
+            } />
           </Route>
 
+          {/* Photography routes */}
           <Route path="photography" element={<PhotoDashboard />}>
-            <Route path="upload-gallery" element={<UploadGallery />} />
+            <Route path="upload-gallery" element={
+              <PhotoProtectedRoute>
+                <UploadGallery />
+              </PhotoProtectedRoute>
+            } />
           </Route>
 
+          {/* Builders routes */}
           <Route path="builders" element={<BuildersDashboard />}>
-            <Route path="upload-project" element={<ProjectUpload />} />
+            <Route path="upload-project" element={
+              <BuildersProtectedRoute>
+                <ProjectUpload />
+              </BuildersProtectedRoute>
+            } />
+            <Route path="upload-home-banners" element={
+              <BuildersProtectedRoute>
+                <HomeBannerUpload />
+              </BuildersProtectedRoute>
+            } />
           </Route>
         </Route>
-
-        {/* Catch-all route - redirect to login if not authenticated, otherwise to dashboard */}
-        <Route path="*" element={<Navigate to={token ? "/" : "/login"} replace />} />
       </Routes>
     </Router>
   );

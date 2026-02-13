@@ -15,9 +15,9 @@ const initialState: PhotoState = {
 
 export const uploadGalleryPhoto = createAsyncThunk(
     'photo/uploadGalleryPhoto',
-    async ({ file, category, title }: { file: File; category: string; title: string }, { rejectWithValue }) => {
+    async ({ file, category }: { file: File; category: string }, { rejectWithValue }) => {
         try {
-            await photoService.uploadGalleryItem(file, category, title);
+            await photoService.uploadGalleryItem(file, category);
             return 'Photo added to gallery successfully';
         } catch (error) {
             return rejectWithValue('Failed to upload photo');
@@ -36,6 +36,7 @@ const photoSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+            // Upload Gallery Photo
             .addCase(uploadGalleryPhoto.pending, (state) => {
                 state.loading = true;
                 state.error = null;

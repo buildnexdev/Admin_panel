@@ -48,6 +48,7 @@ const schoolSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+            // Upload Content
             .addCase(uploadSchoolContent.pending, (state) => {
                 state.loading = true;
                 state.error = null;

@@ -1,54 +1,163 @@
 import axios from 'axios';
+const API_URL = 'http://localhost:3000/';
 
-// Create an Axios instance (for future API integration)
-const api = axios.create({
-    baseURL: 'http://localhost:3000/api', // Placeholder for local database
-    headers: {
-        'Content-Type': 'application/json',
-    },
-});
-
-// Mock Service for now
-export const authService = {
-    login: async (credentials: any) => {
-        // Simulate API call
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve({
-                    user: { id: 1, name: 'Admin', email: credentials.email },
-                    token: 'mock-jwt-token',
-                });
-            }, 1000); // 1-second delay
-        });
+// User login Service
+export const UserloginService = {
+    login: async (credentials: { phone: string; password: string }) => {
+        const response = await axios.post(API_URL + 'users/login', credentials); return response.data;
     },
     logout: async () => {
-        return new Promise((resolve) => resolve(true));
+        return Promise.resolve(true);
     }
 };
 
 export const schoolService = {
     uploadContent: async (data: any) => {
-        console.log('Uploading School Content:', data);
-        return new Promise((resolve) => setTimeout(() => resolve({ success: true, id: Date.now() }), 1000));
+        const response = await axios.post(API_URL + 'school/upload-content', data); return response.data;
     },
     uploadImage: async (file: File, caption: string) => {
-        console.log('Uploading School Image:', file.name, caption);
-        return new Promise((resolve) => setTimeout(() => resolve({ success: true, url: URL.createObjectURL(file) }), 1000));
+        const response = await axios.post(API_URL + 'school/upload-image', { file, caption }); return response.data;
     }
 };
 
 export const photoService = {
-    uploadGalleryItem: async (file: File, category: string, title: string) => {
-        console.log('Uploading Photo Gallery:', file.name, category);
-        return new Promise((resolve) => setTimeout(() => resolve({ success: true, url: URL.createObjectURL(file) }), 1000));
+    uploadGalleryItem: async (file: File, category: string) => {
+        const response = await axios.post(API_URL + 'photo/upload-gallery-item', { file, category }); return response.data;
     }
 };
 
 export const buildersService = {
     uploadProject: async (data: any, file: File) => {
-        console.log('Uploading Builder Project:', data, file.name);
-        return new Promise((resolve) => setTimeout(() => resolve({ success: true, id: Date.now(), imageUrl: URL.createObjectURL(file) }), 1000));
+        const response = await axios.post(API_URL + 'builders/upload-project', { data, file }); return response.data;
+    },
+    uploadHomeBanners: async (userId: number, companyId: number, files: File[]) => {
+        const response = await axios.post(API_URL + 'builders/upload-home-banners', { userId, companyId, files }); return response.data;
     }
 }
 
-export default api;
+export const homePageImageUpload = async (userId: number, companyId: number, category: string, file: File) => {
+    const response = await axios.post(API_URL + 'home-page/upload-image', {
+        file,
+        imageName: file.name,
+        userId,
+        companyId,
+        category
+    });
+    return response.data;
+}
+
+// Helper function to get userId from localStorage
+const getUserId = (): number | null => {
+    const authUser = localStorage.getItem('auth_user');
+    if (!authUser) return null;
+    try {
+        const user = JSON.parse(authUser);
+        return user?.userId || null;
+    } catch {
+        return null;
+    }
+};
+
+// Helper function to handle missing userId
+const handleMissingUserId = () => {
+    // Clear auth data if userId is missing
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_user');
+    throw new Error('User ID is required. Please login again.');
+};
+
+// Upload home image - similar to addToCart pattern
+export const uploadHomeImage = async (imageData: FormData | { file?: File; imageName?: string; category?: string; companyId?: number; [key: string]: any }) => {
+    try {
+        const userId = getUserId();
+        if (!userId) {
+            handleMissingUserId();
+            throw new Error('User ID is required. Please login again.');
+        }
+
+        // Check if imageData is FormData (contains files) or regular object
+        if (imageData instanceof FormData) {
+            // FormData - append userId and send with multipart/form-data
+            imageData.append('userId', userId.toString());
+            const result = await axios.post(`${API_URL}home-page/upload-image`, imageData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            return result.data;
+        } else {
+            // Regular JSON payload
+            const payload = {
+                ...imageData,
+                userId: userId
+            };
+            const result = await axios.post(`${API_URL}home-page/upload-image`, payload);
+            return result.data;
+        }
+    } catch (error: any) {
+        throw new Error(error.response?.data?.message || error.message || 'Failed to upload home image');
+    }
+}
+
+// Upload builders project - always as multipart/form-data with user/company context
+export const uploadBuilderProjectApi = async (projectData: { data: any; file: File }) => {
+    try {
+        const authUserRaw = localStorage.getItem('auth_user');
+        if (!authUserRaw) {
+            handleMissingUserId();
+            throw new Error('User ID is required. Please login again.');
+        }
+
+        let authUser: any;
+        try {
+            authUser = JSON.parse(authUserRaw);
+        } catch {
+            handleMissingUserId();
+            throw new Error('User ID is required. Please login again.');
+        }
+
+        const userId = authUser?.userId;
+        if (!userId) {
+            handleMissingUserId();
+            throw new Error('User ID is required. Please login again.');
+        }
+
+        const formData = new FormData();
+        const { data, file } = projectData;
+
+        // Flatten project data fields into FormData (title, description, location, etc.)
+        if (data && typeof data === 'object') {
+            Object.entries(data).forEach(([key, value]) => {
+                if (value !== undefined && value !== null) {
+                    formData.append(key, String(value));
+                }
+            });
+        }
+
+        // Append file
+        if (file) {
+            formData.append('file', file);
+        }
+
+        // Append user context
+        formData.append('userId', userId.toString());
+        if (authUser.companyID) {
+            formData.append('companyId', authUser.companyID.toString());
+        }
+        if (authUser.category) {
+            formData.append('category', authUser.category);
+        }
+
+        const result = await axios.post(`${API_URL}builders/upload-project`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return result.data;
+    } catch (error: any) {
+        throw new Error(error.response?.data?.message || error.message || 'Failed to upload builder project');
+    }
+}
+
+
+// export default api;

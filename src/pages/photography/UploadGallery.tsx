@@ -26,7 +26,7 @@ const UploadGallery = () => {
         if (!image) return;
 
         dispatch(clearMessages());
-        const result = await dispatch(uploadGalleryPhoto({ file, category, title }));
+        const result = await dispatch(uploadGalleryPhoto({ file: image, category }));
 
         if (uploadGalleryPhoto.fulfilled.match(result)) {
             setImage(null);

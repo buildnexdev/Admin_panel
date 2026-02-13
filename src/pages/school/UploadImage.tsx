@@ -27,7 +27,7 @@ const UploadImage = () => {
         dispatch(clearMessages());
         // Note: We need to handle File object properly in serializable state if needed, 
         // but for AsyncThunk payload it's fine as long as we don't put it directly in slice state.
-        const result = await dispatch(uploadSchoolImage({ file, caption }));
+        const result = await dispatch(uploadSchoolImage({ file: image, caption }));
 
         if (uploadSchoolImage.fulfilled.match(result)) {
             setImage(null);
