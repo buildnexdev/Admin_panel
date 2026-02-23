@@ -3,34 +3,79 @@ import { useDispatch, useSelector } from 'react-redux';
 import { uploadHomeBanners, clearMessages } from '../../store/slices/buildersSlice';
 import type { AppDispatch, RootState } from '../../store/store';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
+import { imageUploadToS3 } from '../../services/api';
 
 const HomeBannerUpload = () => {
     const dispatch = useDispatch<AppDispatch>();
     const { loading, error, successMessage } = useSelector((state: RootState) => state.builders);
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [previews, setPreviews] = useState<string[]>([]);
+    const [fileNames, setFileNames] = useState<string[]>([]);
 
-    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) {
-            const files = Array.from(e.target.files);
+    const { user } = useSelector((state: RootState) => state.auth);
+    const companyID = user?.companyID;
+    const userID = user?.userId;
 
-            if (files.length + selectedFiles.length > 5) {
-                alert('You can only upload a maximum of 5 images.');
-                return;
+    async function handleFileChange(e: ChangeEvent<HTMLInputElement>, docFor: string = 'HomeBanner') {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+
+        const newFiles = Array.from(files);
+
+        // Update local previews for UI immediately
+        const newPreviews = newFiles.map(file => URL.createObjectURL(file));
+        setPreviews(prev => [...prev, ...newPreviews].slice(0, 5));
+        setSelectedFiles(prev => [...prev, ...newFiles].slice(0, 5));
+
+        // If you want immediate upload to S3 for each file:
+        for (const file of newFiles) {
+            if (file.type.startsWith('image/') || file.type === 'application/pdf') {
+                try {
+                    const directoryPath = `uploadsA/Company/Company-${companyID}/Builder/${docFor}`;
+                    const uploadResponse = await imageUploadToS3(file, directoryPath, user);
+
+                    if (uploadResponse && uploadResponse !== 'Image Upload Failed') {
+                        const fileName = uploadResponse.fileName;
+                        setFileNames(prev => [...prev, fileName]);
+
+                        console.log('File uploaded successfully:', uploadResponse);
+                    } else {
+                        console.error('File upload failed');
+                    }
+                } catch (error) {
+                    console.error('Error uploading file:', error);
+                }
             }
-
-            const newFiles = [...selectedFiles, ...files].slice(0, 5);
-            setSelectedFiles(newFiles);
-
-            // Generate previews
-            const newPreviews = newFiles.map(file => URL.createObjectURL(file));
-            setPreviews(newPreviews);
         }
-    };
+    }
+
+    // const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    //     if (e.target.files) {
+    //         const files = Array.from(e.target.files);
+
+    //         imageUploadToS3()
+
+    //         // if (files.length + selectedFiles.length > 5) {
+    //         //     alert('You can only upload a maximum of 5 images.');
+    //         //     return;
+    //         // }
+
+    //         const newFiles = [...selectedFiles, ...files].slice(0, 5);
+    //         setSelectedFiles(newFiles);
+
+    //         // Generate previews
+    //         const newPreviews = newFiles.map(file => URL.createObjectURL(file));
+    //         setPreviews(newPreviews);
+    //     }
+    // };
 
     const removeFile = (index: number) => {
         const newFiles = selectedFiles.filter((_, i) => i !== index);
         setSelectedFiles(newFiles);
+
+        // Also remove from fileNames
+        const newFileNames = fileNames.filter((_, i) => i !== index);
+        setFileNames(newFileNames);
 
         // Update previews
         const newPreviews = newFiles.map(file => URL.createObjectURL(file));
@@ -41,15 +86,29 @@ const HomeBannerUpload = () => {
         e.preventDefault();
         dispatch(clearMessages());
 
-        if (selectedFiles.length === 0) {
+        if (fileNames.length === 0) {
             return;
         }
 
-        await dispatch(uploadHomeBanners(selectedFiles));
+        if (!companyID || !userID) {
+            alert('User or Company information missing. Please log in again.');
+            return;
+        }
 
-        // Clear selection on success (handled by effect or manually if success)
+        const imgdata = {
+            fileNames,
+            companyID,
+            userID,
+        };
+
+        dispatch(uploadHomeBanners(imgdata));
+
+        // Note: Success handling (clearing files) could be moved to a useEffect based on successMessage
+        // or handled here if it's not and async action that might fail.
+        // For now, keeping it as is but it might be better in .then() or useEffect.
         setSelectedFiles([]);
         setPreviews([]);
+        setFileNames([]);
     };
 
     return (
@@ -82,7 +141,7 @@ const HomeBannerUpload = () => {
                             type="file"
                             multiple
                             accept="image/*"
-                            onChange={handleFileChange}
+                            onChange={(e) => handleFileChange(e, 'HomeBanner')}
                             style={{ display: 'none' }}
                         />
                     </div>

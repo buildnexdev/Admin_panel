@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { uploadHomeImage, uploadBuilderProjectApi } from '../../services/api';
-import type { RootState } from '../store';
+import { uploadBuilderProjectApi, saveBannerPaths } from '../../services/api';
 
 interface BuildersState {
     loading: boolean;
@@ -15,7 +14,7 @@ const initialState: BuildersState = {
 };
 
 export const uploadBuilderProject = createAsyncThunk(
-    'builders/uploadProject',
+    'banners/uploadProject',
     async ({ data, file }: { data: any; file: File }, { rejectWithValue }) => {
         try {
             await uploadBuilderProjectApi({ data, file });
@@ -28,26 +27,18 @@ export const uploadBuilderProject = createAsyncThunk(
 
 export const uploadHomeBanners = createAsyncThunk<
     string,
-    File[],
-    { state: RootState; rejectValue: string }
+    { fileNames: string[]; companyID: number; userID: number },
+    { rejectValue: string }
 >(
-    'builders/uploadHomeBanners',
-    async (files, { getState, rejectWithValue }) => {
-        const { user } = (getState() as RootState).auth;
-        if (!user) return rejectWithValue('User not authenticated');
-
+    'banners/uploadAndSaveBanners',
+    async ({ fileNames, companyID, userID }, { rejectWithValue }) => {
         try {
-            // Upload each file using FormData with uploadHomeImage API
-            await Promise.all(files.map(file => {
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('imageName', file.name);
-                formData.append('category', user.category || 'Builders');
-                formData.append('companyId', user.companyID.toString());
-                
-                return uploadHomeImage(formData);
-            }));
-            return 'Home banners uploaded successfully';
+            await saveBannerPaths({
+                bannerPaths: fileNames,
+                companyID,
+                userId: userID
+            });
+            return 'Home banners uploaded and saved successfully';
         } catch (error: any) {
             return rejectWithValue(error.message || 'Failed to upload home banners');
         }
