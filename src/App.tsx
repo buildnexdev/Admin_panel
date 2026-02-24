@@ -3,6 +3,7 @@ import Dashboard from './pages/Dashboard';
 import Layout from './components/Layout';
 
 import Login from './pages/Login';
+import Settings from './pages/Settings';
 
 // School
 import SchoolDashboard from './pages/school/SchoolDashboard';
@@ -32,6 +33,7 @@ function App() {
         {/* Main layout - All pages including login are within the layout */}
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />
+          <Route path="settings" element={<Settings />} />
 
           {/* Unified login route */}
           <Route path="login" element={<Login />} />

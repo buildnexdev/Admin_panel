@@ -160,28 +160,90 @@ export const uploadBuilderProjectApi = async (projectData: { data: any; file: Fi
 }
 
 export const contentCMSService = {
+    // Projects
     addProject: async (formData: FormData) => {
         const response = await axios.post(`${API_URL}content/projects`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
         return response.data;
     },
+    getProjects: async (companyID: number) => {
+        const response = await axios.get(`${API_URL}content/projects/${companyID}`);
+        return response.data;
+    },
+    updateProject: async (id: number, formData: FormData) => {
+        const response = await axios.put(`${API_URL}content/projects/${id}`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        return response.data;
+    },
+    deleteProject: async (id: number) => {
+        const response = await axios.delete(`${API_URL}content/projects/${id}`);
+        return response.data;
+    },
+
+    // Banners
     addBanner: async (formData: FormData) => {
         const response = await axios.post(`${API_URL}content/banners`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
         return response.data;
     },
+    getBanners: async (companyID: number) => {
+        const response = await axios.get(`${API_URL}content/banners/${companyID}`);
+        return response.data;
+    },
+    updateBanner: async (id: number, formData: FormData) => {
+        const response = await axios.put(`${API_URL}content/banners/${id}`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        return response.data;
+    },
+    deleteBanner: async (id: number) => {
+        const response = await axios.delete(`${API_URL}content/banners/${id}`);
+        return response.data;
+    },
+
+    // Services
     addService: async (data: any) => {
         const response = await axios.post(`${API_URL}content/services`, data);
         return response.data;
     },
+    getServices: async (companyID: number) => {
+        const response = await axios.get(`${API_URL}content/services/${companyID}`);
+        return response.data;
+    },
+    updateService: async (id: number, data: any) => {
+        const response = await axios.put(`${API_URL}content/services/${id}`, data);
+        return response.data;
+    },
+    deleteService: async (id: number) => {
+        const response = await axios.delete(`${API_URL}content/services/${id}`);
+        return response.data;
+    },
+
+    // Blogs
     addBlog: async (formData: FormData) => {
         const response = await axios.post(`${API_URL}content/blogs`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
         return response.data;
     },
+    getBlogs: async (companyID: number) => {
+        const response = await axios.get(`${API_URL}content/blogs/${companyID}`);
+        return response.data;
+    },
+    updateBlog: async (id: number, formData: FormData) => {
+        const response = await axios.put(`${API_URL}content/blogs/${id}`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        return response.data;
+    },
+    deleteBlog: async (id: number) => {
+        const response = await axios.delete(`${API_URL}content/blogs/${id}`);
+        return response.data;
+    },
+
     addContact: async (data: any) => {
         const response = await axios.post(`${API_URL}content/contact`, data);
         return response.data;
@@ -191,6 +253,5 @@ export const contentCMSService = {
         return response.data;
     }
 };
-
 
 // export default api;

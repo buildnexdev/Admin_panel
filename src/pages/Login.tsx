@@ -215,46 +215,6 @@ const Login = () => {
                         )}
                     </button>
                 </form>
-
-                <div style={{ display: 'flex', alignItems: 'center', margin: '2rem 0', gap: '1rem' }}>
-                    <div style={{ flex: 1, height: '1px', backgroundColor: '#e2e8f0' }} />
-                    <span style={{ fontSize: '0.875rem', color: '#94a3b8', fontWeight: '500' }}>OR</span>
-                    <div style={{ flex: 1, height: '1px', backgroundColor: '#e2e8f0' }} />
-                </div>
-
-                <button
-                    onClick={handleDemoLogin}
-                    style={{
-                        width: '100%',
-                        padding: '1rem',
-                        backgroundColor: '#f8fafc',
-                        color: '#6366f1',
-                        border: '2px solid #6366f1',
-                        borderRadius: '12px',
-                        cursor: 'pointer',
-                        fontWeight: '700',
-                        fontSize: '1rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.75rem',
-                        transition: 'all 0.2s'
-                    }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#6366f1';
-                        e.currentTarget.style.color = 'white';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#f8fafc';
-                        e.currentTarget.style.color = '#6366f1';
-                    }}
-                >
-                    <Zap size={20} /> Access Dashboard (Demo)
-                </button>
-
-                <p style={{ textAlign: 'center', marginTop: '2rem', fontSize: '0.75rem', color: '#94a3b8' }}>
-                    Authorized personnel only. All access is logged.
-                </p>
             </div>
         </div>
     );
