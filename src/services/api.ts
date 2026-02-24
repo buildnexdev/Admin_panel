@@ -67,7 +67,7 @@ const handleMissingUserId = () => {
 };
 
 // Upload home image - similar to addToCart pattern
-export const uploadHomeImage = async (imageData: FormData | { file?: File; imageName?: string; category?: string; companyId?: number; [key: string]: any }) => {
+export const uploadHomeImage = async (imageData: FormData | { file?: File; imageName?: string; category?: string; companyId?: number;[key: string]: any }) => {
     try {
         const userId = getUserId();
         if (!userId) {
@@ -158,6 +158,39 @@ export const uploadBuilderProjectApi = async (projectData: { data: any; file: Fi
         throw new Error(error.response?.data?.message || error.message || 'Failed to upload builder project');
     }
 }
+
+export const contentCMSService = {
+    addProject: async (formData: FormData) => {
+        const response = await axios.post(`${API_URL}content/projects`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        return response.data;
+    },
+    addBanner: async (formData: FormData) => {
+        const response = await axios.post(`${API_URL}content/banners`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        return response.data;
+    },
+    addService: async (data: any) => {
+        const response = await axios.post(`${API_URL}content/services`, data);
+        return response.data;
+    },
+    addBlog: async (formData: FormData) => {
+        const response = await axios.post(`${API_URL}content/blogs`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        return response.data;
+    },
+    addContact: async (data: any) => {
+        const response = await axios.post(`${API_URL}content/contact`, data);
+        return response.data;
+    },
+    getContactMessages: async (companyID: number) => {
+        const response = await axios.get(`${API_URL}content/contact/${companyID}`);
+        return response.data;
+    }
+};
 
 
 // export default api;

@@ -19,6 +19,9 @@ import PhotoProtectedRoute from './components/PhotoProtectedRoute';
 import BuildersDashboard from './pages/builders/BuildersDashboard';
 import ProjectUpload from './pages/builders/ProjectUpload';
 import HomeBannerUpload from './pages/builders/HomeBannerUpload';
+import ServiceUpload from './pages/builders/ServiceUpload';
+import BlogUpload from './pages/builders/BlogUpload';
+import ContactMessages from './pages/builders/ContactMessages';
 import BuildersProtectedRoute from './components/BuildersProtectedRoute';
 
 
@@ -66,6 +69,21 @@ function App() {
             <Route path="upload-home-banners" element={
               <BuildersProtectedRoute>
                 <HomeBannerUpload />
+              </BuildersProtectedRoute>
+            } />
+            <Route path="services" element={
+              <BuildersProtectedRoute>
+                <ServiceUpload />
+              </BuildersProtectedRoute>
+            } />
+            <Route path="blog" element={
+              <BuildersProtectedRoute>
+                <BlogUpload />
+              </BuildersProtectedRoute>
+            } />
+            <Route path="contact" element={
+              <BuildersProtectedRoute>
+                <ContactMessages />
               </BuildersProtectedRoute>
             } />
           </Route>

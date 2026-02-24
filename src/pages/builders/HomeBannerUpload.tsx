@@ -2,7 +2,7 @@ import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { uploadHomeBanners, clearMessages } from '../../store/slices/buildersSlice';
 import type { AppDispatch, RootState } from '../../store/store';
-import { Upload, X, Image as ImageIcon } from 'lucide-react';
+import { X, Image as ImageIcon, CheckCircle2, AlertCircle, Plus } from 'lucide-react';
 
 const HomeBannerUpload = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -46,37 +46,89 @@ const HomeBannerUpload = () => {
         }
 
         await dispatch(uploadHomeBanners(selectedFiles));
-
-        // Clear selection on success (handled by effect or manually if success)
         setSelectedFiles([]);
         setPreviews([]);
     };
 
     return (
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1f2937', marginBottom: '1.5rem' }}>Upload Home Banners</h2>
-
-            {successMessage && (
-                <div style={{ padding: '1rem', backgroundColor: '#dcfce7', color: '#166534', borderRadius: '4px', marginBottom: '1.5rem', border: '1px solid #bbf7d0' }}>
-                    {successMessage}
+        <div style={{ maxWidth: '900px', margin: '0 auto' }} className="animate-fade-in">
+            <div style={{ backgroundColor: 'white', padding: '2.5rem', borderRadius: '24px', boxShadow: '0 4px 25px rgba(0,0,0,0.03)', border: '1px solid #f1f5f9' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
+                    <div style={{ padding: '0.75rem', backgroundColor: '#f0fdf4', color: '#166534', borderRadius: '12px' }}>
+                        <ImageIcon size={28} />
+                    </div>
+                    <div>
+                        <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: '#1e293b', margin: 0 }}>Home Page Banners</h2>
+                        <p style={{ color: '#64748b', fontSize: '0.875rem', margin: 0 }}>Add high-resolution images for the main website slider</p>
+                    </div>
                 </div>
-            )}
 
-            {error && (
-                <div style={{ padding: '1rem', backgroundColor: '#fef2f2', color: '#991b1b', borderRadius: '4px', marginBottom: '1.5rem', border: '1px solid #fecaca' }}>
-                    {error}
-                </div>
-            )}
+                {successMessage && (
+                    <div style={{
+                        padding: '1rem',
+                        borderRadius: '12px',
+                        marginBottom: '1.5rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.75rem',
+                        backgroundColor: '#f0fdf4',
+                        color: '#166534',
+                        border: '1px solid #bbf7d0'
+                    }}>
+                        <CheckCircle2 size={20} />
+                        <span style={{ fontWeight: '500', fontSize: '0.875rem' }}>{successMessage}</span>
+                    </div>
+                )}
 
-            <form onSubmit={handleSubmit} style={{ backgroundColor: 'white', padding: '2rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e5e7eb' }}>
-                <div style={{ marginBottom: '2rem' }}>
-                    <label style={{ display: 'block', marginBottom: '1rem', fontWeight: '500', color: '#374151' }}>
-                        Select Images (Max 5)
-                    </label>
-                    <div style={{ border: '2px dashed #d1d5db', borderRadius: '6px', padding: '2rem', textAlign: 'center', cursor: 'pointer', backgroundColor: '#f9fafb' }} onClick={() => document.getElementById('file-upload')?.click()}>
-                        <Upload size={32} color="#9ca3af" style={{ marginBottom: '1rem' }} />
-                        <p style={{ color: '#6b7280', marginBottom: '0.5rem' }}>Click to upload or drag and drop</p>
-                        <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>PNG, JPG up to 5MB</p>
+                {error && (
+                    <div style={{
+                        padding: '1rem',
+                        borderRadius: '12px',
+                        marginBottom: '1.5rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.75rem',
+                        backgroundColor: '#fef2f2',
+                        color: '#991b1b',
+                        border: '1px solid #fecaca'
+                    }}>
+                        <AlertCircle size={20} />
+                        <span style={{ fontWeight: '500', fontSize: '0.875rem' }}>{error}</span>
+                    </div>
+                )}
+
+                <form onSubmit={handleSubmit}>
+                    <div
+                        style={{
+                            border: '2px dashed #e2e8f0',
+                            borderRadius: '20px',
+                            padding: '3rem',
+                            textAlign: 'center',
+                            cursor: 'pointer',
+                            backgroundColor: '#f8fafc',
+                            transition: 'all 0.2s',
+                            marginBottom: '2rem'
+                        }}
+                        onClick={() => document.getElementById('file-upload')?.click()}
+                        onMouseEnter={(e) => e.currentTarget.style.borderColor = '#6366f1'}
+                        onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e2e8f0'}
+                    >
+                        <div style={{
+                            width: '64px',
+                            height: '64px',
+                            backgroundColor: 'white',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            margin: '0 auto 1.5rem',
+                            boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
+                            color: '#6366f1'
+                        }}>
+                            <Plus size={32} />
+                        </div>
+                        <p style={{ color: '#1e293b', fontWeight: '700', fontSize: '1.125rem', marginBottom: '0.5rem' }}>Add up to 5 slider images</p>
+                        <p style={{ color: '#64748b', fontSize: '0.875rem' }}>Drag and drop or click to browse files</p>
                         <input
                             id="file-upload"
                             type="file"
@@ -86,46 +138,69 @@ const HomeBannerUpload = () => {
                             style={{ display: 'none' }}
                         />
                     </div>
-                </div>
 
-                {previews.length > 0 && (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
-                        {previews.map((preview, index) => (
-                            <div key={index} style={{ position: 'relative', aspectRatio: '1', borderRadius: '4px', overflow: 'hidden', border: '1px solid #e5e7eb' }}>
-                                <img src={preview} alt={`Preview ${index}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                <button
-                                    type="button"
-                                    onClick={(e) => { e.stopPropagation(); removeFile(index); }}
-                                    style={{ position: 'absolute', top: '0.25rem', right: '0.25rem', padding: '0.25rem', backgroundColor: 'rgba(255,255,255,0.9)', borderRadius: '50%', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                >
-                                    <X size={14} color="#ef4444" />
-                                </button>
-                            </div>
-                        ))}
+                    {previews.length > 0 && (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
+                            {previews.map((preview, index) => (
+                                <div key={index} style={{
+                                    position: 'relative',
+                                    aspectRatio: '16/10',
+                                    borderRadius: '16px',
+                                    overflow: 'hidden',
+                                    border: '1px solid #f1f5f9',
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+                                }}>
+                                    <img src={preview} alt={`Preview ${index}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    <button
+                                        type="button"
+                                        onClick={(e) => { e.stopPropagation(); removeFile(index); }}
+                                        style={{
+                                            position: 'absolute',
+                                            top: '0.5rem',
+                                            right: '0.5rem',
+                                            padding: '0.4rem',
+                                            backgroundColor: 'rgba(255,255,255,0.9)',
+                                            borderRadius: '50%',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+                                        }}
+                                    >
+                                        <X size={14} color="#ef4444" />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                        <button
+                            type="submit"
+                            disabled={loading || selectedFiles.length === 0}
+                            style={{
+                                padding: '1rem 2.5rem',
+                                backgroundColor: loading || selectedFiles.length === 0 ? '#94a3b8' : '#6366f1',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '12px',
+                                cursor: loading || selectedFiles.length === 0 ? 'not-allowed' : 'pointer',
+                                fontWeight: '700',
+                                fontSize: '1rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.75rem',
+                                boxShadow: '0 4px 12px rgba(99, 102, 241, 0.2)',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            {loading ? 'Uploading...' : 'Publish Banners'}
+                        </button>
                     </div>
-                )}
-
-                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <button
-                        type="submit"
-                        disabled={loading || selectedFiles.length === 0}
-                        style={{
-                            padding: '0.75rem 1.5rem',
-                            backgroundColor: loading || selectedFiles.length === 0 ? '#9ca3af' : '#4f46e5',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: loading || selectedFiles.length === 0 ? 'not-allowed' : 'pointer',
-                            fontWeight: '500',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem'
-                        }}
-                    >
-                        {loading ? 'Uploading...' : 'Upload Banners'}
-                    </button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     );
 };

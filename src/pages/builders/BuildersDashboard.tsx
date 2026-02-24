@@ -1,88 +1,140 @@
-import { Link, Outlet, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { logoutUser } from '../../store/slices/authSlice';
-import type { AppDispatch, RootState } from '../../store/store';
-import { Hammer, ChevronRight, LogOut, Lock } from 'lucide-react';
+import { Link, Outlet, useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import type { RootState } from '../../store/store';
+import { ChevronRight, Lock, Image as ImageIcon, Briefcase, BookOpen, Mail, Layout } from 'lucide-react';
 
 const BuildersDashboard = () => {
-    const dispatch = useDispatch<AppDispatch>();
-    const navigate = useNavigate();
+    const location = useLocation();
     const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
-
     const isAuthorized = isAuthenticated && user?.category === 'Builders';
 
-    const handleLogout = async () => {
-        await dispatch(logoutUser());
-        navigate('/login');
-    };
+    const cmsItems = [
+        {
+            title: 'Project Portfolio',
+            desc: 'Manage completed and ongoing projects',
+            icon: <Briefcase size={24} />,
+            path: '/builders/upload-project',
+            color: '#ea580c',
+            bgColor: '#ffedd5'
+        },
+        {
+            title: 'Home Banners',
+            desc: 'Update the main website carousel',
+            icon: <ImageIcon size={24} />,
+            path: '/builders/upload-home-banners',
+            color: '#166534',
+            bgColor: '#dcfce7'
+        },
+        {
+            title: 'Our Services',
+            desc: 'Manage business service offerings',
+            icon: <Layout size={24} />,
+            path: '/builders/services',
+            color: '#1e40af',
+            bgColor: '#dbeafe'
+        },
+        {
+            title: 'Blog Posts',
+            desc: 'Write and publish industry articles',
+            icon: <BookOpen size={24} />,
+            path: '/builders/blog',
+            color: '#9d174d',
+            bgColor: '#fce7f3'
+        },
+        {
+            title: 'Customer Inquiries',
+            desc: 'View messages from contact form',
+            icon: <Mail size={24} />,
+            path: '/builders/contact',
+            color: '#115e59',
+            bgColor: '#ccfbf1'
+        },
+    ];
+
+    // Show the grid ONLY if we are at the base path /builders
+    const isRoot = location.pathname === '/builders' || location.pathname === '/builders/';
 
     return (
-        <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1f2937', margin: 0 }}>Builders Website Management</h2>
-                {isAuthenticated && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <span style={{ color: '#6b7280', fontSize: '0.875rem' }}>Welcome, {user?.name || 'Admin'}</span>
-                        <button
-                            onClick={handleLogout}
-                            style={{
+        <div className="animate-fade-in">
+
+
+            {isRoot ? (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+                    {cmsItems.map((item, idx) => (
+                        <Link key={idx} to={item.path} style={{ textDecoration: 'none' }}>
+                            <div style={{
+                                padding: '1.5rem',
+                                backgroundColor: 'white',
+                                borderRadius: '20px',
+                                boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
+                                border: '1px solid #f1f5f9',
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '0.5rem',
-                                padding: '0.5rem 1rem',
-                                backgroundColor: '#ef4444',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                fontSize: '0.875rem'
+                                gap: '1.25rem',
+                                position: 'relative',
+                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                cursor: 'pointer'
                             }}
-                        >
-                            <LogOut size={16} />
-                            Logout
-                        </button>
-                    </div>
-                )}
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
-                <Link to="/builders/upload-project" style={{ textDecoration: 'none' }}>
-                    <div style={{ padding: '1.5rem', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', cursor: 'pointer', transition: 'transform 0.2s', border: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', gap: '1rem', position: 'relative' }}>
-                        {!isAuthorized && (
-                            <div style={{ position: 'absolute', top: '0.75rem', right: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.5rem', backgroundColor: '#fef3c7', borderRadius: '4px', fontSize: '0.75rem', color: '#92400e', fontWeight: '500' }}>
-                                <Lock size={12} />
-                                Login Required
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(-5px)';
+                                    e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.05)';
+                                    e.currentTarget.style.borderColor = item.color + '40';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.02)';
+                                    e.currentTarget.style.borderColor = '#f1f5f9';
+                                }}
+                            >
+                                {!isAuthorized && (
+                                    <div style={{
+                                        position: 'absolute',
+                                        top: '1rem',
+                                        right: '1rem',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.25rem',
+                                        padding: '0.25rem 0.625rem',
+                                        backgroundColor: '#fffbeb',
+                                        borderRadius: '99px',
+                                        fontSize: '0.7rem',
+                                        color: '#92400e',
+                                        fontWeight: '700',
+                                        border: '1px solid #fef3c7'
+                                    }}>
+                                        <Lock size={12} /> RESTRICTED
+                                    </div>
+                                )}
+                                <div style={{
+                                    padding: '1rem',
+                                    backgroundColor: item.bgColor,
+                                    color: item.color,
+                                    borderRadius: '16px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}>
+                                    {item.icon}
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                    <h3 style={{ fontSize: '1.05rem', fontWeight: '700', color: '#1e293b', marginBottom: '0.125rem' }}>{item.title}</h3>
+                                    <p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0, lineHeight: '1.4' }}>{item.desc}</p>
+                                </div>
+                                <ChevronRight size={18} color="#cbd5e1" />
                             </div>
-                        )}
-                        <div style={{ padding: '0.75rem', backgroundColor: '#ffedd5', borderRadius: '50%' }}>
-                            <Hammer size={24} color="#ea580c" />
-                        </div>
-                        <div style={{ flex: 1 }}>
-                            <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#1f2937', marginBottom: '0.25rem' }}>Upload New Project</h3>
-                            <p style={{ color: '#6b7280', fontSize: '0.875rem', margin: 0 }}>Add completed or ongoing projects</p>
-                        </div>
-                        <ChevronRight size={20} color="#9ca3af" style={{ marginLeft: 'auto' }} />
+                        </Link>
+                    ))}
+                </div>
+            ) : (
+                <div style={{ backgroundColor: '#f8fafc', borderRadius: '24px', padding: '2rem', border: '1px solid #f1f5f9' }}>
+                    <div style={{ marginBottom: '1.5rem' }}>
+                        <Link to="/builders" style={{ color: '#6366f1', textDecoration: 'none', fontWeight: '600', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <ChevronRight size={16} style={{ transform: 'rotate(180deg)' }} /> Back to CMS Overview
+                        </Link>
                     </div>
-                </Link>
-                <Link to="/builders/upload-home-banners" style={{ textDecoration: 'none' }}>
-                    <div style={{ padding: '1.5rem', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', cursor: 'pointer', transition: 'transform 0.2s', border: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', gap: '1rem', position: 'relative' }}>
-                        {!isAuthorized && (
-                            <div style={{ position: 'absolute', top: '0.75rem', right: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.5rem', backgroundColor: '#fef3c7', borderRadius: '4px', fontSize: '0.75rem', color: '#92400e', fontWeight: '500' }}>
-                                <Lock size={12} />
-                                Login Required
-                            </div>
-                        )}
-                        <div style={{ padding: '0.75rem', backgroundColor: '#dcfce7', borderRadius: '50%' }}>
-                            <Hammer size={24} color="#166534" />
-                        </div>
-                        <div style={{ flex: 1 }}>
-                            <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#1f2937', marginBottom: '0.25rem' }}>Upload Home Banners</h3>
-                            <p style={{ color: '#6b7280', fontSize: '0.875rem', margin: 0 }}>Add 5 images for home carousel</p>
-                        </div>
-                        <ChevronRight size={20} color="#9ca3af" />
-                    </div>
-                </Link>
-            </div>
-            <Outlet />
+                    <Outlet />
+                </div>
+            )}
         </div>
     );
 };
