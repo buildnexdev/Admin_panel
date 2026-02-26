@@ -7,6 +7,9 @@ import {
     LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     BarChart, Bar, PieChart, Pie, Cell
 } from 'recharts';
+import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import type { RootState } from '../store/store';
 import dashboardHero from '../assets/dashboard_hero.png';
 
 const data = [

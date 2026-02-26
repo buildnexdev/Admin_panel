@@ -1,5 +1,38 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { uploadBuilderProjectApi, saveBannerPaths } from '../../services/api';
+import { uploadBuilderProjectApi, saveBannerPaths, contentCMSService } from '../../services/api';
+
+interface Project {
+    id: number;
+    title: string;
+    description: string;
+    image_url: string;
+    companyID: number;
+    created_at: string;
+}
+
+interface Banner {
+    id: number;
+    image_url: string;
+    companyID: number;
+    created_at: string;
+}
+
+interface Service {
+    id: number;
+    title: string;
+    description: string;
+    icon: string;
+    companyID: number;
+}
+
+interface Blog {
+    id: number;
+    title: string;
+    content: string;
+    image_url: string;
+    companyID: number;
+    created_at: string;
+}
 
 interface BuildersState {
     projects: Project[];
@@ -126,7 +159,7 @@ export const deleteBlog = createAsyncThunk(
 // UPLOAD / UPDATE THUNKS
 export const uploadBuilderProject = createAsyncThunk(
     'banners/uploadProject',
-    async ({ data, file }: { data: any; file: File }, { rejectWithValue }) => {
+    async ({ data, file }: { data: any; file: File }, { dispatch, rejectWithValue }) => {
         try {
             await uploadBuilderProjectApi({ data, file });
             if (data.companyID) {
@@ -176,6 +209,10 @@ const buildersSlice = createSlice({
                 state.loading = false;
                 state.projects = action.payload || [];
             })
+            // Individual fetch status handling
+            .addCase(fetchBanners.fulfilled, (state, action) => { state.banners = action.payload || []; })
+            .addCase(fetchServices.fulfilled, (state, action) => { state.services = action.payload || []; })
+            .addCase(fetchBlogs.fulfilled, (state, action) => { state.blogs = action.payload || []; })
             // Upload & Delete Actions
             .addMatcher(
                 (action) => action.type.endsWith('/pending') && !action.type.startsWith('builders/fetch'),
@@ -198,11 +235,7 @@ const buildersSlice = createSlice({
                     state.loading = false;
                     state.error = action.payload as string;
                 }
-            )
-            // Individual fetch status handling
-            .addCase(fetchBanners.fulfilled, (state, action) => { state.banners = action.payload || []; })
-            .addCase(fetchServices.fulfilled, (state, action) => { state.services = action.payload || []; })
-            .addCase(fetchBlogs.fulfilled, (state, action) => { state.blogs = action.payload || []; });
+            );
     },
 });
 

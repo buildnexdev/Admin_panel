@@ -288,7 +288,7 @@ export const imageUploadToS3 = async (result: any, path: any, loginData: any, fi
     if (databaseName) formData.append('databaseName', databaseName);
     formData.append('fileFormat', fileType ? fileType : 'Image');
 
-    const response = await fetch(`${API_URL}_common/uploadImageToServer`, {
+    const response = await fetch(`${API_URL}uploadImageToServer`, {
         method: 'POST',
         body: formData,
     });

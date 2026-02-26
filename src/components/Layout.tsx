@@ -1,6 +1,9 @@
-
-import { Link, Outlet, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Camera, FolderOpen, School, Hammer } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { LayoutDashboard, Camera, FolderOpen, School, Hammer, LayoutGrid, Circle, Briefcase, Image as ImageIcon, BookOpen } from 'lucide-react';
+import { logoutUser } from '../store/slices/authSlice';
+import type { AppDispatch, RootState } from '../store/store';
 
 const Layout = () => {
     const location = useLocation();
@@ -65,10 +68,6 @@ const Layout = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    if (location.pathname === '/login') {
-        return <Outlet />;
-    }
-
     const getUserInitials = (name: string) => {
         if (!name) return 'A';
         return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
@@ -78,17 +77,17 @@ const Layout = () => {
         <div style={{ display: 'flex', height: '100vh', backgroundColor: '#f8fafc', overflow: 'hidden' }}>
             {/* Sidebar */}
             <aside style={{
-                width: '200px',
+                width: '260px',
                 backgroundColor: '#ffffff',
                 borderRight: '1px solid #f1f5f9',
-                padding: '2rem 1rem',
+                padding: '2rem 1.25rem',
                 display: 'flex',
                 flexDirection: 'column',
                 position: 'sticky',
                 top: 0,
                 height: '100vh',
-                zIndex: 10,
-                overflowY: 'auto'
+                zIndex: 40,
+                boxShadow: '4px 0 24px rgba(0,0,0,0.02)'
             }}>
                 <Link to="/" style={{
                     marginBottom: '3rem',
@@ -99,43 +98,43 @@ const Layout = () => {
                     textDecoration: 'none'
                 }}>
                     <div style={{
-                        padding: '0.5rem',
+                        padding: '0.6rem',
                         backgroundColor: '#6366f1',
                         color: 'white',
-                        borderRadius: '12px',
-                        boxShadow: '0 4px 12px rgba(99, 102, 241, 0.2)'
+                        borderRadius: '14px',
+                        boxShadow: '0 8px 16px rgba(99, 102, 241, 0.25)'
                     }}>
-                        <FolderOpen size={24} />
+                        <FolderOpen size={26} />
                     </div>
-                    <span style={{ fontSize: '1.25rem', fontWeight: '800', color: '#1e293b', letterSpacing: '-0.025em' }}>
+                    <span style={{ fontSize: '1.4rem', fontWeight: '900', color: '#111827', letterSpacing: '-0.03em' }}>
                         Admin<span style={{ color: '#6366f1' }}>Flow</span>
                     </span>
                 </Link>
 
-                <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    <p style={{ fontSize: '0.75rem', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem', marginLeft: '0.5rem' }}>
-                        Management
+                <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.75rem', overflowY: 'auto' }}>
+                    <p style={{ fontSize: '0.7rem', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.5rem', marginLeft: '0.75rem' }}>
+                        Management Modules
                     </p>
                     {filteredNavItems.map((item) => {
                         const isModuleActive = location.pathname.startsWith(item.path);
 
                         return (
-                            <div key={item.path} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                            <div key={item.path} style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                                 <div
                                     style={{
                                         display: 'flex',
                                         alignItems: 'center',
-                                        gap: '0.75rem',
+                                        gap: '0.85rem',
                                         padding: '0.875rem 1rem',
-                                        borderRadius: '12px',
-                                        color: isModuleActive ? '#6366f1' : '#64748b',
+                                        borderRadius: '14px',
+                                        color: isModuleActive ? '#6366f1' : '#475569',
                                         backgroundColor: isModuleActive ? '#f5f7ff' : 'transparent',
-                                        fontWeight: isModuleActive ? '700' : '500',
+                                        fontWeight: isModuleActive ? '750' : '600',
                                         cursor: 'default',
-                                        transition: 'all 0.2s',
+                                        fontSize: '0.925rem'
                                     }}
                                 >
-                                    <span style={{ opacity: isModuleActive ? 1 : 0.7 }}>{item.icon}</span>
+                                    <span style={{ opacity: isModuleActive ? 1 : 0.6 }}>{item.icon}</span>
                                     <span>{item.name}</span>
                                 </div>
 
@@ -143,11 +142,11 @@ const Layout = () => {
                                 <div style={{
                                     display: 'flex',
                                     flexDirection: 'column',
-                                    gap: '4px',
+                                    gap: '6px',
                                     paddingLeft: '1.25rem',
-                                    marginTop: '4px',
+                                    marginTop: '2px',
                                     borderLeft: '2px solid #f1f5f9',
-                                    marginLeft: '1.75rem'
+                                    marginLeft: '1.9rem'
                                 }}>
                                     {item.subItems.map((sub) => {
                                         const isSubActive = location.pathname === sub.path;
@@ -158,20 +157,20 @@ const Layout = () => {
                                                 style={{
                                                     display: 'flex',
                                                     alignItems: 'center',
-                                                    gap: '0.75rem',
-                                                    padding: '0.625rem 0.875rem',
-                                                    borderRadius: '8px',
+                                                    gap: '0.8rem',
+                                                    padding: '0.65rem 1rem',
+                                                    borderRadius: '10px',
                                                     color: isSubActive ? '#6366f1' : '#64748b',
                                                     backgroundColor: isSubActive ? '#f5f7ff' : 'transparent',
                                                     textDecoration: 'none',
-                                                    fontSize: '0.875rem',
-                                                    fontWeight: isSubActive ? '600' : '500',
+                                                    fontSize: '0.85rem',
+                                                    fontWeight: isSubActive ? '700' : '500',
                                                     transition: 'all 0.2s',
                                                 }}
                                                 onMouseEnter={(e) => !isSubActive && (e.currentTarget.style.backgroundColor = '#f8fafc')}
                                                 onMouseLeave={(e) => !isSubActive && (e.currentTarget.style.backgroundColor = 'transparent')}
                                             >
-                                                <span style={{ opacity: isSubActive ? 1 : 0.5 }}>{sub.icon}</span>
+                                                <span style={{ opacity: isSubActive ? 1 : 0.4 }}>{sub.icon}</span>
                                                 <span>{sub.name}</span>
                                             </Link>
                                         );
@@ -183,10 +182,149 @@ const Layout = () => {
                 </nav>
             </aside>
 
-            {/* Main Content */}
-            <main style={{ flex: 1, padding: '2rem', overflowY: 'auto' }}>
-                <Outlet />
-            </main>
+            {/* Content Wrapper */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
+                {/* Top Header */}
+                <header style={{
+                    height: '80px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                    backdropFilter: 'blur(12px)',
+                    borderBottom: '1px solid #f1f5f9',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '0 2.5rem',
+                    zIndex: 30
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+                        <div style={{
+                            width: '44px',
+                            height: '44px',
+                            backgroundColor: '#f5f7ff',
+                            borderRadius: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#6366f1',
+                            border: '1px solid #eef2ff'
+                        }}>
+                            {user?.category === 'Photography' ? <Camera size={24} /> :
+                                user?.category === 'School' ? <School size={24} /> :
+                                    <Hammer size={24} />}
+                        </div>
+                        <div>
+                            <h2 style={{ fontSize: '1.15rem', fontWeight: '800', color: '#1e293b', margin: 0, letterSpacing: '-0.02em' }}>
+                                {user?.category || 'General'} <span style={{ color: '#6366f1' }}>Management</span>
+                            </h2>
+                            <p style={{ margin: 0, fontSize: '0.7rem', color: '#94a3b8', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                Personalized Dashboard
+                            </p>
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                        <div style={{ textAlign: 'right', display: 'none', '@media (min-width: 768px)': { display: 'block' } } as any}>
+                            <p style={{ margin: 0, fontSize: '0.95rem', fontWeight: '800', color: '#1e293b' }}>{user?.name || 'Administrator'}</p>
+                            <p style={{ margin: 0, fontSize: '0.75rem', color: '#6366f1', fontWeight: '700', textTransform: 'uppercase' }}>{user?.category || 'Super Admin'}</p>
+                        </div>
+                        <div style={{ position: 'relative' }} ref={dropdownRef}>
+                            <button
+                                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                                style={{
+                                    width: '48px',
+                                    height: '48px',
+                                    borderRadius: '16px',
+                                    backgroundColor: '#6366f1',
+                                    color: 'white',
+                                    border: '3px solid #eef2ff',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '1rem',
+                                    fontWeight: '800',
+                                    cursor: 'pointer',
+                                    boxShadow: '0 4px 12px rgba(99, 102, 241, 0.15)'
+                                }}
+                            >
+                                {getUserInitials(user?.name || 'Admin')}
+                            </button>
+
+                            {isDropdownOpen && (
+                                <div style={{
+                                    position: 'absolute',
+                                    top: 'calc(100% + 12px)',
+                                    right: 0,
+                                    width: '220px',
+                                    backgroundColor: 'white',
+                                    borderRadius: '20px',
+                                    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                                    border: '1px solid #f1f5f9',
+                                    padding: '0.75rem',
+                                    zIndex: 50
+                                }}>
+                                    <div style={{ padding: '0.75rem', borderBottom: '1px solid #f1f5f9', marginBottom: '0.5rem' }}>
+                                        <p style={{ margin: 0, fontSize: '0.875rem', fontWeight: '700', color: '#1e293b' }}>{user?.name}</p>
+                                        <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b' }}>{user?.phoneNumber}</p>
+                                    </div>
+                                    <Link to="/settings" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', color: '#475569', textDecoration: 'none', fontSize: '0.875rem', borderRadius: '10px', transition: 'all 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                                        <Circle size={8} fill="#6366f1" /> Settings
+                                    </Link>
+                                    <button
+                                        onClick={handleLogout}
+                                        style={{
+                                            width: '100%',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.75rem',
+                                            padding: '0.75rem',
+                                            color: '#ef4444',
+                                            backgroundColor: 'transparent',
+                                            border: 'none',
+                                            fontSize: '0.875rem',
+                                            borderRadius: '10px',
+                                            cursor: 'pointer',
+                                            textAlign: 'left',
+                                            fontWeight: '600'
+                                        }}
+                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fef2f2'}
+                                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                                    >
+                                        <Circle size={8} fill="#ef4444" /> Sign Out
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </header>
+
+                {/* Main Content Area */}
+                <main style={{ flex: 1, overflowY: 'auto', padding: '2.5rem', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ flex: 1 }}>
+                        <Outlet />
+                    </div>
+
+                    {/* Footer */}
+                    <footer style={{
+                        marginTop: '4rem',
+                        padding: '2rem 0',
+                        borderTop: '1px solid #f1f5f9',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        color: '#94a3b8',
+                        fontSize: '0.875rem'
+                    }}>
+                        <div>
+                            © 2026 AdminFlow Pro. All rights reserved.
+                        </div>
+                        <div style={{ display: 'flex', gap: '1.5rem', fontWeight: '600' }}>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981' }} /> System Status: Operational
+                            </span>
+                        </div>
+                    </footer>
+                </main>
+            </div>
         </div>
     );
 };

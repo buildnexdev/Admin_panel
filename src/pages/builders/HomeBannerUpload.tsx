@@ -3,21 +3,33 @@ import { useDispatch, useSelector } from 'react-redux';
 import { uploadHomeBanners, clearMessages, fetchBanners, deleteBanner } from '../../store/slices/buildersSlice';
 import { contentCMSService } from '../../services/api';
 import type { AppDispatch, RootState } from '../../store/store';
-import { Upload, X, Image as ImageIcon } from 'lucide-react';
+import { Upload, X, Image as ImageIcon, CheckCircle2, Calendar, Edit2, Trash2 } from 'lucide-react';
 import { imageUploadToS3 } from '../../services/api';
 
 const HomeBannerUpload = () => {
     const dispatch = useDispatch<AppDispatch>();
-    const { loading, successMessage, banners } = useSelector((state: RootState) => state.builders);
+    const { loading, successMessage, error, banners } = useSelector((state: RootState) => state.builders);
     const { user } = useSelector((state: RootState) => state.auth);
 
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [previews, setPreviews] = useState<string[]>([]);
     const [fileNames, setFileNames] = useState<string[]>([]);
+    const [editingBanner, setEditingBanner] = useState<any>(null);
 
-    const { user } = useSelector((state: RootState) => state.auth);
     const companyID = user?.companyID;
     const userID = user?.userId;
+
+    useEffect(() => {
+        if (companyID) {
+            dispatch(fetchBanners(companyID));
+        }
+    }, [dispatch, companyID]);
+
+    const handleDelete = async (id: number) => {
+        if (window.confirm('Are you sure you want to delete this banner?') && companyID) {
+            dispatch(deleteBanner({ id, companyID }));
+        }
+    };
 
     async function handleFileChange(e: ChangeEvent<HTMLInputElement>, docFor: string = 'HomeBanner') {
         const files = e.target.files;
@@ -52,26 +64,6 @@ const HomeBannerUpload = () => {
         }
     }
 
-    // const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    //     if (e.target.files) {
-    //         const files = Array.from(e.target.files);
-
-    //         imageUploadToS3()
-
-    //         // if (files.length + selectedFiles.length > 5) {
-    //         //     alert('You can only upload a maximum of 5 images.');
-    //         //     return;
-    //         // }
-
-    //         const newFiles = [...selectedFiles, ...files].slice(0, 5);
-    //         setSelectedFiles(newFiles);
-
-    //         // Generate previews
-    //         const newPreviews = newFiles.map(file => URL.createObjectURL(file));
-    //         setPreviews(newPreviews);
-    //     }
-    // };
-
     const removeFile = (index: number) => {
         const newFiles = selectedFiles.filter((_, i) => i !== index);
         setSelectedFiles(newFiles);
@@ -88,13 +80,10 @@ const HomeBannerUpload = () => {
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         if (!user?.companyID) return;
-
         dispatch(clearMessages());
-
         if (fileNames.length === 0) {
             return;
         }
-
         if (!companyID || !userID) {
             alert('User or Company information missing. Please log in again.');
             return;
@@ -114,6 +103,7 @@ const HomeBannerUpload = () => {
         setSelectedFiles([]);
         setPreviews([]);
         setFileNames([]);
+        setEditingBanner(null);
     };
 
     return (
@@ -143,31 +133,31 @@ const HomeBannerUpload = () => {
                         </div>
                     )}
 
-            {error && (
-                <div style={{ padding: '1rem', backgroundColor: '#fef2f2', color: '#991b1b', borderRadius: '4px', marginBottom: '1.5rem', border: '1px solid #fecaca' }}>
-                    {error}
-                </div>
-            )}
+                    {error && (
+                        <div style={{ padding: '1rem', backgroundColor: '#fef2f2', color: '#991b1b', borderRadius: '4px', marginBottom: '1.5rem', border: '1px solid #fecaca' }}>
+                            {error}
+                        </div>
+                    )}
 
-            <form onSubmit={handleSubmit} style={{ backgroundColor: 'white', padding: '2rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e5e7eb' }}>
-                <div style={{ marginBottom: '2rem' }}>
-                    <label style={{ display: 'block', marginBottom: '1rem', fontWeight: '500', color: '#374151' }}>
-                        Select Images (Max 5)
-                    </label>
-                    <div style={{ border: '2px dashed #d1d5db', borderRadius: '6px', padding: '2rem', textAlign: 'center', cursor: 'pointer', backgroundColor: '#f9fafb' }} onClick={() => document.getElementById('file-upload')?.click()}>
-                        <Upload size={32} color="#9ca3af" style={{ marginBottom: '1rem' }} />
-                        <p style={{ color: '#6b7280', marginBottom: '0.5rem' }}>Click to upload or drag and drop</p>
-                        <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>PNG, JPG up to 5MB</p>
-                        <input
-                            id="file-upload"
-                            type="file"
-                            multiple
-                            accept="image/*"
-                            onChange={(e) => handleFileChange(e, 'HomeBanner')}
-                            style={{ display: 'none' }}
-                        />
-                    </div>
-                </div>
+                    <form onSubmit={handleSubmit} style={{ backgroundColor: 'white', padding: '2rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e5e7eb' }}>
+                        <div style={{ marginBottom: '2rem' }}>
+                            <label style={{ display: 'block', marginBottom: '1rem', fontWeight: '500', color: '#374151' }}>
+                                Select Images (Max 5)
+                            </label>
+                            <div style={{ border: '2px dashed #d1d5db', borderRadius: '6px', padding: '2rem', textAlign: 'center', cursor: 'pointer', backgroundColor: '#f9fafb' }} onClick={() => document.getElementById('file-upload')?.click()}>
+                                <Upload size={32} color="#9ca3af" style={{ marginBottom: '1rem' }} />
+                                <p style={{ color: '#6b7280', marginBottom: '0.5rem' }}>Click to upload or drag and drop</p>
+                                <p style={{ color: '#9ca3af', fontSize: '0.875rem' }}>PNG, JPG up to 5MB</p>
+                                <input
+                                    id="file-upload"
+                                    type="file"
+                                    multiple
+                                    accept="image/*"
+                                    onChange={(e) => handleFileChange(e, 'HomeBanner')}
+                                    style={{ display: 'none' }}
+                                />
+                            </div>
+                        </div>
 
                         {previews.length > 0 && (
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '1rem' }}>
