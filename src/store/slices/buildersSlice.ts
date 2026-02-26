@@ -1,41 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { uploadHomeImage, uploadBuilderProjectApi, contentCMSService } from '../../services/api';
-import type { RootState } from '../store';
-
-interface Project {
-    id: number;
-    title: string;
-    description: string;
-    category: string;
-    image_url: string;
-    created_at: string;
-}
-
-interface Banner {
-    id: number;
-    title: string;
-    subtitle: string;
-    image_url: string;
-    page: string;
-    created_at: string;
-}
-
-interface Service {
-    id: number;
-    title: string;
-    description: string;
-    iconName: string;
-    created_at: string;
-}
-
-interface Blog {
-    id: number;
-    title: string;
-    content: string;
-    author: string;
-    image_url: string;
-    created_at: string;
-}
+import { uploadBuilderProjectApi, saveBannerPaths } from '../../services/api';
 
 interface BuildersState {
     projects: Project[];
@@ -161,8 +125,8 @@ export const deleteBlog = createAsyncThunk(
 
 // UPLOAD / UPDATE THUNKS
 export const uploadBuilderProject = createAsyncThunk(
-    'builders/uploadProject',
-    async ({ data, file }: { data: any; file: File }, { dispatch, rejectWithValue }) => {
+    'banners/uploadProject',
+    async ({ data, file }: { data: any; file: File }, { rejectWithValue }) => {
         try {
             await uploadBuilderProjectApi({ data, file });
             if (data.companyID) {
@@ -177,30 +141,18 @@ export const uploadBuilderProject = createAsyncThunk(
 
 export const uploadHomeBanners = createAsyncThunk<
     string,
-    File[],
-    { state: RootState; rejectValue: string }
+    { fileNames: string[]; companyID: number; userID: number },
+    { rejectValue: string }
 >(
-    'builders/uploadHomeBanners',
-    async (files, { getState, dispatch, rejectWithValue }) => {
-        const { user } = (getState() as RootState).auth;
-        if (!user) return rejectWithValue('User not authenticated');
-
+    'banners/uploadAndSaveBanners',
+    async ({ fileNames, companyID, userID }, { rejectWithValue }) => {
         try {
-            await Promise.all(files.map(file => {
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('imageName', file.name);
-                formData.append('category', user.category || 'Builders');
-                formData.append('companyId', user.companyID.toString());
-
-                return uploadHomeImage(formData);
-            }));
-
-            if (user.companyID) {
-                dispatch(fetchBanners(user.companyID));
-            }
-
-            return 'Home banners uploaded successfully';
+            await saveBannerPaths({
+                bannerPaths: fileNames,
+                companyID,
+                userId: userID
+            });
+            return 'Home banners uploaded and saved successfully';
         } catch (error: any) {
             return rejectWithValue(error.message || 'Failed to upload home banners');
         }

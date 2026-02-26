@@ -1,5 +1,5 @@
 import axios from 'axios';
-const API_URL = 'http://localhost:3000/';
+export const API_URL = 'http://localhost:3000/';
 
 // User login Service
 export const UserloginService = {
@@ -254,4 +254,55 @@ export const contentCMSService = {
     }
 };
 
-// export default api;
+// IMAGE UPLOAD TO SERVER
+// Upload multiple banners and save to tblBannerImg
+export const uploadBannersToTable = async (formData: FormData) => {
+    try {
+        const response = await axios.post(`${API_URL}banners/upload`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        return response.data;
+    } catch (error: any) {
+        throw new Error(error.response?.data?.message || error.message || 'Failed to upload and save banners');
+    }
+};
+
+// Save banner paths to tblBannerImg
+export const saveBannerPaths = async (data: { bannerPaths: string[]; companyID: number; userId: number }) => {
+    try {
+        const response = await axios.post(`${API_URL}banners/save-paths`, data);
+        return response.data;
+    } catch (error: any) {
+        throw new Error(error.response?.data?.message || error.message || 'Failed to save banner paths');
+    }
+};
+
+export const imageUploadToS3 = async (result: any, path: any, loginData: any, fileType?: any) => {
+    const { companyID, databaseName } = loginData || {};
+    const formData = new FormData();
+    formData.append('photoimg', result);
+    formData.append('typeval', path);
+    if (companyID) formData.append('companyID', companyID);
+    if (databaseName) formData.append('databaseName', databaseName);
+    formData.append('fileFormat', fileType ? fileType : 'Image');
+
+    const response = await fetch(`${API_URL}_common/uploadImageToServer`, {
+        method: 'POST',
+        body: formData,
+    });
+
+    if (!response.ok) {
+        console.error('Server returned an error:', response.status, response.statusText);
+        return null;
+    } else {
+        const responseJson = await response.json();
+        if (responseJson.status === 'Success' || responseJson.status === true) {
+            return responseJson.response || responseJson;
+        } else if ('error_message' in responseJson || responseJson.status === false) {
+            return 'Image Upload Failed';
+        }
+    }
+    return null;
+};
