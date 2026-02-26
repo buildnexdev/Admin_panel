@@ -34,6 +34,9 @@ const recentActivities = [
 ];
 
 const Dashboard = () => {
+    const navigate = useNavigate();
+    const { user } = useSelector((state: RootState) => state.auth);
+
     const stats = [
         { name: 'School Growth', icon: <School size={24} />, value: '+12.5%', color: '#3b82f6', bgColor: '#dbeafe', trend: 'up' },
         { name: 'Photography', icon: <Camera size={24} />, value: '85 New', color: '#8b5cf6', bgColor: '#ede9fe', trend: 'up' },

@@ -61,6 +61,22 @@ const authSlice = createSlice({
     reducers: {
         clearAuthError: (state) => {
             state.error = null;
+        },
+        setDemoAuth: (state) => {
+            state.isAuthenticated = true;
+            state.user = {
+                userId: 999,
+                name: 'Demo Admin',
+                phoneNumber: '1234567890',
+                companyID: 1,
+                location: 'Demo City',
+                isActive: 1,
+                role: 'admin',
+                category: 'Builders'
+            };
+            state.token = 'demo-token';
+            localStorage.setItem('auth_token', 'demo-token');
+            localStorage.setItem('auth_user', JSON.stringify(state.user));
         }
     },
     extraReducers: (builder) => {
@@ -87,5 +103,5 @@ const authSlice = createSlice({
     },
 });
 
-export const { clearAuthError } = authSlice.actions;
+export const { clearAuthError, setDemoAuth } = authSlice.actions;
 export default authSlice.reducer;

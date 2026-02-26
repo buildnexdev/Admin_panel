@@ -3,6 +3,7 @@ import Dashboard from './pages/Dashboard';
 import Layout from './components/Layout';
 
 import Login from './pages/Login';
+import Settings from './pages/Settings';
 
 // School
 import SchoolDashboard from './pages/school/SchoolDashboard';
@@ -19,6 +20,9 @@ import PhotoProtectedRoute from './components/PhotoProtectedRoute';
 import BuildersDashboard from './pages/builders/BuildersDashboard';
 import ProjectUpload from './pages/builders/ProjectUpload';
 import HomeBannerUpload from './pages/builders/HomeBannerUpload';
+import ServiceUpload from './pages/builders/ServiceUpload';
+import BlogUpload from './pages/builders/BlogUpload';
+import ContactMessages from './pages/builders/ContactMessages';
 import BuildersProtectedRoute from './components/BuildersProtectedRoute';
 
 
@@ -29,6 +33,7 @@ function App() {
         {/* Main layout - All pages including login are within the layout */}
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />
+          <Route path="settings" element={<Settings />} />
 
           {/* Unified login route */}
           <Route path="login" element={<Login />} />
@@ -66,6 +71,21 @@ function App() {
             <Route path="upload-home-banners" element={
               <BuildersProtectedRoute>
                 <HomeBannerUpload />
+              </BuildersProtectedRoute>
+            } />
+            <Route path="services" element={
+              <BuildersProtectedRoute>
+                <ServiceUpload />
+              </BuildersProtectedRoute>
+            } />
+            <Route path="blog" element={
+              <BuildersProtectedRoute>
+                <BlogUpload />
+              </BuildersProtectedRoute>
+            } />
+            <Route path="contact" element={
+              <BuildersProtectedRoute>
+                <ContactMessages />
               </BuildersProtectedRoute>
             } />
           </Route>

@@ -1,118 +1,191 @@
+
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Camera, FolderOpen, School, Hammer, Search, Activity } from 'lucide-react';
+import { LayoutDashboard, Camera, FolderOpen, School, Hammer } from 'lucide-react';
 
 const Layout = () => {
     const location = useLocation();
+    const navigate = useNavigate();
+    const dispatch = useDispatch<AppDispatch>();
+    const { user } = useSelector((state: RootState) => state.auth);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
 
+    // Sidebar items mapping with submenus
     const navItems = [
-        { name: 'Dashboard', path: '/', icon: <LayoutDashboard size={20} /> },
-        { name: 'School', path: '/school', icon: <School size={20} /> },
-        { name: 'Photography', path: '/photography', icon: <Camera size={20} /> },
-        { name: 'Builders', path: '/builders', icon: <Hammer size={20} /> },
+        {
+            name: 'School',
+            path: '/school',
+            icon: <School size={20} />,
+            category: 'School',
+            subItems: [
+                { name: 'Dashboard', path: '/school', icon: <LayoutGrid size={16} /> },
+                { name: 'Content', path: '/school/upload-content', icon: <Circle size={8} /> },
+                { name: 'Library', path: '/school/upload-image', icon: <Circle size={8} /> },
+            ]
+        },
+        {
+            name: 'Photography',
+            path: '/photography',
+            icon: <Camera size={20} />,
+            category: 'Photography',
+            subItems: [
+                { name: 'Gallery', path: '/photography/upload-gallery', icon: <Circle size={8} /> },
+            ]
+        },
+        {
+            name: 'Builders',
+            path: '/builders',
+            icon: <Hammer size={20} />,
+            category: 'Builders',
+            subItems: [
+                { name: 'Portfolio', path: '/builders/upload-project', icon: <Briefcase size={16} /> },
+                { name: 'Banners', path: '/builders/upload-home-banners', icon: <ImageIcon size={16} /> },
+                { name: 'Services', path: '/builders/services', icon: <Circle size={8} /> },
+                { name: 'Blog', path: '/builders/blog', icon: <BookOpen size={16} /> },
+            ]
+        },
     ];
 
+    const filteredNavItems = navItems.filter(item =>
+        user?.role === "0" || user?.category === item.category
+    );
+
+    const handleLogout = async () => {
+        await dispatch(logoutUser());
+        navigate('/login');
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsDropdownOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    if (location.pathname === '/login') {
+        return <Outlet />;
+    }
+
+    const getUserInitials = (name: string) => {
+        if (!name) return 'A';
+        return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+    };
+
     return (
-        <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f9fafb' }}>
+        <div style={{ display: 'flex', height: '100vh', backgroundColor: '#f8fafc', overflow: 'hidden' }}>
             {/* Sidebar */}
             <aside style={{
-                width: '250px',
-                backgroundColor: '#1f2937',
-                color: 'white',
-                padding: '1.5rem',
+                width: '200px',
+                backgroundColor: '#ffffff',
+                borderRight: '1px solid #f1f5f9',
+                padding: '2rem 1rem',
                 display: 'flex',
                 flexDirection: 'column',
                 position: 'sticky',
                 top: 0,
                 height: '100vh',
+                zIndex: 10,
                 overflowY: 'auto'
             }}>
-                <div style={{ marginBottom: '2rem', fontSize: '1.5rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <FolderOpen size={28} />
-                    <span>Admin Panel</span>
-                </div>
+                <Link to="/" style={{
+                    marginBottom: '3rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    color: '#6366f1',
+                    textDecoration: 'none'
+                }}>
+                    <div style={{
+                        padding: '0.5rem',
+                        backgroundColor: '#6366f1',
+                        color: 'white',
+                        borderRadius: '12px',
+                        boxShadow: '0 4px 12px rgba(99, 102, 241, 0.2)'
+                    }}>
+                        <FolderOpen size={24} />
+                    </div>
+                    <span style={{ fontSize: '1.25rem', fontWeight: '800', color: '#1e293b', letterSpacing: '-0.025em' }}>
+                        Admin<span style={{ color: '#6366f1' }}>Flow</span>
+                    </span>
+                </Link>
 
                 <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    {navItems.map((item) => {
-                        const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
+                    <p style={{ fontSize: '0.75rem', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem', marginLeft: '0.5rem' }}>
+                        Management
+                    </p>
+                    {filteredNavItems.map((item) => {
+                        const isModuleActive = location.pathname.startsWith(item.path);
+
                         return (
-                            <Link
-                                key={item.path}
-                                to={item.path}
-                                style={{
+                            <div key={item.path} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.75rem',
+                                        padding: '0.875rem 1rem',
+                                        borderRadius: '12px',
+                                        color: isModuleActive ? '#6366f1' : '#64748b',
+                                        backgroundColor: isModuleActive ? '#f5f7ff' : 'transparent',
+                                        fontWeight: isModuleActive ? '700' : '500',
+                                        cursor: 'default',
+                                        transition: 'all 0.2s',
+                                    }}
+                                >
+                                    <span style={{ opacity: isModuleActive ? 1 : 0.7 }}>{item.icon}</span>
+                                    <span>{item.name}</span>
+                                </div>
+
+                                {/* Submenu Items */}
+                                <div style={{
                                     display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '0.75rem',
-                                    padding: '0.75rem 1rem',
-                                    borderRadius: '6px',
-                                    color: isActive ? 'white' : '#9ca3af',
-                                    backgroundColor: isActive ? '#374151' : 'transparent',
-                                    textDecoration: 'none',
-                                    whiteSpace: 'nowrap',
-                                    transition: 'background-color 0.2s, color 0.2s',
-                                }}
-                            >
-                                {item.icon}
-                                <span>{item.name}</span>
-                            </Link>
+                                    flexDirection: 'column',
+                                    gap: '4px',
+                                    paddingLeft: '1.25rem',
+                                    marginTop: '4px',
+                                    borderLeft: '2px solid #f1f5f9',
+                                    marginLeft: '1.75rem'
+                                }}>
+                                    {item.subItems.map((sub) => {
+                                        const isSubActive = location.pathname === sub.path;
+                                        return (
+                                            <Link
+                                                key={sub.path}
+                                                to={sub.path}
+                                                style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '0.75rem',
+                                                    padding: '0.625rem 0.875rem',
+                                                    borderRadius: '8px',
+                                                    color: isSubActive ? '#6366f1' : '#64748b',
+                                                    backgroundColor: isSubActive ? '#f5f7ff' : 'transparent',
+                                                    textDecoration: 'none',
+                                                    fontSize: '0.875rem',
+                                                    fontWeight: isSubActive ? '600' : '500',
+                                                    transition: 'all 0.2s',
+                                                }}
+                                                onMouseEnter={(e) => !isSubActive && (e.currentTarget.style.backgroundColor = '#f8fafc')}
+                                                onMouseLeave={(e) => !isSubActive && (e.currentTarget.style.backgroundColor = 'transparent')}
+                                            >
+                                                <span style={{ opacity: isSubActive ? 1 : 0.5 }}>{sub.icon}</span>
+                                                <span>{sub.name}</span>
+                                            </Link>
+                                        );
+                                    })}
+                                </div>
+                            </div>
                         );
                     })}
                 </nav>
             </aside>
 
             {/* Main Content */}
-            <main style={{ flex: 1, height: '100vh', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
-                {/* Top Header */}
-                <header style={{
-                    backgroundColor: 'white',
-                    padding: '0.75rem 2rem',
-                    borderBottom: '1px solid #e5e7eb',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    position: 'sticky',
-                    top: 0,
-                    zIndex: 10
-                }}>
-                    <div style={{ position: 'relative', width: '300px' }}>
-                        <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
-                        <input
-                            type="text"
-                            placeholder="Search everything..."
-                            style={{
-                                width: '100%',
-                                padding: '0.6rem 1rem 0.6rem 2.5rem',
-                                border: '1px solid #e5e7eb',
-                                borderRadius: '10px',
-                                fontSize: '0.875rem',
-                                outline: 'none',
-                                background: '#f9fafb'
-                            }}
-                        />
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                        <div style={{ position: 'relative', cursor: 'pointer', color: '#6b7280' }}>
-                            <Activity size={20} />
-                            <span style={{ position: 'absolute', top: '-5px', right: '-5px', width: '8px', height: '8px', background: '#ef4444', borderRadius: '50%', border: '2px solid white' }}></span>
-                        </div>
-
-                        <div style={{ height: '24px', width: '1px', backgroundColor: '#e5e7eb' }}></div>
-
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
-                            <div style={{ textAlign: 'right' }}>
-                                <p style={{ fontSize: '0.875rem', fontWeight: '600', color: '#111827', margin: 0 }}>Super Admin</p>
-                                <p style={{ fontSize: '0.75rem', color: '#6b7280', margin: 0 }}>Master Control</p>
-                            </div>
-                            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold' }}>
-                                SA
-                            </div>
-                        </div>
-                    </div>
-                </header>
-
-                <div style={{ padding: '2rem' }}>
-                    <Outlet />
-                </div>
+            <main style={{ flex: 1, padding: '2rem', overflowY: 'auto' }}>
+                <Outlet />
             </main>
         </div>
     );
