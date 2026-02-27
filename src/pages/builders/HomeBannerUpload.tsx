@@ -1,10 +1,9 @@
 import { useState, useEffect, type ChangeEvent, type FormEvent } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { uploadHomeBanners, clearMessages, fetchBanners, deleteBanner } from '../../store/slices/buildersSlice';
-import { contentCMSService } from '../../services/api';
+import { contentCMSService, imageUploadToS3, Img_Url } from '../../services/api';
 import type { AppDispatch, RootState } from '../../store/store';
 import { Upload, X, Image as ImageIcon, CheckCircle2, Calendar, Edit2, Trash2 } from 'lucide-react';
-import { imageUploadToS3 } from '../../services/api';
 
 const HomeBannerUpload = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -21,13 +20,13 @@ const HomeBannerUpload = () => {
 
     useEffect(() => {
         if (companyID) {
-            dispatch(fetchBanners(companyID));
+            dispatch(fetchBanners({ companyID, category: 'HomeBanner' }));
         }
     }, [dispatch, companyID]);
 
     const handleDelete = async (id: number) => {
         if (window.confirm('Are you sure you want to delete this banner?') && companyID) {
-            dispatch(deleteBanner({ id, companyID }));
+            dispatch(deleteBanner({ id, companyID, category: 'HomeBanner' }));
         }
     };
 
@@ -37,12 +36,19 @@ const HomeBannerUpload = () => {
 
         const newFiles = Array.from(files);
 
+        // Total images after adding new ones
+        const totalImages = selectedFiles.length + newFiles.length;
+        if (totalImages > 5) {
+            alert('You can only upload a maximum of 5 images.');
+            return;
+        }
+
         // Update local previews for UI immediately
         const newPreviews = newFiles.map(file => URL.createObjectURL(file));
-        setPreviews(prev => [...prev, ...newPreviews].slice(0, 5));
-        setSelectedFiles(prev => [...prev, ...newFiles].slice(0, 5));
+        setPreviews(prev => [...prev, ...newPreviews]);
+        setSelectedFiles(prev => [...prev, ...newFiles]);
 
-        // If you want immediate upload to S3 for each file:
+        // Upload to S3 for each file
         for (const file of newFiles) {
             if (file.type.startsWith('image/') || file.type === 'application/pdf') {
                 try {
@@ -52,7 +58,6 @@ const HomeBannerUpload = () => {
                     if (uploadResponse && uploadResponse !== 'Image Upload Failed') {
                         const fileName = uploadResponse.fileName;
                         setFileNames(prev => [...prev, fileName]);
-
                         console.log('File uploaded successfully:', uploadResponse);
                     } else {
                         console.error('File upload failed');
@@ -82,6 +87,7 @@ const HomeBannerUpload = () => {
         if (!user?.companyID) return;
         dispatch(clearMessages());
         if (fileNames.length === 0) {
+            alert('Please select and upload at least one image first.');
             return;
         }
         if (!companyID || !userID) {
@@ -93,13 +99,12 @@ const HomeBannerUpload = () => {
             fileNames,
             companyID,
             userID,
+            category: 'HomeBanner'
         };
 
         dispatch(uploadHomeBanners(imgdata));
 
-        // Note: Success handling (clearing files) could be moved to a useEffect based on successMessage
-        // or handled here if it's not and async action that might fail.
-        // For now, keeping it as is but it might be better in .then() or useEffect.
+        // Note: Success handling could be moved to a useEffect based on successMessage
         setSelectedFiles([]);
         setPreviews([]);
         setFileNames([]);
@@ -206,12 +211,12 @@ const HomeBannerUpload = () => {
                             banners.map((banner: any) => (
                                 <div key={banner.id} style={{ backgroundColor: 'white', borderRadius: '20px', overflow: 'hidden', border: '1px solid #f1f5f9' }}>
                                     <div style={{ height: '160px', overflow: 'hidden', position: 'relative' }}>
-                                        <img src={banner.image_url} alt="Banner" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        <img src={Img_Url + banner.imageUrl} alt="Banner" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     </div>
                                     <div style={{ padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94a3b8', fontSize: '0.75rem' }}>
                                             <Calendar size={14} />
-                                            {new Date(banner.created_at).toLocaleDateString()}
+                                            {new Date(banner.createdAt).toLocaleDateString()}
                                         </div>
                                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                                             <button onClick={() => { setEditingBanner(banner); window.scrollTo({ top: 0, behavior: 'smooth' }); }} style={{ color: '#6366f1', padding: '0.4rem', borderRadius: '8px', backgroundColor: '#f1f5f9', border: 'none', cursor: 'pointer' }}>

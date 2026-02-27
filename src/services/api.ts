@@ -1,6 +1,6 @@
 import axios from 'axios';
 export const API_URL = 'http://localhost:3000/';
-
+export const Img_Url = 'https://s3.eu-north-1.amazonaws.com/buildnex-dev-bucket/';
 // User login Service
 export const UserloginService = {
     login: async (credentials: { phone: string; password: string }) => {
@@ -189,8 +189,9 @@ export const contentCMSService = {
         });
         return response.data;
     },
-    getBanners: async (companyID: number) => {
-        const response = await axios.get(`${API_URL}content/banners/${companyID}`);
+    getBanners: async (companyID: number, category?: string) => {
+        const url = category ? `${API_URL}content/banners/${companyID}?category=${category}` : `${API_URL}content/banners/${companyID}`;
+        const response = await axios.get(url);
         return response.data;
     },
     updateBanner: async (id: number, formData: FormData) => {
@@ -270,7 +271,7 @@ export const uploadBannersToTable = async (formData: FormData) => {
 };
 
 // Save banner paths to tblBannerImg
-export const saveBannerPaths = async (data: { bannerPaths: string[]; companyID: number; userId: number }) => {
+export const saveBannerPaths = async (data: { bannerPaths: string[]; companyID: number; userId: number; category?: string }) => {
     try {
         const response = await axios.post(`${API_URL}banners/save-paths`, data);
         return response.data;

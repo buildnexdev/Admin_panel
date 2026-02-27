@@ -12,9 +12,9 @@ interface Project {
 
 interface Banner {
     id: number;
-    image_url: string;
+    imageUrl: string;
     companyID: number;
-    created_at: string;
+    createdAt: string;
 }
 
 interface Service {
@@ -69,9 +69,9 @@ export const fetchProjects = createAsyncThunk(
 
 export const fetchBanners = createAsyncThunk(
     'builders/fetchBanners',
-    async (companyID: number, { rejectWithValue }) => {
+    async ({ companyID, category }: { companyID: number; category?: string }, { rejectWithValue }) => {
         try {
-            const response = await contentCMSService.getBanners(companyID);
+            const response = await contentCMSService.getBanners(companyID, category);
             return response.data;
         } catch (error) {
             return rejectWithValue('Failed to fetch banners');
@@ -119,10 +119,10 @@ export const deleteProject = createAsyncThunk(
 
 export const deleteBanner = createAsyncThunk(
     'builders/deleteBanner',
-    async ({ id, companyID }: { id: number; companyID: number }, { dispatch, rejectWithValue }) => {
+    async ({ id, companyID, category }: { id: number; companyID: number; category?: string }, { dispatch, rejectWithValue }) => {
         try {
             await contentCMSService.deleteBanner(id);
-            dispatch(fetchBanners(companyID));
+            dispatch(fetchBanners({ companyID, category }));
             return 'Banner deleted successfully';
         } catch (error) {
             return rejectWithValue('Failed to delete banner');
@@ -174,17 +174,19 @@ export const uploadBuilderProject = createAsyncThunk(
 
 export const uploadHomeBanners = createAsyncThunk<
     string,
-    { fileNames: string[]; companyID: number; userID: number },
+    { fileNames: string[]; companyID: number; userID: number; category?: string },
     { rejectValue: string }
 >(
     'banners/uploadAndSaveBanners',
-    async ({ fileNames, companyID, userID }, { rejectWithValue }) => {
+    async ({ fileNames, companyID, userID, category }, { dispatch, rejectWithValue }) => {
         try {
             await saveBannerPaths({
                 bannerPaths: fileNames,
                 companyID,
-                userId: userID
+                userId: userID,
+                category: category || 'HomeBanner'
             });
+            dispatch(fetchBanners({ companyID, category: category || 'HomeBanner' }));
             return 'Home banners uploaded and saved successfully';
         } catch (error: any) {
             return rejectWithValue(error.message || 'Failed to upload home banners');
