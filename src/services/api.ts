@@ -4,7 +4,8 @@ export const Img_Url = 'https://s3.eu-north-1.amazonaws.com/buildnex-dev-bucket/
 // User login Service
 export const UserloginService = {
     login: async (credentials: { phone: string; password: string }) => {
-        const response = await axios.post(API_URL + 'users/login', credentials); return response.data;
+        const response = await axios.post(API_URL + 'users/login', credentials, { timeout: 15000 });
+        return response.data;
     },
     logout: async () => {
         return Promise.resolve(true);

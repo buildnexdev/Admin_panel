@@ -1,7 +1,7 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { loginUser, setDemoAuth } from '../store/slices/authSlice';
+import { loginUser, setDemoAuth, clearAuthError } from '../store/slices/authSlice';
 import type { RootState, AppDispatch } from '../store/store';
 import { Lock, Eye, EyeOff, User, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
 
@@ -16,11 +16,17 @@ const Login = () => {
 
     const from = (location.state as any)?.from?.pathname || '/';
 
+    // When already authenticated, go to dashboard (or intended page)
     useEffect(() => {
         if (isAuthenticated) {
             navigate(from, { replace: true });
         }
     }, [isAuthenticated, navigate, from]);
+
+    // Clear previous login error when showing login screen so conditionals are clear
+    useEffect(() => {
+        dispatch(clearAuthError());
+    }, [dispatch]);
 
     const handleLogin = async (e: FormEvent) => {
         e.preventDefault();
@@ -45,7 +51,8 @@ const Login = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '1rem'
+            padding: '1rem',
+            background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 50%, #f1f5f9 100%)'
         }}>
             <div className="animate-fade-in" style={{
                 maxWidth: '450px',
@@ -88,7 +95,7 @@ const Login = () => {
                         <ShieldCheck size={32} color="white" />
                     </div>
                     <h1 style={{ fontSize: '1.875rem', fontWeight: '800', color: '#1e293b', marginBottom: '0.5rem', letterSpacing: '-0.025em' }}>
-                        Welcome Back
+                        BuildNex dev Admin Panel
                     </h1>
                     <p style={{ color: '#64748b', fontSize: '0.975rem' }}>
                         Enter your credentials to access your dashboard

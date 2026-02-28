@@ -1,21 +1,13 @@
-import { useState, useEffect, type FormEvent } from 'react';
+import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { clearMessages, fetchServices, deleteService } from '../../store/slices/buildersSlice';
-import { contentCMSService } from '../../services/api';
+import { fetchServices, deleteService } from '../../store/slices/buildersSlice';
 import type { AppDispatch, RootState } from '../../store/store';
-import { Settings, CheckCircle2, AlertCircle, Trash2, Calendar, Layout, Edit2 } from 'lucide-react';
+import { Briefcase, PenTool, Layout, Droplet, Monitor, Home, Edit, Trash2, Plus } from 'lucide-react';
 
 const ServiceUpload = () => {
     const dispatch = useDispatch<AppDispatch>();
     const { user } = useSelector((state: RootState) => state.auth);
     const { services } = useSelector((state: RootState) => state.builders);
-
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
-    const [iconName, setIconName] = useState('Settings');
-    const [loading, setLoading] = useState(false);
-    const [editingId, setEditingId] = useState<number | null>(null);
-    const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
     useEffect(() => {
         if (user?.companyID) {
@@ -23,161 +15,151 @@ const ServiceUpload = () => {
         }
     }, [dispatch, user?.companyID]);
 
-    const resetForm = () => {
-        setTitle('');
-        setDescription('');
-        setIconName('Settings');
-        setEditingId(null);
-    };
-
-    const handleSubmit = async (e: FormEvent) => {
-        e.preventDefault();
-        if (!user?.companyID) return;
-
-        setLoading(true);
-        setMessage(null);
-
-        try {
-            if (editingId) {
-                await contentCMSService.updateService(editingId, { title, description, iconName });
-                setMessage({ type: 'success', text: 'Service updated successfully!' });
-            } else {
-                await contentCMSService.addService({ title, description, iconName, companyID: user.companyID });
-                setMessage({ type: 'success', text: 'Service added successfully!' });
-            }
-            resetForm();
-            dispatch(fetchServices(user.companyID));
-        } catch (error: any) {
-            setMessage({ type: 'error', text: error.message || 'Failed to process request' });
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleEdit = (service: any) => {
-        setEditingId(service.id);
-        setTitle(service.title);
-        setDescription(service.description);
-        setIconName(service.iconName || 'Settings');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
     const handleDelete = async (id: number) => {
         if (window.confirm('Delete this service?') && user?.companyID) {
             dispatch(deleteService({ id, companyID: user.companyID }));
         }
     };
 
+    // Helper to render icon based on category or name
+    const renderIcon = (serviceTitle: string, index: number) => {
+        const title = serviceTitle.toLowerCase();
+        if (title.includes('design')) return <PenTool size={24} color="#3b82f6" />;
+        if (title.includes('management')) return <Layout size={24} color="#f97316" />;
+        if (title.includes('plumb') || title.includes('water')) return <Droplet size={24} color="#06b6d4" />;
+        if (title.includes('electric') || title.includes('tech')) return <Monitor size={24} color="#10b981" />;
+        if (title.includes('interior') || title.includes('home')) return <Home size={24} color="#ec4899" />;
+        return <Briefcase size={24} color="#8b5cf6" />;
+    };
+
+    const getIconBgColor = (serviceTitle: string, index: number) => {
+        const title = serviceTitle.toLowerCase();
+        if (title.includes('design')) return '#eff6ff';
+        if (title.includes('management')) return '#fff7ed';
+        if (title.includes('plumb') || title.includes('water')) return '#ecfeff';
+        if (title.includes('electric') || title.includes('tech')) return '#d1fae5';
+        if (title.includes('interior') || title.includes('home')) return '#fce7f3';
+        return '#f3e8ff';
+    };
+
     return (
-        <div style={{ width: '100%' }} className="animate-fade-in">
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.2fr)', gap: '2rem', alignItems: 'start' }}>
-
-                {/* Add Service Section */}
-                <div style={{ backgroundColor: 'white', padding: '2rem', borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
-                        <div style={{ padding: '0.625rem', backgroundColor: editingId ? '#eef2ff' : '#f0fdf4', color: editingId ? '#6366f1' : '#166534', borderRadius: '12px' }}>
-                            {editingId ? <Edit2 size={24} /> : <Layout size={24} />}
-                        </div>
-                        <div>
-                            <h2 style={{ fontSize: '1.25rem', fontWeight: '800', color: '#1e293b', margin: 0 }}>
-                                {editingId ? 'Edit Service' : 'Add New Service'}
-                            </h2>
-                            <p style={{ color: '#64748b', fontSize: '0.8125rem', margin: 0 }}>
-                                {editingId ? 'Update your service offering' : 'Create a new service offering for your clients'}
-                            </p>
-                        </div>
-                    </div>
-
-                    {message && (
-                        <div style={{ padding: '0.875rem', borderRadius: '12px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', backgroundColor: message.type === 'success' ? '#f0fdf4' : '#fef2f2', color: message.type === 'success' ? '#166534' : '#991b1b', border: `1px solid ${message.type === 'success' ? '#bbf7d0' : '#fecaca'}`, fontSize: '0.875rem' }}>
-                            {message.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
-                            <span>{message.text}</span>
-                        </div>
-                    )}
-
-                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <label style={{ fontSize: '0.8125rem', fontWeight: '700', color: '#475569' }}>Service Title</label>
-                            <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required placeholder="e.g. Interior Design" style={{ padding: '0.75rem', borderRadius: '10px', border: '1px solid #e2e8f0', fontSize: '0.9375rem' }} />
-                        </div>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <label style={{ fontSize: '0.8125rem', fontWeight: '700', color: '#475569' }}>Description</label>
-                            <textarea value={description} onChange={(e) => setDescription(e.target.value)} required rows={4} placeholder="Describe this service..." style={{ padding: '0.75rem', borderRadius: '10px', border: '1px solid #e2e8f0', resize: 'none', fontSize: '0.9375rem' }} />
-                        </div>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <label style={{ fontSize: '0.8125rem', fontWeight: '700', color: '#475569' }}>Icon Theme</label>
-                            <select value={iconName} onChange={(e) => setIconName(e.target.value)} style={{ padding: '0.75rem', borderRadius: '10px', border: '1px solid #e2e8f0', backgroundColor: 'white', fontSize: '0.9375rem' }}>
-                                <option value="Settings">General Settings</option>
-                                <option value="Home">Residential / Home</option>
-                                <option value="Building">Commercial / Building</option>
-                                <option value="Hammer">Construction</option>
-                                <option value="Palmtree">Landscaping</option>
-                            </select>
-                        </div>
-
-                        <div style={{ display: 'flex', gap: '1rem' }}>
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                style={{
-                                    flex: 1, padding: '0.875rem', backgroundColor: loading ? '#94a3b8' : (editingId ? '#6366f1' : '#166534'),
-                                    color: 'white', border: 'none', borderRadius: '10px', fontWeight: '700', cursor: 'pointer', transition: 'all 0.2s'
-                                }}
-                            >
-                                {loading ? 'Processing...' : (editingId ? 'Update Service' : 'Publish Service')}
-                            </button>
-                            {editingId && (
-                                <button type="button" onClick={resetForm} style={{ padding: '0.875rem 1.5rem', backgroundColor: '#f1f5f9', color: '#475569', border: 'none', borderRadius: '10px', fontWeight: '700' }}>
-                                    Cancel
-                                </button>
-                            )}
-                        </div>
-                    </form>
+        <div style={{ padding: '0 0.5rem', maxWidth: '1400px', margin: '0 auto' }}>
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+                <div>
+                    <h1 style={{ fontSize: '1.8rem', fontWeight: '600', color: '#0f172a', marginBottom: '0.4rem', letterSpacing: '-0.02em' }}>
+                        Services Management
+                    </h1>
+                    <p style={{ color: '#64748b', fontSize: '0.95rem' }}>
+                        List of services you offer
+                    </p>
                 </div>
+                <button style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    backgroundColor: '#0f172a',
+                    color: 'white',
+                    padding: '0.6rem 1.2rem',
+                    borderRadius: '8px',
+                    border: 'none',
+                    fontWeight: '500',
+                    fontSize: '0.9rem',
+                    cursor: 'pointer'
+                }}>
+                    <Plus size={18} /> Add Service
+                </button>
+            </div>
 
-                {/* List Section */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <h2 style={{ fontSize: '1.25rem', fontWeight: '800', color: '#1e293b', margin: 0 }}>Active Services</h2>
-                        <div style={{ padding: '0.4rem 0.8rem', backgroundColor: '#f1f5f9', borderRadius: '20px', color: '#475569', fontSize: '0.75rem', fontWeight: '700' }}>
-                            {services?.length || 0} Total
-                        </div>
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
-                        {services && services.length > 0 ? (
-                            services.map((service: any) => (
-                                <div key={service.id} style={{ backgroundColor: 'white', padding: '1.25rem', borderRadius: '20px', border: '1px solid #f1f5f9' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                                        <div style={{ padding: '0.5rem', backgroundColor: '#f8fafc', color: '#6366f1', borderRadius: '10px' }}>
-                                            <Settings size={20} />
-                                        </div>
-                                        <h3 style={{ fontSize: '1rem', fontWeight: '700', color: '#1e293b', margin: 0 }}>{service.title}</h3>
-                                    </div>
-                                    <p style={{ fontSize: '0.875rem', color: '#64748b', lineHeight: '1.5', margin: '0 0 1rem 0', display: '-webkit-box', WebkitLineClamp: '3', WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{service.description}</p>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.75rem', borderTop: '1px solid #f8fafc' }}>
-                                        <div style={{ color: '#94a3b8', fontSize: '0.7rem' }}>{new Date(service.created_at).toLocaleDateString()}</div>
-                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                            <button onClick={() => handleEdit(service)} style={{ color: '#6366f1', padding: '0.4rem', borderRadius: '8px', backgroundColor: '#f1f5f9', border: 'none', cursor: 'pointer' }}>
-                                                <Edit2 size={14} />
-                                            </button>
-                                            <button onClick={() => handleDelete(service.id)} style={{ color: '#ef4444', padding: '0.4rem', borderRadius: '8px', backgroundColor: '#fef2f2', border: 'none', cursor: 'pointer' }}>
-                                                <Trash2 size={14} />
-                                            </button>
-                                        </div>
-                                    </div>
+            {/* Grid */}
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+                gap: '1.5rem'
+            }}>
+                {services && services.length > 0 ? (
+                    services.map((service: any, index: number) => (
+                        <div key={service.id} style={{
+                            backgroundColor: 'white',
+                            borderRadius: '16px',
+                            padding: '1.5rem',
+                            border: '1px solid #f1f5f9',
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+                            display: 'flex',
+                            flexDirection: 'column'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', marginBottom: '1rem' }}>
+                                <div style={{
+                                    backgroundColor: getIconBgColor(service.title, index),
+                                    padding: '0.75rem',
+                                    borderRadius: '12px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}>
+                                    {renderIcon(service.title, index)}
                                 </div>
-                            ))
-                        ) : (
-                            <div style={{ gridColumn: '1 / -1', padding: '3rem', textAlign: 'center', backgroundColor: '#f8fafc', borderRadius: '24px', border: '2px dashed #e2e8f0' }}>
-                                <Settings size={40} style={{ margin: '0 auto 1rem', color: '#cbd5e1' }} />
-                                <p style={{ color: '#64748b', fontWeight: '600' }}>No services published yet.</p>
+                                <div style={{ flex: 1 }}>
+                                    <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#0f172a', margin: '0 0 0.25rem 0' }}>
+                                        {service.title}
+                                    </h3>
+                                    <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '500' }}>
+                                        {/* Since actual category isn't consistently in the model, we show a general label based on title */}
+                                        {service.category || (service.title.toLowerCase().includes('design') ? 'Design' : 'Construction')}
+                                    </span>
+                                </div>
                             </div>
-                        )}
+
+                            <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '1.5rem', flex: 1, lineHeight: '1.5' }}>
+                                {service.description}
+                            </p>
+
+                            <div style={{
+                                display: 'flex',
+                                gap: '0.5rem',
+                                borderTop: '1px solid #f8fafc',
+                                paddingTop: '1rem'
+                            }}>
+                                <button style={{
+                                    flex: 1,
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                    padding: '0.5rem',
+                                    backgroundColor: '#f8fafc',
+                                    border: '1px solid #f1f5f9',
+                                    borderRadius: '8px',
+                                    color: '#475569',
+                                    fontWeight: '500',
+                                    fontSize: '0.875rem',
+                                    cursor: 'pointer'
+                                }}>
+                                    <Edit size={16} /> Edit
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(service.id)}
+                                    style={{
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        padding: '0.5rem 1rem',
+                                        backgroundColor: '#fef2f2',
+                                        border: '1px solid #fee2e2',
+                                        borderRadius: '8px',
+                                        color: '#ef4444',
+                                        cursor: 'pointer'
+                                    }}>
+                                    <Trash2 size={16} />
+                                </button>
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <div style={{ gridColumn: '1 / -1', padding: '4rem 2rem', textAlign: 'center', backgroundColor: '#f8fafc', borderRadius: '16px', border: '1px dashed #cbd5e1' }}>
+                        <p style={{ color: '#64748b', fontWeight: '500' }}>No services published yet.</p>
                     </div>
-                </div>
+                )}
             </div>
         </div>
     );
