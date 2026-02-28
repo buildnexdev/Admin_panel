@@ -1,96 +1,60 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Dashboard from './pages/Dashboard';
-import Layout from './components/Layout';
+import Layout, { GlobalLoader } from './components/Layout';
+import BuildersProtectedRoute from './components/BuildersProtectedRoute';
+import RootGate from './components/RootGate';
 
-import Login from './pages/Login';
-import Settings from './pages/Settings';
+// Lazy loaded pages to enable Suspense global loader
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Login = lazy(() => import('./pages/Login'));
+const Settings = lazy(() => import('./pages/Settings'));
+const Profile = lazy(() => import('./pages/Profile'));
 
-// School
-import SchoolDashboard from './pages/school/SchoolDashboard';
-import UploadContent from './pages/school/UploadContent';
-import UploadImage from './pages/school/UploadImage';
-import SchoolProtectedRoute from './components/SchoolProtectedRoute';
-
-// Photography
-import PhotoDashboard from './pages/photography/PhotoDashboard';
-import UploadGallery from './pages/photography/UploadGallery';
-import PhotoProtectedRoute from './components/PhotoProtectedRoute';
+const CompanyDetails = lazy(() => import('./pages/CompanyDetails'));
+const ContactInfo = lazy(() => import('./pages/ContactInfo'));
+const RevenueReport = lazy(() => import('./pages/RevenueReport'));
 
 // Builders
-import BuildersDashboard from './pages/builders/BuildersDashboard';
-import ProjectUpload from './pages/builders/ProjectUpload';
-import HomeBannerUpload from './pages/builders/HomeBannerUpload';
-import ServiceUpload from './pages/builders/ServiceUpload';
-import BlogUpload from './pages/builders/BlogUpload';
-import ContactMessages from './pages/builders/ContactMessages';
-import BuildersProtectedRoute from './components/BuildersProtectedRoute';
-
+const BuildersDashboard = lazy(() => import('./pages/builders/BuildersDashboard'));
+const ProjectUpload = lazy(() => import('./pages/builders/ProjectUpload'));
+const ManageProjects = lazy(() => import('./pages/builders/ManageProjects'));
+const Categories = lazy(() => import('./pages/builders/Categories'));
+const HomeBannerUpload = lazy(() => import('./pages/builders/HomeBannerUpload'));
+const ServiceUpload = lazy(() => import('./pages/builders/ServiceUpload'));
+const BlogUpload = lazy(() => import('./pages/builders/BlogUpload'));
+const ContactMessages = lazy(() => import('./pages/builders/ContactMessages'));
 
 function App() {
   return (
     <Router>
-      <Routes>
-        {/* Main layout - All pages including login are within the layout */}
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="settings" element={<Settings />} />
-
-          {/* Unified login route */}
+      <Suspense fallback={<GlobalLoader />}>
+        <Routes>
           <Route path="login" element={<Login />} />
 
-          {/* School routes */}
-          <Route path="school" element={<SchoolDashboard />}>
-            <Route path="upload-content" element={
-              <SchoolProtectedRoute>
-                <UploadContent />
-              </SchoolProtectedRoute>
-            } />
-            <Route path="upload-image" element={
-              <SchoolProtectedRoute>
-                <UploadImage />
-              </SchoolProtectedRoute>
-            } />
-          </Route>
+          {/* / shows login when not authenticated, dashboard when authenticated */}
+          <Route path="/" element={<RootGate />}>
+            <Route element={<Layout />}>
+              <Route index element={<Dashboard />} />
+            <Route path="settings" element={<Settings />} />
+            <Route path="profile" element={<Profile />} />
 
-          {/* Photography routes */}
-          <Route path="photography" element={<PhotoDashboard />}>
-            <Route path="upload-gallery" element={
-              <PhotoProtectedRoute>
-                <UploadGallery />
-              </PhotoProtectedRoute>
-            } />
-          </Route>
+            <Route path="company-details" element={<CompanyDetails />} />
+            <Route path="contact-info" element={<ContactInfo />} />
+            <Route path="revenue-report" element={<RevenueReport />} />
 
-          {/* Builders routes */}
-          <Route path="builders" element={<BuildersDashboard />}>
-            <Route path="upload-project" element={
-              <BuildersProtectedRoute>
-                <ProjectUpload />
-              </BuildersProtectedRoute>
-            } />
-            <Route path="upload-home-banners" element={
-              <BuildersProtectedRoute>
-                <HomeBannerUpload />
-              </BuildersProtectedRoute>
-            } />
-            <Route path="services" element={
-              <BuildersProtectedRoute>
-                <ServiceUpload />
-              </BuildersProtectedRoute>
-            } />
-            <Route path="blog" element={
-              <BuildersProtectedRoute>
-                <BlogUpload />
-              </BuildersProtectedRoute>
-            } />
-            <Route path="contact" element={
-              <BuildersProtectedRoute>
-                <ContactMessages />
-              </BuildersProtectedRoute>
-            } />
+            <Route path="builders" element={<BuildersDashboard />}>
+              <Route path="upload-project" element={<BuildersProtectedRoute><ProjectUpload /></BuildersProtectedRoute>} />
+              <Route path="manage-projects" element={<BuildersProtectedRoute><ManageProjects /></BuildersProtectedRoute>} />
+              <Route path="categories" element={<BuildersProtectedRoute><Categories /></BuildersProtectedRoute>} />
+              <Route path="upload-home-banners" element={<BuildersProtectedRoute><HomeBannerUpload /></BuildersProtectedRoute>} />
+              <Route path="services" element={<BuildersProtectedRoute><ServiceUpload /></BuildersProtectedRoute>} />
+              <Route path="blog" element={<BuildersProtectedRoute><BlogUpload /></BuildersProtectedRoute>} />
+              <Route path="contact" element={<BuildersProtectedRoute><ContactMessages /></BuildersProtectedRoute>} />
+            </Route>
+            </Route>
           </Route>
-        </Route>
-      </Routes>
+        </Routes>
+      </Suspense>
     </Router>
   );
 }

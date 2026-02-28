@@ -1,5 +1,38 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { uploadBuilderProjectApi, saveBannerPaths } from '../../services/api';
+import { uploadBuilderProjectApi, saveBannerPaths, contentCMSService } from '../../services/api';
+
+interface Project {
+    id: number;
+    title: string;
+    description: string;
+    image_url: string;
+    companyID: number;
+    created_at: string;
+}
+
+interface Banner {
+    id: number;
+    imageUrl: string;
+    companyID: number;
+    createdAt: string;
+}
+
+interface Service {
+    id: number;
+    title: string;
+    description: string;
+    icon: string;
+    companyID: number;
+}
+
+interface Blog {
+    id: number;
+    title: string;
+    content: string;
+    image_url: string;
+    companyID: number;
+    created_at: string;
+}
 
 interface BuildersState {
     projects: Project[];
@@ -36,9 +69,9 @@ export const fetchProjects = createAsyncThunk(
 
 export const fetchBanners = createAsyncThunk(
     'builders/fetchBanners',
-    async (companyID: number, { rejectWithValue }) => {
+    async ({ companyID, category }: { companyID: number; category?: string }, { rejectWithValue }) => {
         try {
-            const response = await contentCMSService.getBanners(companyID);
+            const response = await contentCMSService.getBanners(companyID, category);
             return response.data;
         } catch (error) {
             return rejectWithValue('Failed to fetch banners');
@@ -86,10 +119,10 @@ export const deleteProject = createAsyncThunk(
 
 export const deleteBanner = createAsyncThunk(
     'builders/deleteBanner',
-    async ({ id, companyID }: { id: number; companyID: number }, { dispatch, rejectWithValue }) => {
+    async ({ id, companyID, category }: { id: number; companyID: number; category?: string }, { dispatch, rejectWithValue }) => {
         try {
             await contentCMSService.deleteBanner(id);
-            dispatch(fetchBanners(companyID));
+            dispatch(fetchBanners({ companyID, category }));
             return 'Banner deleted successfully';
         } catch (error) {
             return rejectWithValue('Failed to delete banner');
@@ -126,7 +159,7 @@ export const deleteBlog = createAsyncThunk(
 // UPLOAD / UPDATE THUNKS
 export const uploadBuilderProject = createAsyncThunk(
     'banners/uploadProject',
-    async ({ data, file }: { data: any; file: File }, { rejectWithValue }) => {
+    async ({ data, file }: { data: any; file: File }, { dispatch, rejectWithValue }) => {
         try {
             await uploadBuilderProjectApi({ data, file });
             if (data.companyID) {
@@ -141,17 +174,19 @@ export const uploadBuilderProject = createAsyncThunk(
 
 export const uploadHomeBanners = createAsyncThunk<
     string,
-    { fileNames: string[]; companyID: number; userID: number },
+    { fileNames: string[]; companyID: number; userID: number; category?: string },
     { rejectValue: string }
 >(
     'banners/uploadAndSaveBanners',
-    async ({ fileNames, companyID, userID }, { rejectWithValue }) => {
+    async ({ fileNames, companyID, userID, category }, { dispatch, rejectWithValue }) => {
         try {
             await saveBannerPaths({
                 bannerPaths: fileNames,
                 companyID,
-                userId: userID
+                userId: userID,
+                category: category || 'HomeBanner'
             });
+            dispatch(fetchBanners({ companyID, category: category || 'HomeBanner' }));
             return 'Home banners uploaded and saved successfully';
         } catch (error: any) {
             return rejectWithValue(error.message || 'Failed to upload home banners');
@@ -176,6 +211,10 @@ const buildersSlice = createSlice({
                 state.loading = false;
                 state.projects = action.payload || [];
             })
+            // Individual fetch status handling
+            .addCase(fetchBanners.fulfilled, (state, action) => { state.banners = action.payload || []; })
+            .addCase(fetchServices.fulfilled, (state, action) => { state.services = action.payload || []; })
+            .addCase(fetchBlogs.fulfilled, (state, action) => { state.blogs = action.payload || []; })
             // Upload & Delete Actions
             .addMatcher(
                 (action) => action.type.endsWith('/pending') && !action.type.startsWith('builders/fetch'),
@@ -198,11 +237,7 @@ const buildersSlice = createSlice({
                     state.loading = false;
                     state.error = action.payload as string;
                 }
-            )
-            // Individual fetch status handling
-            .addCase(fetchBanners.fulfilled, (state, action) => { state.banners = action.payload || []; })
-            .addCase(fetchServices.fulfilled, (state, action) => { state.services = action.payload || []; })
-            .addCase(fetchBlogs.fulfilled, (state, action) => { state.blogs = action.payload || []; });
+            );
     },
 });
 
