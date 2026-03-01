@@ -15,9 +15,18 @@ const initialState: PhotoState = {
 
 export const uploadGalleryPhoto = createAsyncThunk(
     'photo/uploadGalleryPhoto',
-    async ({ file, category }: { file: File; category: string }, { rejectWithValue }) => {
+    async (
+        payload: { file?: File; category: string; imagePath?: string },
+        { rejectWithValue }
+    ) => {
         try {
-            await photoService.uploadGalleryItem(file, category);
+            if (payload.imagePath) {
+                await photoService.uploadGalleryItemByPath(payload.category, payload.imagePath);
+            } else if (payload.file) {
+                await photoService.uploadGalleryItem(payload.file, payload.category);
+            } else {
+                return rejectWithValue('Provide file or imagePath');
+            }
             return 'Photo added to gallery successfully';
         } catch (error) {
             return rejectWithValue('Failed to upload photo');

@@ -1,23 +1,24 @@
-import { useState, useEffect, type ChangeEvent, type FormEvent } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchBlogs, deleteBlog } from '../../store/slices/buildersSlice';
-import { contentCMSService } from '../../services/api';
+import { fetchBlogs, addBlog, updateBlog, clearMessages } from '../../store/slices/buildersSlice';
 import type { AppDispatch, RootState } from '../../store/store';
-import { BookOpen, Upload, CheckCircle2, AlertCircle, Calendar, User, Trash2, Edit2, X } from 'lucide-react';
+import { Img_Url } from '../../services/api';
+import { Plus, X } from 'lucide-react';
 
 const BlogUpload = () => {
     const dispatch = useDispatch<AppDispatch>();
     const { user } = useSelector((state: RootState) => state.auth);
-    const { blogs } = useSelector((state: RootState) => state.builders);
-
+    const { blogs, loading, successMessage, error } = useSelector((state: RootState) => state.builders);
+    const [showAddForm, setShowAddForm] = useState(false);
     const [title, setTitle] = useState('');
-    const [content, setContent] = useState('');
-    const [author] = useState(user?.name || '');
-    const [image, setImage] = useState<File | null>(null);
-    const [preview, setPreview] = useState<string | null>(null);
-    const [loading, setLoading] = useState(false);
-    const [editingId, setEditingId] = useState<number | null>(null);
-    const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+    const [description, setDescription] = useState('');
+    const [link, setLink] = useState('');
+    const [coverImage, setCoverImage] = useState<File | null>(null);
+    const [coverPreview, setCoverPreview] = useState<string | null>(null);
+
+    useEffect(() => {
+        dispatch(clearMessages());
+    }, [dispatch]);
 
     useEffect(() => {
         if (user?.companyID) {
@@ -25,197 +26,284 @@ const BlogUpload = () => {
         }
     }, [dispatch, user?.companyID]);
 
-    const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            const file = e.target.files[0];
-            setImage(file);
-            setPreview(URL.createObjectURL(file));
+    const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setCoverImage(file);
+            setCoverPreview(URL.createObjectURL(file));
+        } else {
+            setCoverImage(null);
+            setCoverPreview(null);
         }
     };
 
-    const resetForm = () => {
-        setTitle('');
-        setContent('');
-        setImage(null);
-        setPreview(null);
-        setEditingId(null);
-    };
-
-    const handleSubmit = async (e: FormEvent) => {
+    const handleAddBlog = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!title.trim()) return;
+        const result = await dispatch(addBlog({
+            title: title.trim(),
+            description: description.trim(),
+            link: link.trim(),
+            imageFile: coverImage
+        }));
+        if (addBlog.fulfilled.match(result)) {
+            setTitle('');
+            setDescription('');
+            setLink('');
+            setCoverImage(null);
+            setCoverPreview(null);
+            setShowAddForm(false);
+        }
+    };
+
+    const handleToggleActive = (id: number, currentActive: boolean) => {
         if (!user?.companyID) return;
-
-        setLoading(true);
-        setMessage(null);
-
-        try {
-            const formData = new FormData();
-            formData.append('title', title);
-            formData.append('content', content);
-            formData.append('author', author);
-            formData.append('companyID', user.companyID.toString());
-            if (image) formData.append('image', image);
-
-            if (editingId) {
-                await contentCMSService.updateBlog(editingId, formData);
-                setMessage({ type: 'success', text: 'Blog post updated successfully!' });
-            } else {
-                await contentCMSService.addBlog(formData);
-                setMessage({ type: 'success', text: 'Blog post published successfully!' });
-            }
-            resetForm();
-            dispatch(fetchBlogs(user.companyID));
-        } catch (error: any) {
-            setMessage({ type: 'error', text: error.message || 'Failed to process blog' });
-        } finally {
-            setLoading(false);
-        }
+        dispatch(updateBlog({ id, companyID: user.companyID, isActive: !currentActive }));
     };
 
-    const handleEdit = (blog: any) => {
-        setEditingId(blog.id);
-        setTitle(blog.title);
-        setContent(blog.content);
-        setPreview(blog.image_url);
-        setImage(null);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+    const getBlogImageUrl = (blog: any) => {
+        const path = blog.imageUrl || blog.image_url || blog.image || blog.imagePath || blog.cover_image || blog.coverImage || '';
+        if (!path) return '';
+        if (path.startsWith('http://') || path.startsWith('https://')) return path;
+        const base = Img_Url.endsWith('/') ? Img_Url : Img_Url + '/';
+        const p = path.startsWith('/') ? path.slice(1) : path;
+        return base + p;
     };
 
-    const handleDelete = async (id: number) => {
-        if (window.confirm('Delete this blog post?') && user?.companyID) {
-            dispatch(deleteBlog({ id, companyID: user.companyID }));
-        }
-    };
+    const getBlogLink = (blog: any) => blog.link || blog.linkUrl || blog.url || blog.blogLink || '';
+
+    const cardRadius = 12;
 
     return (
-        <div style={{ width: '100%' }} className="animate-fade-in">
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.2fr)', gap: '2rem', alignItems: 'start' }}>
+        <div style={{ padding: '0 0.5rem', maxWidth: '1400px', margin: '0 auto' }}>
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+                <div>
+                    <h1 style={{ fontSize: '1.8rem', fontWeight: '600', color: '#0f172a', marginBottom: '0.4rem', letterSpacing: '-0.02em' }}>
+                        Blog Management
+                    </h1>
+                    <p style={{ color: '#64748b', fontSize: '0.95rem' }}>
+                        Publish and manage blog posts
+                    </p>
+                </div>
+                <button
+                    onClick={() => setShowAddForm((v) => !v)}
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        backgroundColor: '#0f172a',
+                        color: 'white',
+                        padding: '0.6rem 1.2rem',
+                        borderRadius: '8px',
+                        border: 'none',
+                        fontWeight: '500',
+                        fontSize: '0.9rem',
+                        cursor: 'pointer'
+                    }}
+                >
+                    <Plus size={18} /> Add Blog
+                </button>
+            </div>
 
-                {/* Create Blog Post Section */}
-                <div style={{ backgroundColor: 'white', padding: '2rem', borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
-                        <div style={{ padding: '0.625rem', backgroundColor: editingId ? '#fdf2f8' : '#f0fdf4', color: editingId ? '#db2777' : '#166534', borderRadius: '12px' }}>
-                            {editingId ? <Edit2 size={24} /> : <BookOpen size={24} />}
+            {successMessage && (
+                <div style={{ padding: '0.75rem 1rem', marginBottom: '1rem', backgroundColor: '#d1fae5', color: '#065f46', borderRadius: '8px', fontSize: '0.9rem' }}>
+                    {successMessage}
+                </div>
+            )}
+            {error && (
+                <div style={{ padding: '0.75rem 1rem', marginBottom: '1rem', backgroundColor: '#fee2e2', color: '#991b1b', borderRadius: '8px', fontSize: '0.9rem' }}>
+                    {error}
+                </div>
+            )}
+
+            {showAddForm && (
+                <form onSubmit={handleAddBlog} style={{
+                    marginBottom: '2rem',
+                    padding: '1.5rem',
+                    backgroundColor: '#f8fafc',
+                    borderRadius: '16px',
+                    border: '1px solid #e2e8f0'
+                }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#0f172a', margin: 0 }}>Add New Blog Post</h2>
+                        <button type="button" onClick={() => setShowAddForm(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', color: '#64748b' }}>
+                            <X size={20} />
+                        </button>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '480px' }}>
+                        <div>
+                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.35rem' }}>Title</label>
+                            <input
+                                type="text"
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                placeholder="Blog post title"
+                                required
+                                style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.95rem' }}
+                            />
                         </div>
                         <div>
-                            <h2 style={{ fontSize: '1.25rem', fontWeight: '800', color: '#1e293b', margin: 0 }}>
-                                {editingId ? 'Edit Blog Post' : 'Create Blog Post'}
-                            </h2>
-                            <p style={{ color: '#64748b', fontSize: '0.8125rem', margin: 0 }}>
-                                {editingId ? 'Update your published article' : 'Publish a new article to your website'}
-                            </p>
+                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.35rem' }}>Description</label>
+                            <textarea
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                placeholder="Brief description or content"
+                                rows={3}
+                                style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.95rem', resize: 'vertical' }}
+                            />
                         </div>
-                    </div>
-
-                    {message && (
-                        <div style={{ padding: '0.875rem', borderRadius: '12px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', backgroundColor: message.type === 'success' ? '#f0fdf4' : '#fef2f2', color: message.type === 'success' ? '#166534' : '#991b1b', border: `1px solid ${message.type === 'success' ? '#bbf7d0' : '#fecaca'}`, fontSize: '0.875rem' }}>
-                            {message.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
-                            <span>{message.text}</span>
+                        <div>
+                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.35rem' }}>Link</label>
+                            <input
+                                type="url"
+                                value={link}
+                                onChange={(e) => setLink(e.target.value)}
+                                placeholder="https://..."
+                                style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.95rem' }}
+                            />
                         </div>
-                    )}
-
-                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <label style={{ fontSize: '0.8125rem', fontWeight: '700', color: '#475569' }}>Post Title</label>
-                            <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required placeholder="Enter title..." style={{ padding: '0.75rem', borderRadius: '10px', border: '1px solid #e2e8f0', fontSize: '0.9375rem' }} />
-                        </div>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <label style={{ fontSize: '0.8125rem', fontWeight: '700', color: '#475569' }}>Content</label>
-                            <textarea value={content} onChange={(e) => setContent(e.target.value)} required rows={6} placeholder="Write content..." style={{ padding: '0.75rem', borderRadius: '10px', border: '1px solid #e2e8f0', resize: 'none', fontSize: '0.9375rem' }} />
-                        </div>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <label style={{ fontSize: '0.8125rem', fontWeight: '700', color: '#475569' }}>
-                                {editingId ? 'Change Cover Image (Optional)' : 'Cover Image'}
-                            </label>
-                            <div style={{ border: '2px dashed #e2e8f0', borderRadius: '12px', padding: preview ? '0.5rem' : '2rem', textAlign: 'center', cursor: 'pointer', position: 'relative', backgroundColor: '#f8fafc', minHeight: '160px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <input type="file" accept="image/*" onChange={handleImageChange} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', zIndex: 2 }} />
-                                {preview ? (
-                                    <div style={{ width: '100%', position: 'relative' }}>
-                                        <img src={preview} alt="Preview" style={{ width: '100%', maxHeight: '140px', objectFit: 'cover', borderRadius: '8px' }} />
-                                        <button type="button" onClick={() => { setPreview(null); setImage(null); }} style={{ position: 'absolute', top: '4px', right: '4px', backgroundColor: 'white', borderRadius: '50%', padding: '2px', border: 'none', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-                                            <X size={14} color="#ef4444" />
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <div style={{ color: '#94a3b8' }}>
-                                        <Upload size={32} style={{ margin: '0 auto 0.5rem' }} />
-                                        <p style={{ fontWeight: '600', fontSize: '0.8125rem' }}>Click to upload</p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        <div style={{ display: 'flex', gap: '1rem' }}>
-                            <button
-                                type="submit"
-                                disabled={loading || (!editingId && !image)}
-                                style={{
-                                    flex: 1, padding: '0.875rem', backgroundColor: loading ? '#94a3b8' : (editingId ? '#db2777' : '#db2777'),
-                                    color: 'white', border: 'none', borderRadius: '10px', fontWeight: '700', cursor: 'pointer'
-                                }}
-                            >
-                                {loading ? 'Processing...' : (editingId ? 'Update Post' : 'Publish Blog Post')}
-                            </button>
-                            {editingId && (
-                                <button type="button" onClick={resetForm} style={{ padding: '0.875rem 1.5rem', backgroundColor: '#f1f5f9', color: '#475569', border: 'none', borderRadius: '10px', fontWeight: '700' }}>
-                                    Cancel
-                                </button>
+                        <div>
+                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.35rem' }}>Cover image</label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleCoverChange}
+                                style={{ width: '100%', padding: '0.5rem', fontSize: '0.9rem' }}
+                            />
+                            {coverPreview && (
+                                <img src={coverPreview} alt="Cover preview" style={{ marginTop: '0.5rem', maxWidth: '160px', maxHeight: '120px', objectFit: 'cover', borderRadius: '8px' }} />
                             )}
                         </div>
-                    </form>
-                </div>
-
-                {/* List Section */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <h2 style={{ fontSize: '1.25rem', fontWeight: '800', color: '#1e293b', margin: 0 }}>Active Blog Posts</h2>
-                        <div style={{ padding: '0.4rem 0.8rem', backgroundColor: '#f1f5f9', borderRadius: '20px', color: '#475569', fontSize: '0.75rem', fontWeight: '700' }}>
-                            {blogs?.length || 0} Total
+                        <div style={{ display: 'flex', gap: '0.75rem' }}>
+                            <button type="submit" disabled={loading} style={{
+                                padding: '0.6rem 1.25rem',
+                                backgroundColor: '#0f172a',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '8px',
+                                fontWeight: '500',
+                                cursor: loading ? 'not-allowed' : 'pointer',
+                                opacity: loading ? 0.7 : 1
+                            }}>
+                                {loading ? 'Adding...' : 'Add Blog'}
+                            </button>
+                            <button type="button" onClick={() => setShowAddForm(false)} style={{
+                                padding: '0.6rem 1.25rem',
+                                backgroundColor: '#f1f5f9',
+                                color: '#475569',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: '8px',
+                                fontWeight: '500',
+                                cursor: 'pointer'
+                            }}>
+                                Cancel
+                            </button>
                         </div>
                     </div>
+                </form>
+            )}
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
-                        {blogs && blogs.length > 0 ? (
-                            blogs.map((blog: any) => (
-                                <div key={blog.id} style={{ backgroundColor: 'white', borderRadius: '20px', overflow: 'hidden', border: '1px solid #f1f5f9' }}>
-                                    {blog.image_url && (
-                                        <div style={{ height: '140px' }}>
-                                            <img src={blog.image_url} alt={blog.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            {/* Grid */}
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+                gap: '1.5rem'
+            }}>
+                {blogs && blogs.length > 0 ? (
+                    blogs.map((blog: any) => {
+                        const imageUrl = getBlogImageUrl(blog);
+                        return (
+                            <div key={blog.id} style={{
+                                backgroundColor: 'white',
+                                borderRadius: cardRadius,
+                                overflow: 'hidden',
+                                border: '1px solid #e2e8f0',
+                                boxShadow: '0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.05)',
+                                display: 'flex',
+                                flexDirection: 'column'
+                            }}>
+                                {/* Top: cover image */}
+                                <div style={{ width: '100%', height: '200px', backgroundColor: '#f1f5f9', overflow: 'hidden' }}>
+                                    {imageUrl ? (
+                                        <img
+                                            src={imageUrl}
+                                            alt={blog.title}
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                        />
+                                    ) : (
+                                        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: '0.875rem' }}>
+                                            No image
                                         </div>
                                     )}
-                                    <div style={{ padding: '1.25rem' }}>
-                                        <h3 style={{ fontSize: '1rem', fontWeight: '700', color: '#1e293b', marginBottom: '0.5rem' }}>{blog.title}</h3>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#94a3b8', fontSize: '0.7rem', marginBottom: '1rem' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                                                <User size={12} /> {blog.author}
-                                            </div>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                                                <Calendar size={12} /> {new Date(blog.created_at).toLocaleDateString()}
-                                            </div>
-                                        </div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.75rem', borderTop: '1px solid #f8fafc' }}>
-                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                <button onClick={() => handleEdit(blog)} style={{ color: '#6366f1', padding: '0.4rem', borderRadius: '8px', backgroundColor: '#f1f5f9', border: 'none', cursor: 'pointer' }}>
-                                                    <Edit2 size={14} />
-                                                </button>
-                                                <button onClick={() => handleDelete(blog.id)} style={{ color: '#ef4444', padding: '0.4rem', borderRadius: '8px', backgroundColor: '#fef2f2', border: 'none', cursor: 'pointer' }}>
-                                                    <Trash2 size={14} />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
-                            ))
-                        ) : (
-                            <div style={{ gridColumn: '1 / -1', padding: '3rem', textAlign: 'center', backgroundColor: '#f8fafc', borderRadius: '24px', border: '2px dashed #e2e8f0' }}>
-                                <BookOpen size={40} style={{ margin: '0 auto 1rem', color: '#cbd5e1' }} />
-                                <p style={{ color: '#64748b', fontWeight: '600' }}>No articles published yet.</p>
+
+                                {/* Content: title, description, link */}
+                                <div style={{ padding: '1.25rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                    <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#1E293B', margin: 0, lineHeight: 1.3 }}>
+                                        {blog.title}
+                                    </h3>
+                                    <p style={{ color: '#4A5568', fontSize: '0.9375rem', lineHeight: 1.55, margin: 0, flex: 1 }}>
+                                        {blog.content || blog.description || 'No description.'}
+                                    </p>
+                                    {getBlogLink(blog) && (
+                                        <div style={{ marginTop: '0.25rem' }}>
+                                            <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '600', display: 'block', marginBottom: '0.25rem' }}>Link</span>
+                                            <a href={getBlogLink(blog)} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.875rem', color: '#2563eb', wordBreak: 'break-all' }}>
+                                                {getBlogLink(blog)}
+                                            </a>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Active / Inactive */}
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    padding: '1rem 1.5rem',
+                                    borderTop: '1px solid #f1f5f9'
+                                }}>
+                                    <span style={{ fontSize: '0.875rem', color: '#64748b', fontWeight: '500' }}>
+                                        {(blog.isActive ?? true) ? 'Active' : 'Inactive'}
+                                    </span>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleToggleActive(blog.id, !!blog.isActive)}
+                                        disabled={loading}
+                                        style={{
+                                            width: '44px',
+                                            height: '24px',
+                                            borderRadius: '12px',
+                                            border: 'none',
+                                            cursor: loading ? 'not-allowed' : 'pointer',
+                                            backgroundColor: (blog.isActive ?? true) ? '#22c55e' : '#e2e8f0',
+                                            position: 'relative',
+                                            transition: 'background-color 0.2s'
+                                        }}
+                                        aria-label={(blog.isActive ?? true) ? 'Set inactive' : 'Set active'}
+                                    >
+                                        <span style={{
+                                            position: 'absolute',
+                                            top: '2px',
+                                            left: (blog.isActive ?? true) ? '22px' : '2px',
+                                            width: '20px',
+                                            height: '20px',
+                                            borderRadius: '50%',
+                                            backgroundColor: 'white',
+                                            boxShadow: '0 1px 2px rgba(0,0,0,0.2)',
+                                            transition: 'left 0.2s'
+                                        }} />
+                                    </button>
+                                </div>
                             </div>
-                        )}
+                        );
+                    })
+                ) : (
+                    <div style={{ gridColumn: '1 / -1', padding: '4rem 2rem', textAlign: 'center', backgroundColor: '#f8fafc', borderRadius: '16px', border: '1px dashed #cbd5e1' }}>
+                        <p style={{ color: '#64748b', fontWeight: '500' }}>No blog posts yet.</p>
                     </div>
-                </div>
+                )}
             </div>
         </div>
     );

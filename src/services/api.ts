@@ -168,14 +168,19 @@ export const contentCMSService = {
         });
         return response.data;
     },
-    getProjects: async (companyID: number) => {
-        const response = await axios.get(`${API_URL}content/projects/${companyID}`);
+    getProjects: async (companyID: number, category?: string) => {
+        const url = category ? `${API_URL}content/projects/${companyID}?category=${encodeURIComponent(category)}` : `${API_URL}content/projects/${companyID}`;
+        const response = await axios.get(url);
         return response.data;
     },
-    updateProject: async (id: number, formData: FormData) => {
-        const response = await axios.put(`${API_URL}content/projects/${id}`, formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        });
+    updateProject: async (id: number, data: FormData | Record<string, unknown>) => {
+        if (data instanceof FormData) {
+            const response = await axios.put(`${API_URL}content/projects/${id}`, data, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            return response.data;
+        }
+        const response = await axios.put(`${API_URL}content/projects/${id}`, data);
         return response.data;
     },
     deleteProject: async (id: number) => {
@@ -183,7 +188,7 @@ export const contentCMSService = {
         return response.data;
     },
 
-    // Banners
+    // Banners - add uses POST /banners; get/update/delete use /content/banners
     addBanner: async (formData: FormData) => {
         const response = await axios.post(`${API_URL}content/banners`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
@@ -206,13 +211,20 @@ export const contentCMSService = {
         return response.data;
     },
 
-    // Services
-    addService: async (data: any) => {
+    // Services - add with payload: name, description, photo, category, userId (FormData or JSON)
+    addService: async (data: FormData | { name?: string; title?: string; description?: string; imagePath?: string; category: string; userId: number; companyID?: number }) => {
+        if (data instanceof FormData) {
+            const response = await axios.post(`${API_URL}content/services`, data, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            return response.data;
+        }
         const response = await axios.post(`${API_URL}content/services`, data);
         return response.data;
     },
-    getServices: async (companyID: number) => {
-        const response = await axios.get(`${API_URL}content/services/${companyID}`);
+    getServices: async (companyID: number, category?: string) => {
+        const url = category ? `${API_URL}content/services/${companyID}?category=${encodeURIComponent(category)}` : `${API_URL}content/services/${companyID}`;
+        const response = await axios.get(url);
         return response.data;
     },
     updateService: async (id: number, data: any) => {
@@ -231,14 +243,19 @@ export const contentCMSService = {
         });
         return response.data;
     },
-    getBlogs: async (companyID: number) => {
-        const response = await axios.get(`${API_URL}content/blogs/${companyID}`);
+    getBlogs: async (companyID: number, category?: string) => {
+        const url = category ? `${API_URL}content/blogs/${companyID}?category=${encodeURIComponent(category)}` : `${API_URL}content/blogs/${companyID}`;
+        const response = await axios.get(url);
         return response.data;
     },
-    updateBlog: async (id: number, formData: FormData) => {
-        const response = await axios.put(`${API_URL}content/blogs/${id}`, formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        });
+    updateBlog: async (id: number, data: FormData | Record<string, unknown>) => {
+        if (data instanceof FormData) {
+            const response = await axios.put(`${API_URL}content/blogs/${id}`, data, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            return response.data;
+        }
+        const response = await axios.put(`${API_URL}content/blogs/${id}`, data);
         return response.data;
     },
     deleteBlog: async (id: number) => {
@@ -271,8 +288,8 @@ export const uploadBannersToTable = async (formData: FormData) => {
     }
 };
 
-// Save banner paths to tblBannerImg
-export const saveBannerPaths = async (data: { bannerPaths: string[]; companyID: number; userId: number; category?: string }) => {
+// Save banner paths to tblBannerImg (pass category and userId in payload)
+export const saveBannerPaths = async (data: { bannerPaths: string[]; companyID: number; userId: number; category: string }) => {
     try {
         const response = await axios.post(`${API_URL}banners/save-paths`, data);
         return response.data;

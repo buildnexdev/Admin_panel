@@ -27,9 +27,18 @@ export const uploadSchoolContent = createAsyncThunk(
 
 export const uploadSchoolImage = createAsyncThunk(
     'school/uploadImage',
-    async ({ file, caption }: { file: File; caption: string }, { rejectWithValue }) => {
+    async (
+        payload: { file?: File; caption: string; imagePath?: string },
+        { rejectWithValue }
+    ) => {
         try {
-            await schoolService.uploadImage(file, caption);
+            if (payload.imagePath) {
+                await schoolService.uploadImageByPath(payload.caption, payload.imagePath);
+            } else if (payload.file) {
+                await schoolService.uploadImage(payload.file, payload.caption);
+            } else {
+                return rejectWithValue('Provide file or imagePath');
+            }
             return 'Image uploaded successfully';
         } catch (error) {
             return rejectWithValue('Failed to upload image');

@@ -1,17 +1,22 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { uploadGalleryPhoto, clearMessages } from '../../store/slices/photoSlice';
+import { imageUploadToS3, getS3PathFromResult } from '../../services/api';
 import type { AppDispatch, RootState } from '../../store/store';
 import { Upload } from 'lucide-react';
+
+const S3_PATH_PREFIX = 'uploadsA/Photography/Gallery';
 
 const UploadGallery = () => {
     const [image, setImage] = useState<File | null>(null);
     const [category, setCategory] = useState('wedding');
     const [title, setTitle] = useState('');
     const [preview, setPreview] = useState<string | null>(null);
+    const [uploadingS3, setUploadingS3] = useState(false);
 
     const dispatch = useDispatch<AppDispatch>();
     const { loading, error, successMessage } = useSelector((state: RootState) => state.photo);
+    const { user } = useSelector((state: RootState) => state.auth);
 
     const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -26,12 +31,21 @@ const UploadGallery = () => {
         if (!image) return;
 
         dispatch(clearMessages());
-        const result = await dispatch(uploadGalleryPhoto({ file: image, category }));
-
-        if (uploadGalleryPhoto.fulfilled.match(result)) {
-            setImage(null);
-            setTitle('');
-            setPreview(null);
+        setUploadingS3(true);
+        try {
+            const loginData = user ? { companyID: user.companyID, databaseName: (user as any).databaseName } : null;
+            const s3Result = await imageUploadToS3(image, `${S3_PATH_PREFIX}/${category}`, loginData);
+            const imagePath = getS3PathFromResult(s3Result);
+            const result = imagePath
+                ? await dispatch(uploadGalleryPhoto({ category, imagePath }))
+                : await dispatch(uploadGalleryPhoto({ file: image, category }));
+            if (uploadGalleryPhoto.fulfilled.match(result)) {
+                setImage(null);
+                setTitle('');
+                setPreview(null);
+            }
+        } finally {
+            setUploadingS3(false);
         }
     };
 
@@ -96,19 +110,19 @@ const UploadGallery = () => {
 
                 <button
                     type="submit"
-                    disabled={loading || !image}
+                    disabled={loading || uploadingS3 || !image}
                     style={{
                         marginTop: '1rem',
                         padding: '0.75rem',
-                        backgroundColor: (loading || !image) ? '#93c5fd' : '#2563eb',
+                        backgroundColor: (loading || uploadingS3 || !image) ? '#93c5fd' : '#2563eb',
                         color: 'white',
                         border: 'none',
                         borderRadius: '4px',
-                        cursor: (loading || !image) ? 'not-allowed' : 'pointer',
+                        cursor: (loading || uploadingS3 || !image) ? 'not-allowed' : 'pointer',
                         fontWeight: '500'
                     }}
                 >
-                    {loading ? 'Uploading...' : 'Add to Gallery'}
+                    {uploadingS3 ? 'Uploading to S3...' : loading ? 'Saving...' : 'Add to Gallery'}
                 </button>
             </form>
         </div>

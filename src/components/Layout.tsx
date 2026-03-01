@@ -2,7 +2,7 @@ import { useState, Suspense } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
     LayoutDashboard, Tag, Image as ImageIcon, Briefcase, FileText,
-    Building, Phone, DollarSign, FolderOpen, ChevronDown, ChevronUp, LogOut, User, Loader2
+    Building, Phone, DollarSign, FolderOpen, ChevronDown, ChevronUp, LogOut, Loader2
 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { logoutUser } from '../store/slices/authSlice';
@@ -30,13 +30,14 @@ const Layout = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch<AppDispatch>();
     const { user } = useSelector((state: RootState) => state.auth);
+    const isAdmin = user?.role === 'admin';
     const [openMenus, setOpenMenus] = useState<{ [key: string]: boolean }>({ Projects: true });
 
     const toggleMenu = (name: string) => {
         setOpenMenus(prev => ({ ...prev, [name]: !prev[name] }));
     };
 
-    const navItems = [
+    const allNavItems = [
         { name: 'Dashboard', path: '/', icon: <LayoutDashboard size={20} /> },
         {
             name: 'Projects',
@@ -48,12 +49,21 @@ const Layout = () => {
         },
         { name: 'Categories', path: '/builders/categories', icon: <Tag size={20} /> },
         { name: 'Banners', path: '/builders/upload-home-banners', icon: <ImageIcon size={20} /> },
+        { name: 'Project Gallery', path: '/builders/project-gallery', icon: <ImageIcon size={20} /> },
         { name: 'Services', path: '/builders/services', icon: <Briefcase size={20} /> },
         { name: 'Blog', path: '/builders/blog', icon: <FileText size={20} /> },
         { name: 'Company Details', path: '/company-details', icon: <Building size={20} /> },
         { name: 'Contact Info', path: '/contact-info', icon: <Phone size={20} /> },
         { name: 'Revenue Report', path: '/revenue-report', icon: <DollarSign size={20} /> },
     ];
+
+    const navItems = isAdmin
+        ? allNavItems
+        : allNavItems.filter((item) => {
+            if (item.path === '/company-details' || item.path === '/contact-info' || item.path === '/revenue-report' || item.path === '/builders/categories') return false;
+            if (item.name === 'Projects') return false;
+            return true;
+          });
 
     return (
         <div style={{ display: 'flex', height: '100vh', backgroundColor: '#f8fafc', overflow: 'hidden' }}>
@@ -186,12 +196,8 @@ const Layout = () => {
                     })}
                 </nav>
 
-                {/* Profile & Logout Section */}
+                {/* Logout Section */}
                 <div style={{ padding: '1.5rem', borderTop: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', borderRadius: '8px', color: location.pathname === '/profile' ? '#3b82f6' : '#475569', backgroundColor: location.pathname === '/profile' ? '#eff6ff' : 'transparent', textDecoration: 'none', fontWeight: location.pathname === '/profile' ? '600' : '500', fontSize: '0.925rem', transition: 'all 0.2s' }}>
-                        <span style={{ color: location.pathname === '/profile' ? '#3b82f6' : '#64748b' }}><User size={20} /></span>
-                        <span>Profile</span>
-                    </Link>
                     <button onClick={() => { dispatch(logoutUser()); navigate('/'); }} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', borderRadius: '8px', color: '#ef4444', backgroundColor: 'transparent', border: 'none', fontWeight: '500', fontSize: '0.925rem', cursor: 'pointer', transition: 'all 0.2s', width: '100%', textAlign: 'left' }}>
                         <LogOut size={20} />
                         <span>Logout</span>
@@ -201,6 +207,11 @@ const Layout = () => {
 
             {/* Main Content Area */}
             <main style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', backgroundColor: '#f8fafc' }}>
+                <header style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', padding: '1rem 2rem', backgroundColor: '#ffffff', borderBottom: '1px solid #f1f5f9', minHeight: '56px' }}>
+                    <span style={{ fontSize: '0.9375rem', fontWeight: '500', color: '#0f172a' }}>
+                        {user?.name || 'User'}
+                    </span>
+                </header>
                 <div style={{ flex: 1, padding: '2rem' }}>
                     <Suspense fallback={<GlobalLoader />}>
                         <Outlet />

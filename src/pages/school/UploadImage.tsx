@@ -1,16 +1,21 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { uploadSchoolImage, clearMessages } from '../../store/slices/schoolSlice';
+import { imageUploadToS3, getS3PathFromResult } from '../../services/api';
 import type { AppDispatch, RootState } from '../../store/store';
 import { Upload } from 'lucide-react';
+
+const S3_PATH = 'uploadsA/School/Library';
 
 const UploadImage = () => {
     const [image, setImage] = useState<File | null>(null);
     const [caption, setCaption] = useState('');
     const [preview, setPreview] = useState<string | null>(null);
+    const [uploadingS3, setUploadingS3] = useState(false);
 
     const dispatch = useDispatch<AppDispatch>();
     const { loading, error, successMessage } = useSelector((state: RootState) => state.school);
+    const { user } = useSelector((state: RootState) => state.auth);
 
     const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -25,14 +30,24 @@ const UploadImage = () => {
         if (!image) return;
 
         dispatch(clearMessages());
-        // Note: We need to handle File object properly in serializable state if needed, 
-        // but for AsyncThunk payload it's fine as long as we don't put it directly in slice state.
-        const result = await dispatch(uploadSchoolImage({ file: image, caption }));
-
-        if (uploadSchoolImage.fulfilled.match(result)) {
-            setImage(null);
-            setCaption('');
-            setPreview(null);
+        setUploadingS3(true);
+        let result: any;
+        try {
+            const loginData = user ? { companyID: user.companyID, databaseName: (user as any).databaseName } : null;
+            const s3Result = await imageUploadToS3(image, S3_PATH, loginData);
+            const imagePath = getS3PathFromResult(s3Result);
+            if (imagePath) {
+                result = await dispatch(uploadSchoolImage({ caption, imagePath }));
+            } else {
+                result = await dispatch(uploadSchoolImage({ file: image, caption }));
+            }
+            if (uploadSchoolImage.fulfilled.match(result)) {
+                setImage(null);
+                setCaption('');
+                setPreview(null);
+            }
+        } finally {
+            setUploadingS3(false);
         }
     };
 
@@ -83,19 +98,19 @@ const UploadImage = () => {
 
                 <button
                     type="submit"
-                    disabled={loading || !image}
+                    disabled={loading || uploadingS3 || !image}
                     style={{
                         marginTop: '1rem',
                         padding: '0.75rem',
-                        backgroundColor: (loading || !image) ? '#93c5fd' : '#2563eb',
+                        backgroundColor: (loading || uploadingS3 || !image) ? '#93c5fd' : '#2563eb',
                         color: 'white',
                         border: 'none',
                         borderRadius: '4px',
-                        cursor: (loading || !image) ? 'not-allowed' : 'pointer',
+                        cursor: (loading || uploadingS3 || !image) ? 'not-allowed' : 'pointer',
                         fontWeight: '500'
                     }}
                 >
-                    {loading ? 'Uploading...' : 'Upload Image'}
+                    {uploadingS3 ? 'Uploading to S3...' : loading ? 'Saving...' : 'Upload Image'}
                 </button>
             </form>
         </div>
