@@ -1,7 +1,7 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { uploadSchoolImage, clearMessages } from '../../store/slices/schoolSlice';
-import { imageUploadToS3, getS3PathFromResult } from '../../services/api';
+import { imageUploadToS3 } from '../../services/api';
 import type { AppDispatch, RootState } from '../../store/store';
 import { Upload } from 'lucide-react';
 
@@ -35,7 +35,8 @@ const UploadImage = () => {
         try {
             const loginData = user ? { companyID: user.companyID, databaseName: (user as any).databaseName } : null;
             const s3Result = await imageUploadToS3(image, S3_PATH, loginData);
-            const imagePath = getS3PathFromResult(s3Result);
+            // const imagePath = getS3PathFromResult(s3Result);
+            const imagePath = s3Result;
             if (imagePath) {
                 result = await dispatch(uploadSchoolImage({ caption, imagePath }));
             } else {

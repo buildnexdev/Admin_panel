@@ -21,7 +21,7 @@ export const uploadGalleryPhoto = createAsyncThunk(
     ) => {
         try {
             if (payload.imagePath) {
-                await photoService.uploadGalleryItemByPath(payload.category, payload.imagePath);
+                // await photoService.uploadGalleryItemByPath(payload.category, payload.imagePath);
             } else if (payload.file) {
                 await photoService.uploadGalleryItem(payload.file, payload.category);
             } else {

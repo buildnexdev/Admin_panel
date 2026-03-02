@@ -1,7 +1,7 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { uploadGalleryPhoto, clearMessages } from '../../store/slices/photoSlice';
-import { imageUploadToS3, getS3PathFromResult } from '../../services/api';
+import { imageUploadToS3 } from '../../services/api';
 import type { AppDispatch, RootState } from '../../store/store';
 import { Upload } from 'lucide-react';
 
@@ -16,7 +16,7 @@ const UploadGallery = () => {
 
     const dispatch = useDispatch<AppDispatch>();
     const { loading, error, successMessage } = useSelector((state: RootState) => state.photo);
-    const { user } = useSelector((state: RootState) => state.auth);
+    // const { user } = useSelector((state: RootState) => state.auth);
 
     const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -33,9 +33,11 @@ const UploadGallery = () => {
         dispatch(clearMessages());
         setUploadingS3(true);
         try {
-            const loginData = user ? { companyID: user.companyID, databaseName: (user as any).databaseName } : null;
+            // const loginData = user ? { companyID: user.companyID, databaseName: (user as any).databaseName } : null;
+            const loginData = null;
             const s3Result = await imageUploadToS3(image, `${S3_PATH_PREFIX}/${category}`, loginData);
-            const imagePath = getS3PathFromResult(s3Result);
+            // const imagePath = getImagePathFromUploadResult(s3Result);
+            const imagePath = s3Result;
             const result = imagePath
                 ? await dispatch(uploadGalleryPhoto({ category, imagePath }))
                 : await dispatch(uploadGalleryPhoto({ file: image, category }));

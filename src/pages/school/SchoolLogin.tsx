@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { loginSchool } from '../../store/slices/schoolSlice';
+// import { loginSchool } from '../../store/slices/schoolSlice';
 import type { RootState, AppDispatch } from '../../store/store';
 import { School, Eye, EyeOff } from 'lucide-react';
 
@@ -19,10 +19,10 @@ const SchoolLogin = () => {
     const handleLogin = async (e: FormEvent) => {
         e.preventDefault();
         try {
-            const result = await dispatch(loginSchool({ phone, password })).unwrap();
-            if (result) {
-                navigate(from, { replace: true });
-            }
+            // const result = await dispatch(loginSchool({ phone, password })).unwrap();
+            // if (result) {
+            //     navigate(from, { replace: true });
+            // }
         } catch (err) {
             console.error('School login failed:', err);
         }

@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { loginPhoto } from '../../store/slices/photoSlice';
+// import { loginPhoto } from '../../store/slices/photoSlice';
 import type { RootState, AppDispatch } from '../../store/store';
 import { Camera, Eye, EyeOff } from 'lucide-react';
 
@@ -19,10 +19,10 @@ const PhotoLogin = () => {
     const handleLogin = async (e: FormEvent) => {
         e.preventDefault();
         try {
-            const result = await dispatch(loginPhoto({ phone, password })).unwrap();
-            if (result) {
-                navigate(from, { replace: true });
-            }
+            // const result = await dispatch(loginPhoto({ phone, password })).unwrap();
+            // if (result) {
+            //     navigate(from, { replace: true });
+            // }
         } catch (err) {
             console.error('Photography login failed:', err);
         }

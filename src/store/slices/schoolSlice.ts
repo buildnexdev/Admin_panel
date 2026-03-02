@@ -33,7 +33,7 @@ export const uploadSchoolImage = createAsyncThunk(
     ) => {
         try {
             if (payload.imagePath) {
-                await schoolService.uploadImageByPath(payload.caption, payload.imagePath);
+                // await schoolService.uploadImageByPath(payload.caption, payload.imagePath);
             } else if (payload.file) {
                 await schoolService.uploadImage(payload.file, payload.caption);
             } else {
