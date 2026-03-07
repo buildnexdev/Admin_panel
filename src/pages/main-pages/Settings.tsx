@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import type { RootState } from '../store/store';
+import type { RootState } from '../../store/store';
 import { Building2, Lock, Save, Globe, Phone, MapPin, Mail, Key } from 'lucide-react';
 
 const Settings = () => {

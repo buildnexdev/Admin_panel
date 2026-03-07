@@ -329,7 +329,7 @@ const BlogUpload = () => {
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                         <button
                                             type="button"
-                                            onClick={() => handleToggleActive(blog, !!blog.isActive)}
+                                            onClick={() => handleToggleActive(blog)}
                                             disabled={loading}
                                             style={{
                                                 width: '44px',
