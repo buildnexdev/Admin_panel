@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { uploadSchoolContent, clearMessages } from '../../store/slices/schoolSlice';
-import type { AppDispatch, RootState } from '../../store/store';
+import { uploadSchoolContent, clearMessages } from '../../../store/slices/schoolSlice';
+import type { AppDispatch, RootState } from '../../../store/store';
 
 const UploadContent = () => {
     const [title, setTitle] = useState('');

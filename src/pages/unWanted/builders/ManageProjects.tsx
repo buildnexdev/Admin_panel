@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchProjects, deleteProject } from '../../store/slices/buildersSlice';
-import type { AppDispatch, RootState } from '../../store/store';
+import { fetchProjects, deleteProject } from '../../../store/slices/buildersSlice';
+import type { AppDispatch, RootState } from '../../../store/store';
 import { Briefcase, Edit2, Trash2 } from 'lucide-react';
 
 const ManageProjects = () => {

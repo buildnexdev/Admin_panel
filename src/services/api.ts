@@ -1,5 +1,6 @@
 import axios from 'axios';
 export const API_URL = 'http://localhost:3000/';
+// export const API_URL = ' https://bulidnex.xyz/';
 export const Img_Url = 'https://s3.eu-north-1.amazonaws.com/buildnex-dev-bucket/';
 // User login Service
 export const UserloginService = {
@@ -200,10 +201,14 @@ export const contentCMSService = {
         const response = await axios.get(url);
         return response.data;
     },
-    updateBanner: async (id: number, formData: FormData) => {
-        const response = await axios.put(`${API_URL}content/banners/${id}`, formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        });
+    updateBanner: async (id: number, data: FormData | Record<string, unknown>) => {
+        if (data instanceof FormData) {
+            const response = await axios.put(`${API_URL}content/banners/${id}`, data, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            return response.data;
+        }
+        const response = await axios.put(`${API_URL}content/banners/${id}`, data);
         return response.data;
     },
     deleteBanner: async (id: number) => {
@@ -324,4 +329,78 @@ export const imageUploadToS3 = async (result: any, path: any, loginData: any, fi
         }
     }
     return null;
+};
+
+export const fetchQuotationByToken = async (token: string) => {
+    const response = await axios.get(`${API_URL}quotation/${token}`);
+    const raw = response?.data;
+    const data = raw?.data ?? raw?.response ?? raw?.quotation ?? raw;
+    if (data && typeof data === "object") {
+        return {
+            client_name: data.client_name ?? data.clientName ?? "",
+            project_details: data.project_details ?? data.projectDetails ?? "",
+            price: data.price ?? 0,
+            token: data.token ?? data.id ?? token,
+            company_name: data.company_name ?? data.companyName ?? "",
+        };
+    }
+    return raw;
+};
+
+/** List all quotations for the current user (optional userId, category). Expects array in res.data or res.data.data */
+export const getQuotationList = async (params?: { userId?: number; category?: string | null }) => {
+    const response = await axios.get(`${API_URL}quotation`, { params: params ?? {} });
+    const data = response?.data?.data ?? response?.data;
+    return Array.isArray(data) ? data : [];
+};
+
+export const createQuotation = async (data: {
+    client_name: string;
+    project_details: string;
+    price: number;
+    companyID?: number;
+    userId?: number;
+    category?: string | null;
+    company_name?: string | null;
+}) => {
+    const response = await axios.post(`${API_URL}quotation`, data);
+    return response.data;
+};
+
+/** Call when client opens the quotation link – backend should increment view/click count */
+export const recordQuotationView = async (token: string) => {
+    try {
+        await axios.post(`${API_URL}quotation/${token}/view`, {});
+        return true;
+    } catch {
+        return false;
+    }
+};
+
+/** Get view/click count for a quotation. Tries /stats first, then GET quotation (view_count in body). */
+export const getQuotationViewCount = async (token: string): Promise<number> => {
+    try {
+        const res = await axios.get(`${API_URL}quotation/${token}/stats`);
+        const count = res?.data?.view_count ?? res?.data?.viewCount ?? res?.data?.clicks ?? 0;
+        return Number(count);
+    } catch {
+        try {
+            const res = await axios.get(`${API_URL}quotation/${token}`);
+            const data = res?.data?.data ?? res?.data;
+            const count = data?.view_count ?? data?.viewCount ?? data?.clicks ?? 0;
+            return Number(count);
+        } catch {
+            return 0;
+        }
+    }
+};
+
+export const updateQuotation = async (token: string, data: { client_name?: string; project_details?: string; price?: number }) => {
+    const response = await axios.put(`${API_URL}quotation/${token}`, data);
+    return response.data;
+};
+
+export const deleteQuotation = async (token: string) => {
+    const response = await axios.delete(`${API_URL}quotation/${token}`);
+    return response.data;
 };

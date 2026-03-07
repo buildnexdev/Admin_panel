@@ -1,6 +1,6 @@
 import { User, Mail, Phone, Lock, Home } from 'lucide-react';
 import { useSelector } from 'react-redux';
-import type { RootState } from '../store/store';
+import type { RootState } from '../../store/store';
 
 const Profile = () => {
     const { user } = useSelector((state: RootState) => state.auth);

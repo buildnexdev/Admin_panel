@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../store/store';
-import Login from '../pages/Login';
+import Login from '../pages/main-pages/Login';
 
 /**
  * At root URL (/): show Login when not authenticated, otherwise render app (Layout + Dashboard etc).

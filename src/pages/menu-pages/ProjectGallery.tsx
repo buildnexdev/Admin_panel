@@ -1,9 +1,9 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchProjects, addSingleProject, updateProject, clearMessages } from '../../store/slices/buildersSlice';
+import { fetchProjects, addSingleProject, updateProject, deleteProject, clearMessages } from '../../store/slices/buildersSlice';
 import { Img_Url } from '../../services/api';
 import type { AppDispatch, RootState } from '../../store/store';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, Edit2, Trash2 } from 'lucide-react';
 
 const PROJECT_CATEGORIES = ['Residential', 'Commercial', 'Industrial'] as const;
 
@@ -20,6 +20,9 @@ const ProjectGallery = () => {
     const companyID = user?.companyID;
 
     const [showUpload, setShowUpload] = useState(false);
+    const [editMode, setEditMode] = useState(false);
+    const [editProjectId, setEditProjectId] = useState<number | null>(null);
+
     const [category, setCategory] = useState<string>(PROJECT_CATEGORIES[0]);
     const [title, setTitle] = useState('');
     const [image, setImage] = useState<File | null>(null);
@@ -48,7 +51,23 @@ const ProjectGallery = () => {
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        if (!companyID || !title.trim() || !image) return;
+        if (!companyID || !title.trim()) return;
+
+        if (editMode && editProjectId) {
+            const result = await dispatch(updateProject({
+                id: editProjectId,
+                companyID: user.companyID,
+                data: { title: title.trim(), category: category.trim() },
+                imageFile: image
+            }) as any);
+            if (updateProject.fulfilled.match(result)) {
+                resetForm();
+            }
+            return;
+        }
+
+        if (!image) return;
+
         const result = await dispatch(addSingleProject({
             category,
             title: title.trim(),
@@ -56,17 +75,44 @@ const ProjectGallery = () => {
             companyID
         }));
         if (addSingleProject.fulfilled.match(result)) {
-            setTitle('');
-            setCategory(PROJECT_CATEGORIES[0]);
-            setImage(null);
-            setPreview(null);
-            setShowUpload(false);
+            resetForm();
         }
     };
 
-    const handleToggleActive = (project: any) => {
+    const resetForm = () => {
+        setTitle('');
+        setCategory(PROJECT_CATEGORIES[0]);
+        setImage(null);
+        setPreview(null);
+        setShowUpload(false);
+        setEditMode(false);
+        setEditProjectId(null);
+    };
+
+    const handleEditClick = (project: any) => {
+        setEditMode(true);
+        setEditProjectId(project.id);
+        setTitle(project.title || '');
+        setCategory(project.category || PROJECT_CATEGORIES[0]);
+        setPreview(getProjectImageUrl(project));
+        setShowUpload(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleDeleteClick = (project: any) => {
         if (!companyID) return;
-        dispatch(updateProject({ id: project.id, companyID, isActive: !isProjectActive(project) }));
+        if (window.confirm(`Are you sure you want to delete project "${project.title}"?`)) {
+            dispatch(deleteProject({ id: project.id, companyID }));
+        }
+    };
+
+    const handleToggleStatus = (project: any) => {
+        if (!user?.companyID) return;
+        dispatch(updateProject({
+            id: project.id,
+            companyID: user.companyID,
+            data: { isActive: project.isActive ? 0 : 1 }
+        }) as any);
     };
 
     const getProjectImageUrl = (project: any) => {
@@ -111,7 +157,7 @@ const ProjectGallery = () => {
                 </button>
             </div>
 
-            {successMessage && (
+            {successMessage && typeof successMessage === 'string' && (
                 <div style={{ padding: '0.75rem 1rem', marginBottom: '1rem', backgroundColor: '#d1fae5', color: '#065f46', borderRadius: '8px', fontSize: '0.9rem' }}>
                     {successMessage}
                 </div>
@@ -133,10 +179,12 @@ const ProjectGallery = () => {
                     boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
                 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                        <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#0f172a', margin: 0 }}>Upload new project</h2>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#0f172a', margin: 0 }}>
+                            {editMode ? 'Edit Project' : 'Upload new project'}
+                        </h2>
                         <button
                             type="button"
-                            onClick={() => { setShowUpload(false); setTitle(''); setImage(null); setPreview(null); }}
+                            onClick={resetForm}
                             style={{ padding: '0.4rem', border: 'none', background: 'transparent', cursor: 'pointer', color: '#64748b' }}
                             aria-label="Close"
                         >
@@ -174,7 +222,7 @@ const ProjectGallery = () => {
                                 type="file"
                                 accept="image/*"
                                 onChange={handleImageChange}
-                                required
+                                required={!editMode}
                                 style={{ width: '100%', padding: '0.5rem', fontSize: '0.9rem' }}
                             />
                             {preview && (
@@ -191,11 +239,11 @@ const ProjectGallery = () => {
                                 fontWeight: '500',
                                 cursor: loading ? 'not-allowed' : 'pointer'
                             }}>
-                                {loading ? 'Uploading...' : 'Upload Project'}
+                                {loading ? (editMode ? 'Saving...' : 'Uploading...') : (editMode ? 'Save Changes' : 'Upload Project')}
                             </button>
                             <button
                                 type="button"
-                                onClick={() => { setShowUpload(false); setTitle(''); setImage(null); setPreview(null); }}
+                                onClick={resetForm}
                                 style={{
                                     padding: '0.6rem 1.25rem',
                                     backgroundColor: '#f1f5f9',
@@ -278,12 +326,25 @@ const ProjectGallery = () => {
                                     </h3>
 
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid #f1f5f9' }}>
-                                        <span style={{ color: '#64748b', fontWeight: '500', fontSize: '0.875rem' }}>Active:</span>
+                                        <div style={{ display: 'flex', gap: '0.5rem', flex: 1 }}>
+                                            <button
+                                                onClick={() => handleEditClick(project)}
+                                                style={{ padding: '0.4rem 0.8rem', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', color: '#475569', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', fontWeight: '500' }}
+                                            >
+                                                <Edit2 size={14} /> Edit
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteClick(project)}
+                                                style={{ padding: '0.4rem 0.8rem', border: '1px solid #fee2e2', backgroundColor: '#fef2f2', color: '#ef4444', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', fontWeight: '500' }}
+                                            >
+                                                <Trash2 size={14} /> Trash
+                                            </button>
+                                        </div>
                                         <button
                                             type="button"
                                             role="switch"
                                             aria-checked={isProjectActive(project)}
-                                            onClick={() => handleToggleActive(project)}
+                                            onClick={() => handleToggleStatus(project)}
                                             style={{
                                                 width: '44px',
                                                 height: '24px',

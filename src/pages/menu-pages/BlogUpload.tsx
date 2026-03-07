@@ -1,15 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchBlogs, addBlog, updateBlog, clearMessages } from '../../store/slices/buildersSlice';
+import { fetchBlogs, addBlog, updateBlog, deleteBlog, clearMessages } from '../../store/slices/buildersSlice';
 import type { AppDispatch, RootState } from '../../store/store';
-import { Img_Url } from '../../services/api';
-import { Plus, X } from 'lucide-react';
+import { Img_Url, contentCMSService } from '../../services/api';
+import { Plus, X, Edit2, Trash2 } from 'lucide-react';
 
 const BlogUpload = () => {
     const dispatch = useDispatch<AppDispatch>();
     const { user } = useSelector((state: RootState) => state.auth);
     const { blogs, loading, successMessage, error } = useSelector((state: RootState) => state.builders);
     const [showAddForm, setShowAddForm] = useState(false);
+    const [editMode, setEditMode] = useState(false);
+    const [editBlogId, setEditBlogId] = useState<number | null>(null);
+
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [link, setLink] = useState('');
@@ -39,7 +42,21 @@ const BlogUpload = () => {
 
     const handleAddBlog = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!title.trim()) return;
+        if (!title.trim() || !user?.companyID) return;
+
+        if (editMode && editBlogId) {
+            const result = await dispatch(updateBlog({
+                id: editBlogId,
+                companyID: user.companyID,
+                data: { title: title.trim(), content: description.trim(), link: link.trim() },
+                imageFile: coverImage
+            }) as any);
+            if (updateBlog.fulfilled.match(result)) {
+                resetForm();
+            }
+            return;
+        }
+
         const result = await dispatch(addBlog({
             title: title.trim(),
             description: description.trim(),
@@ -47,18 +64,46 @@ const BlogUpload = () => {
             imageFile: coverImage
         }));
         if (addBlog.fulfilled.match(result)) {
-            setTitle('');
-            setDescription('');
-            setLink('');
-            setCoverImage(null);
-            setCoverPreview(null);
-            setShowAddForm(false);
+            resetForm();
         }
     };
 
-    const handleToggleActive = (id: number, currentActive: boolean) => {
+    const resetForm = () => {
+        setTitle('');
+        setDescription('');
+        setLink('');
+        setCoverImage(null);
+        setCoverPreview(null);
+        setShowAddForm(false);
+        setEditMode(false);
+        setEditBlogId(null);
+    };
+
+    const handleEditClick = (blog: any) => {
+        setEditMode(true);
+        setEditBlogId(blog.id);
+        setTitle(blog.title || '');
+        setDescription(blog.content || blog.description || '');
+        setLink(getBlogLink(blog) || '');
+        setCoverPreview(getBlogImageUrl(blog));
+        setShowAddForm(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleDeleteClick = (blog: any) => {
         if (!user?.companyID) return;
-        dispatch(updateBlog({ id, companyID: user.companyID, isActive: !currentActive }));
+        if (window.confirm(`Are you sure you want to delete blog "${blog.title}"?`)) {
+            dispatch(deleteBlog({ id: blog.id, companyID: user.companyID }));
+        }
+    };
+
+    const handleToggleActive = (blog: any) => {
+        if (!user?.companyID) return;
+        dispatch(updateBlog({
+            id: blog.id,
+            companyID: user.companyID,
+            data: { isActive: blog.isActive ? 0 : 1 }
+        }) as any);
     };
 
     const getBlogImageUrl = (blog: any) => {
@@ -126,8 +171,10 @@ const BlogUpload = () => {
                     border: '1px solid #e2e8f0'
                 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                        <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#0f172a', margin: 0 }}>Add New Blog Post</h2>
-                        <button type="button" onClick={() => setShowAddForm(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', color: '#64748b' }}>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#0f172a', margin: 0 }}>
+                            {editMode ? 'Edit Blog Post' : 'Add New Blog Post'}
+                        </h2>
+                        <button type="button" onClick={resetForm} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', color: '#64748b' }}>
                             <X size={20} />
                         </button>
                     </div>
@@ -186,9 +233,9 @@ const BlogUpload = () => {
                                 cursor: loading ? 'not-allowed' : 'pointer',
                                 opacity: loading ? 0.7 : 1
                             }}>
-                                {loading ? 'Adding...' : 'Add Blog'}
+                                {loading ? (editMode ? 'Saving...' : 'Adding...') : (editMode ? 'Save Changes' : 'Add Blog')}
                             </button>
-                            <button type="button" onClick={() => setShowAddForm(false)} style={{
+                            <button type="button" onClick={resetForm} style={{
                                 padding: '0.6rem 1.25rem',
                                 backgroundColor: '#f1f5f9',
                                 color: '#475569',
@@ -256,7 +303,7 @@ const BlogUpload = () => {
                                     )}
                                 </div>
 
-                                {/* Active / Inactive */}
+                                {/* Active / Inactive / Edit / Delete */}
                                 <div style={{
                                     display: 'flex',
                                     alignItems: 'center',
@@ -264,37 +311,51 @@ const BlogUpload = () => {
                                     padding: '1rem 1.5rem',
                                     borderTop: '1px solid #f1f5f9'
                                 }}>
-                                    <span style={{ fontSize: '0.875rem', color: '#64748b', fontWeight: '500' }}>
-                                        {(blog.isActive ?? true) ? 'Active' : 'Inactive'}
-                                    </span>
-                                    <button
-                                        type="button"
-                                        onClick={() => handleToggleActive(blog.id, !!blog.isActive)}
-                                        disabled={loading}
-                                        style={{
-                                            width: '44px',
-                                            height: '24px',
-                                            borderRadius: '12px',
-                                            border: 'none',
-                                            cursor: loading ? 'not-allowed' : 'pointer',
-                                            backgroundColor: (blog.isActive ?? true) ? '#22c55e' : '#e2e8f0',
-                                            position: 'relative',
-                                            transition: 'background-color 0.2s'
-                                        }}
-                                        aria-label={(blog.isActive ?? true) ? 'Set inactive' : 'Set active'}
-                                    >
-                                        <span style={{
-                                            position: 'absolute',
-                                            top: '2px',
-                                            left: (blog.isActive ?? true) ? '22px' : '2px',
-                                            width: '20px',
-                                            height: '20px',
-                                            borderRadius: '50%',
-                                            backgroundColor: 'white',
-                                            boxShadow: '0 1px 2px rgba(0,0,0,0.2)',
-                                            transition: 'left 0.2s'
-                                        }} />
-                                    </button>
+                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                        <button
+                                            onClick={() => handleEditClick(blog)}
+                                            style={{ padding: '0.4rem 0.8rem', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', color: '#475569', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', fontWeight: '500' }}
+                                        >
+                                            <Edit2 size={14} /> Edit
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteClick(blog)}
+                                            style={{ padding: '0.4rem 0.8rem', border: '1px solid #fee2e2', backgroundColor: '#fef2f2', color: '#ef4444', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', fontWeight: '500' }}
+                                        >
+                                            <Trash2 size={14} /> Trash
+                                        </button>
+                                    </div>
+
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleToggleActive(blog, !!blog.isActive)}
+                                            disabled={loading}
+                                            style={{
+                                                width: '44px',
+                                                height: '24px',
+                                                borderRadius: '12px',
+                                                border: 'none',
+                                                cursor: loading ? 'not-allowed' : 'pointer',
+                                                backgroundColor: (blog.isActive ?? true) ? '#22c55e' : '#e2e8f0',
+                                                position: 'relative',
+                                                transition: 'background-color 0.2s'
+                                            }}
+                                            aria-label={(blog.isActive ?? true) ? 'Set inactive' : 'Set active'}
+                                        >
+                                            <span style={{
+                                                position: 'absolute',
+                                                top: '2px',
+                                                left: (blog.isActive ?? true) ? '22px' : '2px',
+                                                width: '20px',
+                                                height: '20px',
+                                                borderRadius: '50%',
+                                                backgroundColor: 'white',
+                                                boxShadow: '0 1px 2px rgba(0,0,0,0.2)',
+                                                transition: 'left 0.2s'
+                                            }} />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         );

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { contentCMSService } from '../../services/api';
-import type { RootState } from '../../store/store';
+import { contentCMSService } from '../../../services/api';
+import type { RootState } from '../../../store/store';
 import { Mail, RefreshCw, Clock, User, MessageSquare } from 'lucide-react';
 
 interface ContactMessage {

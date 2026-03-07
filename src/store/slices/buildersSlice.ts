@@ -144,25 +144,52 @@ export const deleteBanner = createAsyncThunk(
     }
 );
 
+const BANNER_UPLOAD_PATH = 'uploadsA/Company/Company-';
+const BANNER_FOLDER = 'Builder/HomeBanner';
+
 export const updateBanner = createAsyncThunk(
     'builders/updateBanner',
     async (
-        { id, companyID, category, isActive }: { id: number; companyID: number; category?: string; isActive: boolean },
+        { id, companyID, category, data, imageFile }: { id: number; companyID: number; category?: string; data: any; imageFile?: File | null },
         { dispatch, getState, rejectWithValue }
     ) => {
         try {
             const { user } = (getState() as RootState).auth;
             if (!user) return rejectWithValue('User not authenticated');
 
-            const formData = new FormData();
-            formData.append('isActive', isActive ? '1' : '0');
-            formData.append('userId', String(user.userId));
-            formData.append('category', user.category || category || 'HomeBanner');
-            await contentCMSService.updateBanner(id, formData);
+            let payload: any = { ...data };
+
+            // If there's an image file, upload it first
+            if (imageFile) {
+                const uploadPath = `${BANNER_UPLOAD_PATH}${companyID}/${BANNER_FOLDER}`;
+                const loginData = { companyID: user.companyID, databaseName: (user as any).databaseName };
+                const uploadResult = await imageUploadToS3(imageFile, uploadPath, loginData);
+                const imagePath = getImagePathFromUploadResult(uploadResult);
+                if (imagePath) {
+                    payload.imagePath = imagePath;
+                    payload.image = imagePath; // Some endpoints might expect 'image'
+                }
+            }
+
+            // If data is just a toggle {isActive: boolean}, we enrich it
+            if (!(data instanceof FormData) && typeof data === 'object' && Object.keys(data).length === 1 && 'isActive' in data) {
+                const formData = new FormData();
+                formData.append('isActive', data.isActive ? '1' : '0');
+                formData.append('userId', String(user.userId));
+                formData.append('category', user.category || category || 'HomeBanner');
+                // If an image was uploaded, add it to the FormData as well
+                if (payload.imagePath) {
+                    formData.append('imagePath', payload.imagePath);
+                    formData.append('image', payload.image);
+                }
+                payload = formData;
+            }
+
+            await contentCMSService.updateBanner(id, payload);
             dispatch(fetchBanners({ companyID, category: category || 'HomeBanner' }));
             return 'Banner updated successfully';
-        } catch (error) {
-            return rejectWithValue('Failed to update banner');
+        } catch (error: any) {
+            return rejectWithValue(error?.response?.data?.message || error?.message || 'Failed to update banner');
         }
     }
 );
@@ -225,11 +252,26 @@ export const addService = createAsyncThunk(
 export const updateService = createAsyncThunk(
     'builders/updateService',
     async (
-        { id, companyID, isActive }: { id: number; companyID: number; isActive: boolean },
-        { dispatch, rejectWithValue }
+        { id, companyID, data, imageFile }: { id: number; companyID: number; data: any; imageFile?: File | null },
+        { dispatch, getState, rejectWithValue }
     ) => {
         try {
-            await contentCMSService.updateService(id, { isActive: isActive ? 1 : 0 });
+            const { user } = (getState() as RootState).auth;
+            if (!user) return rejectWithValue('User not authenticated');
+
+            let payload = { ...data };
+
+            if (imageFile) {
+                const uploadPath = `${SERVICE_UPLOAD_PATH_PREFIX}${companyID}/${SERVICE_FOLDER}`;
+                const loginData = { companyID: user.companyID, databaseName: (user as any).databaseName };
+                const uploadResult = await imageUploadToS3(imageFile, uploadPath, loginData);
+                const imagePath = getImagePathFromUploadResult(uploadResult);
+                if (imagePath) {
+                    payload.imagePath = imagePath;
+                }
+            }
+
+            await contentCMSService.updateService(id, payload);
             dispatch(fetchServices(companyID));
             return 'Service updated successfully';
         } catch (error: any) {
@@ -296,11 +338,26 @@ export const addBlog = createAsyncThunk(
 export const updateBlog = createAsyncThunk(
     'builders/updateBlog',
     async (
-        { id, companyID, isActive }: { id: number; companyID: number; isActive: boolean },
-        { dispatch, rejectWithValue }
+        { id, companyID, data, imageFile }: { id: number; companyID: number; data: any; imageFile?: File | null },
+        { dispatch, getState, rejectWithValue }
     ) => {
         try {
-            await contentCMSService.updateBlog(id, { isActive: isActive ? 1 : 0 });
+            const { user } = (getState() as RootState).auth;
+            if (!user) return rejectWithValue('User not authenticated');
+
+            let payload = { ...data };
+
+            if (imageFile) {
+                const uploadPath = `${BLOG_UPLOAD_PATH_PREFIX}${companyID}/${BLOG_FOLDER}`;
+                const loginData = { companyID: user.companyID, databaseName: (user as any).databaseName };
+                const uploadResult = await imageUploadToS3(imageFile, uploadPath, loginData);
+                const imagePath = getImagePathFromUploadResult(uploadResult);
+                if (imagePath) {
+                    payload.imagePath = imagePath;
+                }
+            }
+
+            await contentCMSService.updateBlog(id, payload);
             dispatch(fetchBlogs(companyID));
             return 'Blog updated successfully';
         } catch (error: any) {
@@ -325,8 +382,7 @@ export const uploadBuilderProject = createAsyncThunk(
     }
 );
 
-const BANNER_UPLOAD_PATH = 'uploadsA/Company/Company-';
-const BANNER_FOLDER = 'Builder/HomeBanner';
+
 
 function getImagePathFromUploadResult(res: any): string | null {
     if (!res || res === 'Image Upload Failed') return null;
@@ -410,11 +466,26 @@ export const addSingleProject = createAsyncThunk(
 export const updateProject = createAsyncThunk(
     'builders/updateProject',
     async (
-        { id, companyID, isActive }: { id: number; companyID: number; isActive: boolean },
-        { dispatch, rejectWithValue }
+        { id, companyID, data, imageFile }: { id: number; companyID: number; data: any; imageFile?: File | null },
+        { dispatch, getState, rejectWithValue }
     ) => {
         try {
-            await contentCMSService.updateProject(id, { isActive: isActive ? 1 : 0 });
+            const { user } = (getState() as RootState).auth;
+            if (!user) return rejectWithValue('User not authenticated');
+
+            let payload = { ...data };
+
+            if (imageFile) {
+                const uploadPath = `${PROJECT_UPLOAD_PATH_PREFIX}${companyID}/${PROJECT_FOLDER}`;
+                const loginData = { companyID: user.companyID, databaseName: (user as any).databaseName };
+                const uploadResult = await imageUploadToS3(imageFile, uploadPath, loginData);
+                const imagePath = getImagePathFromUploadResult(uploadResult);
+                if (imagePath) {
+                    payload.imagePath = imagePath;
+                }
+            }
+
+            await contentCMSService.updateProject(id, payload);
             dispatch(fetchProjects({ companyID }));
             return 'Project updated successfully';
         } catch (error: any) {
@@ -472,7 +543,9 @@ const buildersSlice = createSlice({
             .addCase(fetchBlogs.fulfilled, (state, action) => { state.blogs = action.payload || []; })
             // Upload & Delete Actions
             .addMatcher(
-                (action) => action.type.endsWith('/pending') && !action.type.startsWith('builders/fetch'),
+                (action) => (action.type.startsWith('builders/') || action.type.startsWith('banners/')) &&
+                    action.type.endsWith('/pending') &&
+                    !action.type.includes('/fetch'),
                 (state) => {
                     state.loading = true;
                     state.error = null;
@@ -480,17 +553,21 @@ const buildersSlice = createSlice({
                 }
             )
             .addMatcher(
-                (action: { type: string; payload?: unknown }) => action.type.endsWith('/fulfilled') && !action.type.startsWith('builders/fetch'),
+                (action: { type: string; payload?: unknown }) => (action.type.startsWith('builders/') || action.type.startsWith('banners/')) &&
+                    action.type.endsWith('/fulfilled') &&
+                    !action.type.includes('/fetch'),
                 (state, action: { payload?: unknown }) => {
                     state.loading = false;
-                    state.successMessage = action.payload as string;
+                    state.successMessage = typeof action.payload === 'string' ? action.payload : null;
                 }
             )
             .addMatcher(
-                (action: { type: string; payload?: unknown }) => action.type.endsWith('/rejected') && !action.type.startsWith('builders/fetch'),
+                (action: { type: string; payload?: unknown }) => (action.type.startsWith('builders/') || action.type.startsWith('banners/')) &&
+                    action.type.endsWith('/rejected') &&
+                    !action.type.includes('/fetch'),
                 (state, action: { payload?: unknown }) => {
                     state.loading = false;
-                    state.error = action.payload as string;
+                    state.error = typeof action.payload === 'string' ? action.payload : 'An error occurred';
                 }
             );
     },
