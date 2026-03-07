@@ -298,7 +298,7 @@ const ServiceUpload = () => {
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                         <button
                                             type="button"
-                                            onClick={() => handleToggleActive(blog)}
+                                            onClick={() => handleToggleActive(service)}
                                             disabled={loading}
                                             style={{
                                                 width: '44px',
