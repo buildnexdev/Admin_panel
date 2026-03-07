@@ -1,30 +1,30 @@
 import { useState, type FormEvent } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
-// import { loginPhoto } from '../../store/slices/photoSlice';
-import type { RootState, AppDispatch } from '../../store/store';
-import { Camera, Eye, EyeOff } from 'lucide-react';
+// import { loginSchool } from '../../store/slices/schoolSlice';
+import type { RootState, AppDispatch } from '../../../store/store';
+import { School, Eye, EyeOff } from 'lucide-react';
 
-const PhotoLogin = () => {
+const SchoolLogin = () => {
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const location = useLocation();
-    const { loading, error } = useSelector((state: RootState) => state.photo);
+    const { loading, error } = useSelector((state: RootState) => state.school);
 
-    const from = (location.state as any)?.from?.pathname || '/photography';
+    const from = (location.state as any)?.from?.pathname || '/school';
 
     const handleLogin = async (e: FormEvent) => {
         e.preventDefault();
         try {
-            // const result = await dispatch(loginPhoto({ phone, password })).unwrap();
+            // const result = await dispatch(loginSchool({ phone, password })).unwrap();
             // if (result) {
             //     navigate(from, { replace: true });
             // }
         } catch (err) {
-            console.error('Photography login failed:', err);
+            console.error('School login failed:', err);
         }
     };
 
@@ -32,8 +32,8 @@ const PhotoLogin = () => {
         <div style={{ maxWidth: '500px', margin: '2rem auto' }}>
             <div style={{ padding: '2rem', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e5e7eb' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                    <Camera size={32} color="#8b5cf6" />
-                    <h2 style={{ textAlign: 'center', color: '#1f2937', margin: 0 }}>Photography Login</h2>
+                    <School size={32} color="#3b82f6" />
+                    <h2 style={{ textAlign: 'center', color: '#1f2937', margin: 0 }}>School Login</h2>
                 </div>
                 {error && <div style={{ color: 'red', marginBottom: '1rem', textAlign: 'center', padding: '0.75rem', backgroundColor: '#fee2e2', borderRadius: '4px' }}>{error}</div>}
                 <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -70,7 +70,7 @@ const PhotoLogin = () => {
                         disabled={loading}
                         style={{
                             padding: '0.75rem',
-                            backgroundColor: loading ? '#c4b5fd' : '#8b5cf6',
+                            backgroundColor: loading ? '#93c5fd' : '#3b82f6',
                             color: 'white',
                             border: 'none',
                             borderRadius: '4px',
@@ -86,4 +86,4 @@ const PhotoLogin = () => {
     );
 };
 
-export default PhotoLogin;
+export default SchoolLogin;

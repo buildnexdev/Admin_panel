@@ -1,7 +1,7 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { uploadBuilderProject, clearMessages } from '../../store/slices/buildersSlice';
-import type { AppDispatch, RootState } from '../../store/store';
+import { uploadBuilderProject, clearMessages } from '../../../store/slices/buildersSlice';
+import type { AppDispatch, RootState } from '../../../store/store';
 import { Upload, X, CheckCircle2 } from 'lucide-react';
 
 const ProjectUpload = () => {

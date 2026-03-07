@@ -3,6 +3,8 @@ import schoolReducer from './slices/schoolSlice';
 import photoReducer from './slices/photoSlice';
 import buildersReducer from './slices/buildersSlice';
 import authReducer from './slices/authSlice';
+import quotationReducer from './slices/quotationSlice';
+import menuReducer from './slices/menuSlice';
 
 export const store = configureStore({
     reducer: {
@@ -10,6 +12,8 @@ export const store = configureStore({
         school: schoolReducer,
         photo: photoReducer,
         builders: buildersReducer,
+        quotation: quotationReducer,
+        menu: menuReducer,
     },
 });
 

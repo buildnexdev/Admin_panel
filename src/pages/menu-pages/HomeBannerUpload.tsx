@@ -1,9 +1,9 @@
 import { useEffect, useState, type ChangeEvent } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchBanners, updateBanner, addSingleBanner } from '../../store/slices/buildersSlice';
-import { Img_Url } from '../../services/api';
+import { fetchBanners, updateBanner, addSingleBanner, deleteBanner } from '../../store/slices/buildersSlice';
+import { Img_Url, contentCMSService } from '../../services/api';
 import type { AppDispatch, RootState } from '../../store/store';
-import { Plus, Upload, X } from 'lucide-react';
+import { Plus, Upload, X, Edit2, Trash2 } from 'lucide-react';
 
 const MAX_PUBLISHED_BANNERS = 5;
 const CATEGORY = 'HomeBanner';
@@ -24,6 +24,14 @@ const HomeBannerUpload = () => {
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [previews, setPreviews] = useState<string[]>([]);
 
+    // Edit state
+    const [showEditForm, setShowEditForm] = useState(false);
+    const [editBannerId, setEditBannerId] = useState<number | null>(null);
+    const [editTitle, setEditTitle] = useState('');
+    const [editDesc, setEditDesc] = useState('');
+    const [editImageFile, setEditImageFile] = useState<File | null>(null);
+    const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
+
     const activeCount = (banners || []).filter(isBannerActive).length;
     const canUpload = activeCount < MAX_PUBLISHED_BANNERS;
     const remainingSlots = Math.max(0, MAX_PUBLISHED_BANNERS - activeCount);
@@ -37,7 +45,7 @@ const HomeBannerUpload = () => {
     const handleActiveToggle = (banner: any) => {
         if (!companyID) return;
         const nextActive = !isBannerActive(banner);
-        dispatch(updateBanner({ id: banner.id, companyID, category: CATEGORY, isActive: nextActive }));
+        dispatch(updateBanner({ id: banner.id, companyID, category: CATEGORY, data: { isActive: nextActive ? 1 : 0 } }));
     };
 
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -71,6 +79,42 @@ const HomeBannerUpload = () => {
         setPreviews([]);
     };
 
+    const handleEditClick = (banner: any) => {
+        setEditBannerId(banner.id);
+        setEditTitle(banner.title || '');
+        setEditDesc(banner.description || '');
+        setEditImagePreview(Img_Url + (banner.imageUrl || banner.image_url));
+        setEditImageFile(null);
+        setShowEditForm(true);
+        setShowUpload(false);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleDeleteClick = (banner: any) => {
+        if (!companyID) return;
+        if (window.confirm(`Are you sure you want to delete this banner?`)) {
+            dispatch(deleteBanner({ id: banner.id, companyID, category: CATEGORY }));
+        }
+    };
+
+    const handleUpdateBanner = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!companyID || !editBannerId) return;
+
+        const result = await dispatch(updateBanner({
+            id: editBannerId,
+            companyID,
+            category: CATEGORY,
+            data: { title: editTitle.trim(), description: editDesc.trim() },
+            imageFile: editImageFile
+        }));
+
+        if (updateBanner.fulfilled.match(result)) {
+            setShowEditForm(false);
+            setEditBannerId(null);
+        }
+    };
+
     return (
         <div style={{ padding: '0 0.5rem', maxWidth: '1400px', margin: '0 auto' }}>
             {/* Header */}
@@ -83,7 +127,7 @@ const HomeBannerUpload = () => {
                         Manage homepage sliding banners {activeCount > 0 && `(${activeCount}/${MAX_PUBLISHED_BANNERS} active)`}
                     </p>
                 </div>
-                {canUpload && (
+                {canUpload && !showEditForm && (
                     <button
                         type="button"
                         onClick={() => setShowUpload(true)}
@@ -105,6 +149,98 @@ const HomeBannerUpload = () => {
                     </button>
                 )}
             </div>
+
+            {/* Edit section */}
+            {showEditForm && (
+                <div style={{
+                    marginBottom: '2rem',
+                    padding: '1.5rem',
+                    backgroundColor: 'white',
+                    borderRadius: '16px',
+                    border: '1px solid #e2e8f0',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+                }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#0f172a', margin: 0 }}>Edit Banner</h2>
+                        <button
+                            type="button"
+                            onClick={() => setShowEditForm(false)}
+                            style={{ padding: '0.4rem', border: 'none', background: 'transparent', cursor: 'pointer', color: '#64748b' }}
+                        >
+                            <X size={20} />
+                        </button>
+                    </div>
+                    <form onSubmit={handleUpdateBanner} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <div>
+                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '500', color: '#334155', marginBottom: '0.25rem' }}>Title (Optional)</label>
+                            <input
+                                type="text"
+                                value={editTitle}
+                                onChange={(e) => setEditTitle(e.target.value)}
+                                placeholder="Enter banner title"
+                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.95rem' }}
+                            />
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '500', color: '#334155', marginBottom: '0.25rem' }}>Description (Optional)</label>
+                            <textarea
+                                value={editDesc}
+                                onChange={(e) => setEditDesc(e.target.value)}
+                                placeholder="Enter banner description"
+                                rows={2}
+                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.95rem', resize: 'vertical' }}
+                            />
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '500', color: '#334155', marginBottom: '0.25rem' }}>Image (Optional - leaves current if empty)</label>
+                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+                                {editImagePreview && (
+                                    <div style={{ width: '150px', aspectRatio: '16/10', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0', flexShrink: 0 }}>
+                                        <img src={editImagePreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    </div>
+                                )}
+                                <div style={{ flex: 1 }}>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => {
+                                            const f = e.target.files?.[0];
+                                            if (f) {
+                                                setEditImageFile(f);
+                                                setEditImagePreview(URL.createObjectURL(f));
+                                            }
+                                        }}
+                                        style={{ display: 'block', width: '100%', padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: '8px' }}
+                                    />
+                                    <p style={{ color: '#64748b', fontSize: '0.8rem', marginTop: '0.5rem' }}>Select a new image to replace the current one.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                style={{
+                                    padding: '0.6rem 1.25rem', backgroundColor: '#0f172a', color: 'white', border: 'none', borderRadius: '8px', fontWeight: '500',
+                                    cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1
+                                }}
+                            >
+                                {loading ? 'Saving...' : 'Save Changes'}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setShowEditForm(false)}
+                                style={{
+                                    padding: '0.6rem 1.25rem', backgroundColor: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0', borderRadius: '8px', fontWeight: '500',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
 
             {/* Upload section (opens when button clicked) */}
             {canUpload && showUpload && (
@@ -253,39 +389,56 @@ const HomeBannerUpload = () => {
                                 </p>
 
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
-                                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                                        <span style={{ color: '#64748b', fontWeight: '500' }}>Active:</span>
+                                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', justifyContent: 'space-between' }}>
+                                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                            <span style={{ color: '#64748b', fontWeight: '500' }}>Active:</span>
+                                            <button
+                                                type="button"
+                                                role="switch"
+                                                aria-checked={isBannerActive(banner)}
+                                                onClick={() => handleActiveToggle(banner)}
+                                                style={{
+                                                    width: '44px',
+                                                    height: '24px',
+                                                    borderRadius: '12px',
+                                                    border: 'none',
+                                                    cursor: 'pointer',
+                                                    backgroundColor: isBannerActive(banner) ? '#22c55e' : '#e2e8f0',
+                                                    position: 'relative',
+                                                    flexShrink: 0
+                                                }}
+                                            >
+                                                <span style={{
+                                                    position: 'absolute',
+                                                    top: '2px',
+                                                    left: isBannerActive(banner) ? '22px' : '2px',
+                                                    width: '20px',
+                                                    height: '20px',
+                                                    borderRadius: '50%',
+                                                    backgroundColor: 'white',
+                                                    boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                                                    transition: 'left 0.2s ease'
+                                                }} />
+                                            </button>
+                                            <span style={{ color: isBannerActive(banner) ? '#22c55e' : '#64748b', fontWeight: '600', fontSize: '0.875rem' }}>
+                                                {isBannerActive(banner) ? 'Active' : 'Inactive'}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
                                         <button
-                                            type="button"
-                                            role="switch"
-                                            aria-checked={isBannerActive(banner)}
-                                            onClick={() => handleActiveToggle(banner)}
-                                            style={{
-                                                width: '44px',
-                                                height: '24px',
-                                                borderRadius: '12px',
-                                                border: 'none',
-                                                cursor: 'pointer',
-                                                backgroundColor: isBannerActive(banner) ? '#22c55e' : '#e2e8f0',
-                                                position: 'relative',
-                                                flexShrink: 0
-                                            }}
+                                            onClick={() => handleEditClick(banner)}
+                                            style={{ padding: '0.4rem 0.8rem', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', color: '#475569', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', fontWeight: '500' }}
                                         >
-                                            <span style={{
-                                                position: 'absolute',
-                                                top: '2px',
-                                                left: isBannerActive(banner) ? '22px' : '2px',
-                                                width: '20px',
-                                                height: '20px',
-                                                borderRadius: '50%',
-                                                backgroundColor: 'white',
-                                                boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-                                                transition: 'left 0.2s ease'
-                                            }} />
+                                            <Edit2 size={14} /> Edit
                                         </button>
-                                        <span style={{ color: isBannerActive(banner) ? '#22c55e' : '#64748b', fontWeight: '600', fontSize: '0.875rem' }}>
-                                            {isBannerActive(banner) ? 'Active' : 'Inactive'}
-                                        </span>
+                                        <button
+                                            onClick={() => handleDeleteClick(banner)}
+                                            style={{ padding: '0.4rem 0.8rem', border: '1px solid #fee2e2', backgroundColor: '#fef2f2', color: '#ef4444', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', fontWeight: '500' }}
+                                        >
+                                            <Trash2 size={14} /> Trash
+                                        </button>
                                     </div>
                                 </div>
 

@@ -1,8 +1,8 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { loginUser, setDemoAuth, clearAuthError } from '../store/slices/authSlice';
-import type { RootState, AppDispatch } from '../store/store';
+import { loginUser, setDemoAuth, clearAuthError } from '../../store/slices/authSlice';
+import type { RootState, AppDispatch } from '../../store/store';
 import { Lock, Eye, EyeOff, User, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
 
 const Login = () => {
