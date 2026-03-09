@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logoutUser } from '../store/slices/authSlice';
 import { fetchMenu } from '../store/slices/menuSlice';
 import type { AppDispatch, RootState } from '../store/store';
+import Toast from './Toast';
 
 export const GlobalLoader = () => (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: '100%' }}>
@@ -85,6 +86,7 @@ const Layout = () => {
 
     return (
         <div style={{ display: 'flex', height: '100vh', backgroundColor: 'var(--bg-dark)', overflow: 'hidden', position: 'relative' }}>
+            <Toast />
 
             {/* ── Mobile overlay backdrop ── */}
             {sidebarOpen && (
@@ -346,6 +348,12 @@ const Layout = () => {
 
             {/* ─── Global mobile responsive styles ─── */}
             <style>{`
+                body.modal-open {
+                    overflow: hidden !important;
+                }
+                body.modal-open .layout-main {
+                    overflow: hidden !important;
+                }
                 /* Desktop: sidebar always visible, not fixed */
                 @media (min-width: 769px) {
                     .layout-sidebar {

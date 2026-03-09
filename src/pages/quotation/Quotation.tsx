@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { createQuotation, clearQuotationLink, fetchQuotationList, updateQuotation, deleteQuotation } from "../../store/slices/quotationSlice";
 import { getQuotationViewCount } from "../../services/api";
 import type { RootState } from "../../store/store";
 import type { QuotationListItem } from "../../store/slices/quotationSlice";
-import { Copy, Edit2, MessageCircle, MousePointerClick, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { Copy, Edit2, MessageCircle, MousePointerClick, Plus, RefreshCw, Trash2, X } from "lucide-react";
 
 const origin = typeof window !== "undefined" ? window.location.origin : "";
 
@@ -30,6 +31,12 @@ function QuotationPage() {
   useEffect(() => {
     dispatch(fetchQuotationList({ userId: user?.userId, category: user?.category ?? undefined }) as any);
   }, [dispatch, user?.userId, user?.category]);
+
+  useEffect(() => {
+    if (showForm) document.body.classList.add("modal-open");
+    else document.body.classList.remove("modal-open");
+    return () => document.body.classList.remove("modal-open");
+  }, [showForm]);
 
   useEffect(() => {
     if (lastCreatedToken && showForm) {
@@ -99,7 +106,7 @@ function QuotationPage() {
   };
 
   const handleSendWhatsApp = (token: string) => {
-    const num = whatsappNumber.replace(/\D/g, "");
+    const num = (whatsappByToken[token] ?? whatsappNumber).replace(/\D/g, "");
     const link = `${origin}/waasphotographyandevents.quotationlink/${token}`;
     if (!num) return;
     const msg = encodeURIComponent(`Hi, here is your quotation link: ${link}`);
@@ -153,85 +160,126 @@ function QuotationPage() {
         </button>
       </div>
 
-      {showForm && (
-        <div style={{ marginBottom: "2rem", padding: "1.5rem", backgroundColor: "#f8fafc", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-          <h2 style={{ fontSize: "1.15rem", fontWeight: "600", color: "#0f172a", marginBottom: "1rem" }}>
-            {editMode ? "Edit quotation" : "New quotation"}
-          </h2>
-          <form onSubmit={handleCreate} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-            {error && (
-              <div style={{ padding: "0.75rem", backgroundColor: "#fef2f2", color: "#991b1b", borderRadius: "8px", fontSize: "0.9rem" }}>
-                {error}
-              </div>
-            )}
-            <div>
-              <label style={{ display: "block", fontSize: "0.875rem", fontWeight: "500", color: "#374151", marginBottom: "0.35rem" }}>Client name</label>
-              <input
-                type="text"
-                value={clientName}
-                onChange={(e) => setClientName(e.target.value)}
-                required
-                placeholder="e.g. John Smith"
-                style={{ width: "100%", padding: "0.65rem 0.75rem", borderRadius: "8px", border: "1px solid #d1d5db", fontSize: "0.95rem" }}
-              />
-            </div>
-            <div>
-              <label style={{ display: "block", fontSize: "0.875rem", fontWeight: "500", color: "#374151", marginBottom: "0.35rem" }}>Project / work details</label>
-              <textarea
-                value={projectDetails}
-                onChange={(e) => setProjectDetails(e.target.value)}
-                required
-                rows={4}
-                placeholder="Describe the project, scope, deliverables..."
-                style={{ width: "100%", padding: "0.65rem 0.75rem", borderRadius: "8px", border: "1px solid #d1d5db", fontSize: "0.95rem", resize: "vertical" }}
-              />
-            </div>
-            <div>
-              <label style={{ display: "block", fontSize: "0.875rem", fontWeight: "500", color: "#374151", marginBottom: "0.35rem" }}>Price (₹)</label>
-              <input
-                type="text"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                required
-                placeholder="e.g. 50000"
-                style={{ width: "100%", padding: "0.65rem 0.75rem", borderRadius: "8px", border: "1px solid #d1d5db", fontSize: "0.95rem" }}
-              />
-            </div>
-            <div style={{ display: "flex", gap: "0.75rem" }}>
-              <button
-                type="submit"
-                disabled={loading}
-                style={{
-                  padding: "0.75rem 1.25rem",
-                  backgroundColor: loading ? "#94a3b8" : "#0f172a",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "8px",
-                  fontWeight: "600",
-                  fontSize: "0.95rem",
-                  cursor: loading ? "not-allowed" : "pointer",
-                }}
-              >
-                {loading ? (editMode ? "Saving..." : "Creating...") : (editMode ? "Save changes" : "Create quotation")}
-              </button>
-              <button
-                type="button"
-                onClick={resetForm}
-                style={{
-                  padding: "0.75rem 1.25rem",
-                  backgroundColor: "transparent",
-                  color: "#64748b",
-                  border: "1px solid #e2e8f0",
-                  borderRadius: "8px",
-                  fontSize: "0.95rem",
-                  cursor: "pointer",
-                }}
-              >
-                Cancel
+      {showForm && createPortal(
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 10000,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            backdropFilter: "blur(4px)",
+            padding: "2rem 1rem",
+            overflowY: "auto",
+            overflowX: "hidden",
+            WebkitOverflowScrolling: "touch",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "flex-start",
+            boxSizing: "border-box",
+          }}
+          onClick={resetForm}
+        >
+          <div
+            style={{
+              width: "100%",
+              maxWidth: "600px",
+              backgroundColor: "white",
+              borderRadius: "20px",
+              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+              margin: "auto",
+              flexShrink: 0,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ padding: "1.5rem", borderBottom: "1px solid #f1f5f9", display: "flex", justifyContent: "space-between", alignItems: "center", background: "linear-gradient(to right, #f8fafc, #ffffff)" }}>
+              <h2 style={{ fontSize: "1.25rem", fontWeight: "700", color: "#0f172a", margin: 0 }}>
+                {editMode ? "Edit quotation" : "New quotation"}
+              </h2>
+              <button type="button" onClick={resetForm} style={{ background: "none", border: "none", cursor: "pointer", padding: "0.25rem", color: "#64748b" }}>
+                <X size={20} />
               </button>
             </div>
-          </form>
-        </div>
+            <div style={{ padding: "2rem" }}>
+              <form onSubmit={handleCreate} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+                {error && (
+                  <div style={{ padding: "0.75rem", backgroundColor: "#fef2f2", color: "#991b1b", borderRadius: "8px", fontSize: "0.9rem" }}>
+                    {error}
+                  </div>
+                )}
+                <div>
+                  <label style={{ display: "block", fontSize: "0.875rem", fontWeight: "500", color: "#374151", marginBottom: "0.35rem" }}>Client name</label>
+                  <input
+                    type="text"
+                    value={clientName}
+                    onChange={(e) => setClientName(e.target.value)}
+                    required
+                    placeholder="e.g. John Smith"
+                    style={{ width: "100%", padding: "0.65rem 0.75rem", borderRadius: "8px", border: "1px solid #d1d5db", fontSize: "0.95rem" }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "0.875rem", fontWeight: "500", color: "#374151", marginBottom: "0.35rem" }}>Project / work details</label>
+                  <textarea
+                    value={projectDetails}
+                    onChange={(e) => setProjectDetails(e.target.value)}
+                    required
+                    rows={4}
+                    placeholder="Describe the project, scope, deliverables..."
+                    style={{ width: "100%", padding: "0.65rem 0.75rem", borderRadius: "8px", border: "1px solid #d1d5db", fontSize: "0.95rem", resize: "vertical" }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "0.875rem", fontWeight: "500", color: "#374151", marginBottom: "0.35rem" }}>Price (₹)</label>
+                  <input
+                    type="text"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    required
+                    placeholder="e.g. 50000"
+                    style={{ width: "100%", padding: "0.65rem 0.75rem", borderRadius: "8px", border: "1px solid #d1d5db", fontSize: "0.95rem" }}
+                  />
+                </div>
+                <div style={{ display: "flex", gap: "0.75rem" }}>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    style={{
+                      padding: "0.75rem 1.25rem",
+                      backgroundColor: loading ? "#94a3b8" : "#0f172a",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "8px",
+                      fontWeight: "600",
+                      fontSize: "0.95rem",
+                      cursor: loading ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    {loading ? (editMode ? "Saving..." : "Creating...") : (editMode ? "Save changes" : "Create quotation")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    style={{
+                      padding: "0.75rem 1.25rem",
+                      backgroundColor: "transparent",
+                      color: "#64748b",
+                      border: "1px solid #e2e8f0",
+                      borderRadius: "8px",
+                      fontSize: "0.95rem",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
 
       <div style={{ overflowX: "auto", borderRadius: "8px", border: "1px solid #e2e8f0" }}>

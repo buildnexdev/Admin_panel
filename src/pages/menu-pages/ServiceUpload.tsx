@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchServices, addService, updateService, deleteService, clearMessages } from '../../store/slices/buildersSlice';
 import type { AppDispatch, RootState } from '../../store/store';
@@ -17,6 +18,15 @@ const ServiceUpload = () => {
     const [description, setDescription] = useState('');
     const [photo, setPhoto] = useState<File | null>(null);
     const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (showAddForm) {
+            document.body.classList.add('modal-open');
+        } else {
+            document.body.classList.remove('modal-open');
+        }
+        return () => document.body.classList.remove('modal-open');
+    }, [showAddForm]);
 
     useEffect(() => {
         dispatch(clearMessages());
@@ -139,94 +149,94 @@ const ServiceUpload = () => {
                 </button>
             </div>
 
-            {successMessage && (
-                <div style={{ padding: '0.75rem 1rem', marginBottom: '1rem', backgroundColor: '#d1fae5', color: '#065f46', borderRadius: '8px', fontSize: '0.9rem' }}>
-                    {successMessage}
-                </div>
-            )}
-            {error && (
-                <div style={{ padding: '0.75rem 1rem', marginBottom: '1rem', backgroundColor: '#fee2e2', color: '#991b1b', borderRadius: '8px', fontSize: '0.9rem' }}>
-                    {error}
-                </div>
-            )}
 
-            {showAddForm && (
-                <form onSubmit={handleAddService} style={{
-                    marginBottom: '2rem',
-                    padding: '1.5rem',
-                    backgroundColor: '#f8fafc',
-                    borderRadius: '16px',
-                    border: '1px solid #e2e8f0'
-                }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                        <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#0f172a', margin: 0 }}>
-                            {editMode ? 'Edit Service' : 'Add New Service'}
-                        </h2>
-                        <button type="button" onClick={resetForm} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', color: '#64748b' }}>
-                            <X size={20} />
-                        </button>
+            {/* Add/Edit Modal – portal so scroll works */}
+            {showAddForm && createPortal(
+                <div
+                    style={{
+                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 10000,
+                        backgroundColor: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(4px)',
+                        padding: '2rem 1rem', overflowY: 'auto', overflowX: 'hidden', WebkitOverflowScrolling: 'touch',
+                        display: 'flex', justifyContent: 'center', alignItems: 'flex-start', boxSizing: 'border-box',
+                    }}
+                    onClick={resetForm}
+                >
+                    <div style={{ width: '100%', maxWidth: '600px', backgroundColor: 'white', borderRadius: '20px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', margin: 'auto', flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
+                        <div style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'linear-gradient(to right, #f8fafc, #ffffff)' }}>
+                            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#0f172a', margin: 0 }}>{editMode ? 'Edit Service' : 'Add New Service'}</h2>
+                            <button type="button" onClick={resetForm} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', color: '#64748b' }}><X size={20} /></button>
+                        </div>
+                        <div style={{ padding: '2rem' }}>
+                            <form onSubmit={handleAddService} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#475569', marginBottom: '0.5rem' }}>Service name</label>
+                                    <input
+                                        type="text"
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                        placeholder="e.g. Interior Design"
+                                        required
+                                        style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '1px solid #d1d5db', fontSize: '0.95rem' }}
+                                    />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#475569', marginBottom: '0.5rem' }}>Description</label>
+                                    <textarea
+                                        value={description}
+                                        onChange={(e) => setDescription(e.target.value)}
+                                        placeholder="Brief description of the service"
+                                        rows={4}
+                                        style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '1px solid #d1d5db', fontSize: '0.95rem', resize: 'vertical' }}
+                                    />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#475569', marginBottom: '0.5rem' }}>Photo</label>
+                                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                        {photoPreview && (
+                                            <div style={{ width: '100px', height: '100px', borderRadius: '10px', overflow: 'hidden', border: '1px solid #e2e8f0', flexShrink: 0 }}>
+                                                <img src={photoPreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            </div>
+                                        )}
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handlePhotoChange}
+                                            style={{ fontSize: '0.85rem', color: '#64748b' }}
+                                        />
+                                    </div>
+                                </div>
+                                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                                    <button type="submit" disabled={loading} style={{
+                                        flex: 2,
+                                        padding: '0.875rem',
+                                        backgroundColor: '#0f172a',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '12px',
+                                        fontWeight: '600',
+                                        cursor: loading ? 'not-allowed' : 'pointer',
+                                        opacity: loading ? 0.7 : 1
+                                    }}>
+                                        {loading ? (editMode ? 'Saving...' : 'Adding...') : (editMode ? 'Save Changes' : 'Add Service')}
+                                    </button>
+                                    <button type="button" onClick={resetForm} style={{
+                                        flex: 1,
+                                        padding: '0.875rem',
+                                        backgroundColor: '#f1f5f9',
+                                        color: '#475569',
+                                        border: '1px solid #e2e8f0',
+                                        borderRadius: '12px',
+                                        fontWeight: '600',
+                                        cursor: 'pointer'
+                                    }}>
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '480px' }}>
-                        <div>
-                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.35rem' }}>Service name</label>
-                            <input
-                                type="text"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                placeholder="e.g. Interior Design"
-                                required
-                                style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.95rem' }}
-                            />
-                        </div>
-                        <div>
-                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.35rem' }}>Description</label>
-                            <textarea
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
-                                placeholder="Brief description of the service"
-                                rows={3}
-                                style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.95rem', resize: 'vertical' }}
-                            />
-                        </div>
-                        <div>
-                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.35rem' }}>Photo</label>
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={handlePhotoChange}
-                                style={{ width: '100%', padding: '0.5rem', fontSize: '0.9rem' }}
-                            />
-                            {photoPreview && (
-                                <img src={photoPreview} alt="Preview" style={{ marginTop: '0.5rem', maxWidth: '160px', maxHeight: '120px', objectFit: 'cover', borderRadius: '8px' }} />
-                            )}
-                        </div>
-                        <div style={{ display: 'flex', gap: '0.75rem' }}>
-                            <button type="submit" disabled={loading} style={{
-                                padding: '0.6rem 1.25rem',
-                                backgroundColor: '#0f172a',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '8px',
-                                fontWeight: '500',
-                                cursor: loading ? 'not-allowed' : 'pointer',
-                                opacity: loading ? 0.7 : 1
-                            }}>
-                                {loading ? (editMode ? 'Saving...' : 'Adding...') : (editMode ? 'Save Changes' : 'Add Service')}
-                            </button>
-                            <button type="button" onClick={resetForm} style={{
-                                padding: '0.6rem 1.25rem',
-                                backgroundColor: '#f1f5f9',
-                                color: '#475569',
-                                border: '1px solid #e2e8f0',
-                                borderRadius: '8px',
-                                fontWeight: '500',
-                                cursor: 'pointer'
-                            }}>
-                                Cancel
-                            </button>
-                        </div>
-                    </div>
-                </form>
+                </div>,
+                document.body
             )}
 
             {/* Grid */}

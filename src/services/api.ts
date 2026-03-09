@@ -1,6 +1,6 @@
 import axios from 'axios';
 // export const API_URL = 'http://localhost:3000/';
-export const API_URL = ' https://bulidnex.xyz/';
+export const API_URL = 'https://bulidnex.xyz/';
 export const Img_Url = 'https://s3.eu-north-1.amazonaws.com/buildnex-dev-bucket/';
 
 // User login Service
@@ -161,6 +161,13 @@ export const uploadBuilderProjectApi = async (projectData: { data: any; file: Fi
         throw new Error(error.response?.data?.message || error.message || 'Failed to upload builder project');
     }
 }
+
+/** Get all categories (for project gallery etc.). Expects array in res.data or res.data.data or res. */
+export const getCategories = async () => {
+    const response = await axios.get(`${API_URL}categories`);
+    const raw = response?.data?.data ?? response?.data ?? response;
+    return Array.isArray(raw) ? raw : [];
+};
 
 export const contentCMSService = {
     // Projects
