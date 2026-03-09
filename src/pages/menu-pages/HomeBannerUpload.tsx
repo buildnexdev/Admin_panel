@@ -1,4 +1,5 @@
 import { useEffect, useState, type ChangeEvent } from 'react';
+import { createPortal } from 'react-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchBanners, updateBanner, addSingleBanner, deleteBanner } from '../../store/slices/buildersSlice';
 import { Img_Url, contentCMSService } from '../../services/api';
@@ -27,10 +28,17 @@ const HomeBannerUpload = () => {
     // Edit state
     const [showEditForm, setShowEditForm] = useState(false);
     const [editBannerId, setEditBannerId] = useState<number | null>(null);
-    const [editTitle, setEditTitle] = useState('');
-    const [editDesc, setEditDesc] = useState('');
     const [editImageFile, setEditImageFile] = useState<File | null>(null);
     const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (showEditForm) {
+            document.body.classList.add('modal-open');
+        } else {
+            document.body.classList.remove('modal-open');
+        }
+        return () => document.body.classList.remove('modal-open');
+    }, [showEditForm]);
 
     const activeCount = (banners || []).filter(isBannerActive).length;
     const canUpload = activeCount < MAX_PUBLISHED_BANNERS;
@@ -81,13 +89,10 @@ const HomeBannerUpload = () => {
 
     const handleEditClick = (banner: any) => {
         setEditBannerId(banner.id);
-        setEditTitle(banner.title || '');
-        setEditDesc(banner.description || '');
         setEditImagePreview(Img_Url + (banner.imageUrl || banner.image_url));
         setEditImageFile(null);
         setShowEditForm(true);
         setShowUpload(false);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const handleDeleteClick = (banner: any) => {
@@ -105,7 +110,7 @@ const HomeBannerUpload = () => {
             id: editBannerId,
             companyID,
             category: CATEGORY,
-            data: { title: editTitle.trim(), description: editDesc.trim() },
+            data: {}, // No title or description anymore
             imageFile: editImageFile
         }));
 
@@ -150,96 +155,120 @@ const HomeBannerUpload = () => {
                 )}
             </div>
 
-            {/* Edit section */}
-            {showEditForm && (
-                <div style={{
-                    marginBottom: '2rem',
-                    padding: '1.5rem',
-                    backgroundColor: 'white',
-                    borderRadius: '16px',
-                    border: '1px solid #e2e8f0',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
-                }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                        <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#0f172a', margin: 0 }}>Edit Banner</h2>
-                        <button
-                            type="button"
-                            onClick={() => setShowEditForm(false)}
-                            style={{ padding: '0.4rem', border: 'none', background: 'transparent', cursor: 'pointer', color: '#64748b' }}
-                        >
-                            <X size={20} />
-                        </button>
-                    </div>
-                    <form onSubmit={handleUpdateBanner} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <div>
-                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '500', color: '#334155', marginBottom: '0.25rem' }}>Title (Optional)</label>
-                            <input
-                                type="text"
-                                value={editTitle}
-                                onChange={(e) => setEditTitle(e.target.value)}
-                                placeholder="Enter banner title"
-                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.95rem' }}
-                            />
+            {/* Edit Modal – portal so scroll works */}
+            {showEditForm && createPortal(
+                <div
+                    style={{
+                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 10000,
+                        backgroundColor: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(4px)',
+                        padding: '2rem 1rem', overflowY: 'auto', overflowX: 'hidden', WebkitOverflowScrolling: 'touch',
+                        display: 'flex', justifyContent: 'center', alignItems: 'flex-start', boxSizing: 'border-box',
+                    }}
+                    onClick={() => setShowEditForm(false)}
+                >
+                    <div style={{ width: '100%', maxWidth: '500px', backgroundColor: 'white', borderRadius: '20px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', margin: 'auto', flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
+                        <div style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'linear-gradient(to right, #f8fafc, #ffffff)' }}>
+                            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#0f172a', margin: 0 }}>Edit Banner</h2>
+                            <button type="button" onClick={() => setShowEditForm(false)} style={{ padding: '0.5rem', border: 'none', background: '#f1f5f9', borderRadius: '50%', cursor: 'pointer', color: '#64748b', display: 'flex' }}><X size={18} /></button>
                         </div>
-                        <div>
-                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '500', color: '#334155', marginBottom: '0.25rem' }}>Description (Optional)</label>
-                            <textarea
-                                value={editDesc}
-                                onChange={(e) => setEditDesc(e.target.value)}
-                                placeholder="Enter banner description"
-                                rows={2}
-                                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.95rem', resize: 'vertical' }}
-                            />
-                        </div>
-                        <div>
-                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '500', color: '#334155', marginBottom: '0.25rem' }}>Image (Optional - leaves current if empty)</label>
-                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-                                {editImagePreview && (
-                                    <div style={{ width: '150px', aspectRatio: '16/10', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0', flexShrink: 0 }}>
-                                        <img src={editImagePreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <div style={{ padding: '2rem' }}>
+                            <form onSubmit={handleUpdateBanner} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#475569', marginBottom: '0.75rem' }}>Banner Image</label>
+                                    <div style={{
+                                        width: '100%',
+                                        aspectRatio: '16/9',
+                                        borderRadius: '12px',
+                                        overflow: 'hidden',
+                                        border: '2px solid #f1f5f9',
+                                        backgroundColor: '#f8fafc',
+                                        marginBottom: '1rem',
+                                        position: 'relative'
+                                    }}>
+                                        {editImagePreview ? (
+                                            <img src={editImagePreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        ) : (
+                                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
+                                                <Upload size={32} />
+                                            </div>
+                                        )}
                                     </div>
-                                )}
-                                <div style={{ flex: 1 }}>
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={(e) => {
-                                            const f = e.target.files?.[0];
-                                            if (f) {
-                                                setEditImageFile(f);
-                                                setEditImagePreview(URL.createObjectURL(f));
-                                            }
-                                        }}
-                                        style={{ display: 'block', width: '100%', padding: '0.5rem', border: '1px solid #cbd5e1', borderRadius: '8px' }}
-                                    />
-                                    <p style={{ color: '#64748b', fontSize: '0.8rem', marginTop: '0.5rem' }}>Select a new image to replace the current one.</p>
+
+                                    <label style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '0.5rem',
+                                        padding: '0.75rem',
+                                        backgroundColor: '#eff6ff',
+                                        color: '#2563eb',
+                                        borderRadius: '10px',
+                                        fontSize: '0.9rem',
+                                        fontWeight: '600',
+                                        cursor: 'pointer',
+                                        border: '1px solid #dbeafe',
+                                        transition: 'all 0.2s'
+                                    }}>
+                                        <Plus size={18} />
+                                        Change Image
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(e) => {
+                                                const f = e.target.files?.[0];
+                                                if (f) {
+                                                    setEditImageFile(f);
+                                                    setEditImagePreview(URL.createObjectURL(f));
+                                                }
+                                            }}
+                                            style={{ display: 'none' }}
+                                        />
+                                    </label>
                                 </div>
-                            </div>
+
+                                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                                    <button
+                                        type="submit"
+                                        disabled={loading}
+                                        style={{
+                                            flex: 2,
+                                            padding: '0.875rem',
+                                            backgroundColor: '#0f172a',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '12px',
+                                            fontWeight: '600',
+                                            fontSize: '0.95rem',
+                                            cursor: loading ? 'not-allowed' : 'pointer',
+                                            boxShadow: '0 4px 12px rgba(15, 23, 42, 0.2)',
+                                            transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        {loading ? 'Saving...' : 'Save Changes'}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowEditForm(false)}
+                                        style={{
+                                            flex: 1,
+                                            padding: '0.875rem',
+                                            backgroundColor: '#f1f5f9',
+                                            color: '#475569',
+                                            border: '1px solid #e2e8f0',
+                                            borderRadius: '12px',
+                                            fontWeight: '600',
+                                            fontSize: '0.95rem',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
                         </div>
-                        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                style={{
-                                    padding: '0.6rem 1.25rem', backgroundColor: '#0f172a', color: 'white', border: 'none', borderRadius: '8px', fontWeight: '500',
-                                    cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1
-                                }}
-                            >
-                                {loading ? 'Saving...' : 'Save Changes'}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setShowEditForm(false)}
-                                style={{
-                                    padding: '0.6rem 1.25rem', backgroundColor: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0', borderRadius: '8px', fontWeight: '500',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                Cancel
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                    </div>
+                </div>,
+                document.body
             )}
 
             {/* Upload section (opens when button clicked) */}
@@ -381,13 +410,9 @@ const HomeBannerUpload = () => {
                             </div>
 
                             <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                                <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#0f172a', marginBottom: '0.25rem' }}>
-                                    {banner.title || `Banner #${index + 1}`}
+                                <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: '#0f172a', marginBottom: '0.5rem' }}>
+                                    Banner #{index + 1}
                                 </h3>
-                                <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-                                    {banner.description || 'Homepage hero section banner image'}
-                                </p>
-
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
                                     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', justifyContent: 'space-between' }}>
                                         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>

@@ -73,12 +73,6 @@ const ProjectUpload = () => {
                 </p>
             </div>
 
-            {successMessage && (
-                <div style={{ padding: '1rem', borderRadius: '12px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', backgroundColor: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0', fontSize: '0.9rem' }}>
-                    <CheckCircle2 size={20} />
-                    <span>{successMessage}</span>
-                </div>
-            )}
 
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                 {/* Images Section */}

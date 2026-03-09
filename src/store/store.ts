@@ -5,6 +5,7 @@ import buildersReducer from './slices/buildersSlice';
 import authReducer from './slices/authSlice';
 import quotationReducer from './slices/quotationSlice';
 import menuReducer from './slices/menuSlice';
+import categoryReducer from './slices/categorySlice';
 
 export const store = configureStore({
     reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
         builders: buildersReducer,
         quotation: quotationReducer,
         menu: menuReducer,
+        category: categoryReducer,
     },
 });
 

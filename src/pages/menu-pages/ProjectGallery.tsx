@@ -1,11 +1,13 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
+import { createPortal } from 'react-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProjects, addSingleProject, updateProject, deleteProject, clearMessages } from '../../store/slices/buildersSlice';
+import { getCategories } from '../../store/slices/categorySlice';
 import { Img_Url } from '../../services/api';
 import type { AppDispatch, RootState } from '../../store/store';
 import { Plus, X, Edit2, Trash2 } from 'lucide-react';
 
-const PROJECT_CATEGORIES = ['Residential', 'Commercial', 'Industrial'] as const;
+const FALLBACK_CATEGORIES = ['Residential', 'Commercial', 'Industrial'];
 
 function isProjectActive(project: any): boolean {
     if (project.isActive === true || project.isActive === 1) return true;
@@ -16,20 +18,37 @@ function isProjectActive(project: any): boolean {
 const ProjectGallery = () => {
     const dispatch = useDispatch<AppDispatch>();
     const { projects, loading, successMessage, error } = useSelector((state: RootState) => state.builders);
+    const { list: categories } = useSelector((state: RootState) => state.category);
     const { user } = useSelector((state: RootState) => state.auth);
     const companyID = user?.companyID;
+
+    const categoryOptions = categories.length > 0 ? categories.map((c) => (typeof c === 'string' ? c : c.name)) : FALLBACK_CATEGORIES;
+    const defaultCategory = categoryOptions[0] ?? FALLBACK_CATEGORIES[0];
 
     const [showUpload, setShowUpload] = useState(false);
     const [editMode, setEditMode] = useState(false);
     const [editProjectId, setEditProjectId] = useState<number | null>(null);
 
-    const [category, setCategory] = useState<string>(PROJECT_CATEGORIES[0]);
+    const [category, setCategory] = useState<string>(defaultCategory);
     const [title, setTitle] = useState('');
     const [image, setImage] = useState<File | null>(null);
     const [preview, setPreview] = useState<string | null>(null);
 
     useEffect(() => {
+        if (showUpload) {
+            document.body.classList.add('modal-open');
+        } else {
+            document.body.classList.remove('modal-open');
+        }
+        return () => document.body.classList.remove('modal-open');
+    }, [showUpload]);
+
+    useEffect(() => {
         dispatch(clearMessages());
+    }, [dispatch]);
+
+    useEffect(() => {
+        dispatch(getCategories() as any);
     }, [dispatch]);
 
     useEffect(() => {
@@ -81,7 +100,7 @@ const ProjectGallery = () => {
 
     const resetForm = () => {
         setTitle('');
-        setCategory(PROJECT_CATEGORIES[0]);
+        setCategory(defaultCategory);
         setImage(null);
         setPreview(null);
         setShowUpload(false);
@@ -93,7 +112,7 @@ const ProjectGallery = () => {
         setEditMode(true);
         setEditProjectId(project.id);
         setTitle(project.title || '');
-        setCategory(project.category || PROJECT_CATEGORIES[0]);
+        setCategory(project.category || defaultCategory);
         setPreview(getProjectImageUrl(project));
         setShowUpload(true);
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -157,108 +176,133 @@ const ProjectGallery = () => {
                 </button>
             </div>
 
-            {successMessage && typeof successMessage === 'string' && (
-                <div style={{ padding: '0.75rem 1rem', marginBottom: '1rem', backgroundColor: '#d1fae5', color: '#065f46', borderRadius: '8px', fontSize: '0.9rem' }}>
-                    {successMessage}
-                </div>
-            )}
-            {error && (
-                <div style={{ padding: '0.75rem 1rem', marginBottom: '1rem', backgroundColor: '#fee2e2', color: '#991b1b', borderRadius: '8px', fontSize: '0.9rem' }}>
-                    {error}
-                </div>
-            )}
 
-            {/* Upload section */}
-            {showUpload && (
-                <div style={{
-                    marginBottom: '2rem',
-                    padding: '1.5rem',
-                    backgroundColor: 'white',
-                    borderRadius: '16px',
-                    border: '1px solid #e2e8f0',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
-                }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                        <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#0f172a', margin: 0 }}>
-                            {editMode ? 'Edit Project' : 'Upload new project'}
-                        </h2>
-                        <button
-                            type="button"
-                            onClick={resetForm}
-                            style={{ padding: '0.4rem', border: 'none', background: 'transparent', cursor: 'pointer', color: '#64748b' }}
-                            aria-label="Close"
-                        >
-                            <X size={20} />
-                        </button>
+            {/* Add/Edit Modal – rendered in portal so scroll works reliably */}
+            {showUpload && createPortal(
+                <div
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        zIndex: 10000,
+                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                        backdropFilter: 'blur(4px)',
+                        padding: '2rem 1rem',
+                        overflowY: 'auto',
+                        overflowX: 'hidden',
+                        WebkitOverflowScrolling: 'touch',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'flex-start',
+                        boxSizing: 'border-box',
+                    }}
+                    onClick={resetForm}
+                >
+                    <div
+                        style={{
+                            width: '100%',
+                            maxWidth: '600px',
+                            backgroundColor: 'white',
+                            borderRadius: '20px',
+                            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                            margin: 'auto',
+                            flexShrink: 0,
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div style={{
+                            padding: '1.5rem',
+                            borderBottom: '1px solid #f1f5f9',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            background: 'linear-gradient(to right, #f8fafc, #ffffff)'
+                        }}>
+                            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#0f172a', margin: 0 }}>
+                                {editMode ? 'Edit Project' : 'Upload New Project'}
+                            </h2>
+                            <button type="button" onClick={resetForm} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', color: '#64748b' }}>
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div style={{ padding: '2rem' }}>
+                            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#475569', marginBottom: '0.5rem' }}>Category</label>
+                                    <select
+                                        value={category}
+                                        onChange={(e) => setCategory(e.target.value)}
+                                        required
+                                        style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '1px solid #d1d5db', fontSize: '0.95rem' }}
+                                    >
+                                        {categoryOptions.map((c) => (
+                                            <option key={c} value={c}>{c}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#475569', marginBottom: '0.5rem' }}>Title</label>
+                                    <input
+                                        type="text"
+                                        value={title}
+                                        onChange={(e) => setTitle(e.target.value)}
+                                        placeholder="Project title"
+                                        required
+                                        style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '1px solid #d1d5db', fontSize: '0.95rem' }}
+                                    />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#475569', marginBottom: '0.5rem' }}>Project Image</label>
+                                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                        {preview && (
+                                            <div style={{ width: '100px', height: '100px', borderRadius: '10px', overflow: 'hidden', border: '1px solid #e2e8f0', flexShrink: 0 }}>
+                                                <img src={preview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            </div>
+                                        )}
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleImageChange}
+                                            required={!editMode}
+                                            style={{ fontSize: '0.85rem', color: '#64748b' }}
+                                        />
+                                    </div>
+                                </div>
+                                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                                    <button type="submit" disabled={loading} style={{
+                                        flex: 2,
+                                        padding: '0.875rem',
+                                        backgroundColor: '#0f172a',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '12px',
+                                        fontWeight: '600',
+                                        cursor: loading ? 'not-allowed' : 'pointer',
+                                        opacity: loading ? 0.7 : 1
+                                    }}>
+                                        {loading ? (editMode ? 'Saving...' : 'Uploading...') : (editMode ? 'Save Changes' : 'Upload Project')}
+                                    </button>
+                                    <button type="button" onClick={resetForm} style={{
+                                        flex: 1,
+                                        padding: '0.875rem',
+                                        backgroundColor: '#f1f5f9',
+                                        color: '#475569',
+                                        border: '1px solid #e2e8f0',
+                                        borderRadius: '12px',
+                                        fontWeight: '600',
+                                        cursor: 'pointer'
+                                    }}>
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '480px' }}>
-                        <div>
-                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.35rem' }}>Category</label>
-                            <select
-                                value={category}
-                                onChange={(e) => setCategory(e.target.value)}
-                                required
-                                style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.95rem' }}
-                            >
-                                {PROJECT_CATEGORIES.map((c) => (
-                                    <option key={c} value={c}>{c}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div>
-                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.35rem' }}>Title</label>
-                            <input
-                                type="text"
-                                value={title}
-                                onChange={(e) => setTitle(e.target.value)}
-                                placeholder="Project title"
-                                required
-                                style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '0.95rem' }}
-                            />
-                        </div>
-                        <div>
-                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.35rem' }}>Image</label>
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={handleImageChange}
-                                required={!editMode}
-                                style={{ width: '100%', padding: '0.5rem', fontSize: '0.9rem' }}
-                            />
-                            {preview && (
-                                <img src={preview} alt="Preview" style={{ marginTop: '0.5rem', maxWidth: '200px', maxHeight: '140px', objectFit: 'cover', borderRadius: '8px' }} />
-                            )}
-                        </div>
-                        <div style={{ display: 'flex', gap: '0.75rem' }}>
-                            <button type="submit" disabled={loading} style={{
-                                padding: '0.6rem 1.25rem',
-                                backgroundColor: loading ? '#94a3b8' : '#0f172a',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '8px',
-                                fontWeight: '500',
-                                cursor: loading ? 'not-allowed' : 'pointer'
-                            }}>
-                                {loading ? (editMode ? 'Saving...' : 'Uploading...') : (editMode ? 'Save Changes' : 'Upload Project')}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={resetForm}
-                                style={{
-                                    padding: '0.6rem 1.25rem',
-                                    backgroundColor: '#f1f5f9',
-                                    color: '#475569',
-                                    border: '1px solid #e2e8f0',
-                                    borderRadius: '8px',
-                                    fontWeight: '500',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                Cancel
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* Grid */}

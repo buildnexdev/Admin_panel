@@ -383,25 +383,25 @@
 
 /* Services */
 .bnx-services {
-    flex: 1;
     display: flex;
     flex-direction: column;
     border: 1px solid var(--db-border);
     border-radius: var(--db-radius-sm);
     overflow: hidden;
-    min-height: 0;
     background: rgba(255, 255, 255, 0.02);
+    flex: 1 1 auto;
 }
 
 .bnx-svc-row {
     display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 0 1.1rem;
+    align-items: flex-start;
+    gap: 1.25rem;
+    padding: 1.5rem 1.25rem;
     border-bottom: 1px solid var(--db-border);
     cursor: default;
-    flex: 1;
-    min-height: 0;
+    flex: none;
+    width: 100%;
+    position: relative;
     transition: all 0.2s ease;
     animation: svc-in 0.45s ease both;
 }
