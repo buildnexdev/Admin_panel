@@ -164,7 +164,7 @@ export const uploadBuilderProjectApi = async (projectData: { data: any; file: Fi
 
 /** Get all categories (for project gallery etc.). Expects array in res.data or res.data.data or res. */
 export const getCategories = async () => {
-    const response = await axios.get(`${API_URL}categories`);
+    const response = await axios.get(`${API_URL}category`);
     const raw = response?.data?.data ?? response?.data ?? response;
     return Array.isArray(raw) ? raw : [];
 };

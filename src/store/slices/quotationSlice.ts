@@ -27,6 +27,7 @@ interface QuotationState {
   listLoading: boolean;
   loading: boolean;
   error: string | null;
+  successMessage: string | null;
   lastCreatedToken: string | null;
 }
 
@@ -36,6 +37,7 @@ const initialState: QuotationState = {
   listLoading: false,
   loading: false,
   error: null,
+  successMessage: null,
   lastCreatedToken: null,
 };
 
@@ -118,6 +120,10 @@ const quotationSlice = createSlice({
     clearQuotationLink: (state) => {
       state.lastCreatedToken = null;
     },
+    clearQuotationMessages: (state) => {
+      state.error = null;
+      state.successMessage = null;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -165,25 +171,37 @@ const quotationSlice = createSlice({
       })
       .addCase(updateQuotation.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(updateQuotation.fulfilled, (state, action) => {
         state.loading = false;
+        state.successMessage = "Quotation updated successfully.";
         const { token, data } = action.payload;
         const index = state.list.findIndex(q => q.token === token);
         if (index !== -1) {
           state.list[index] = { ...state.list[index], ...data };
         }
       })
+      .addCase(updateQuotation.rejected, (state, action: any) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
       .addCase(deleteQuotation.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(deleteQuotation.fulfilled, (state, action) => {
         state.loading = false;
+        state.successMessage = "Quotation deleted successfully.";
         state.list = state.list.filter(q => q.token !== action.payload);
+      })
+      .addCase(deleteQuotation.rejected, (state, action: any) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });
 
-export const { clearQuotationLink } = quotationSlice.actions;
+export const { clearQuotationLink, clearQuotationMessages } = quotationSlice.actions;
 
 export default quotationSlice.reducer;

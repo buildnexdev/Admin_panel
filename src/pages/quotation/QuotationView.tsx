@@ -89,24 +89,6 @@ function QuotationView() {
                 </p>
               </div>
             </div>
-            {viewCount != null && viewCount > 0 && (
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  padding: "8px 12px",
-                  backgroundColor: "#eff6ff",
-                  borderRadius: "10px",
-                  fontSize: "0.875rem",
-                  fontWeight: "500",
-                  color: "#1e40af",
-                }}
-              >
-                <Eye size={18} />
-                Viewed {viewCount} time{viewCount !== 1 ? "s" : ""}
-              </div>
-            )}
           </div>
         </div>
 

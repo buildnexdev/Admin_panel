@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchBlogs, addBlog, updateBlog, deleteBlog, clearMessages } from '../../store/slices/buildersSlice';
 import type { AppDispatch, RootState } from '../../store/store';
 import { Img_Url, contentCMSService } from '../../services/api';
+import ConfirmModal from '../../components/ConfirmModal';
 import { Plus, X, Edit2, Trash2 } from 'lucide-react';
 
 const BlogUpload = () => {
@@ -19,6 +20,7 @@ const BlogUpload = () => {
     const [link, setLink] = useState('');
     const [coverImage, setCoverImage] = useState<File | null>(null);
     const [coverPreview, setCoverPreview] = useState<string | null>(null);
+    const [confirmDelete, setConfirmDelete] = useState<{ open: boolean; blog: any }>({ open: false, blog: null });
 
     useEffect(() => {
         if (showAddForm) {
@@ -102,9 +104,13 @@ const BlogUpload = () => {
 
     const handleDeleteClick = (blog: any) => {
         if (!user?.companyID) return;
-        if (window.confirm(`Are you sure you want to delete blog "${blog.title}"?`)) {
-            dispatch(deleteBlog({ id: blog.id, companyID: user.companyID }));
+        setConfirmDelete({ open: true, blog });
+    };
+    const handleConfirmDelete = () => {
+        if (confirmDelete.blog && user?.companyID) {
+            dispatch(deleteBlog({ id: confirmDelete.blog.id, companyID: user.companyID }));
         }
+        setConfirmDelete({ open: false, blog: null });
     };
 
     const handleToggleActive = (blog: any) => {
@@ -131,6 +137,14 @@ const BlogUpload = () => {
 
     return (
         <div style={{ padding: '0 0.5rem', maxWidth: '1400px', margin: '0 auto' }}>
+            <ConfirmModal
+                open={confirmDelete.open}
+                title="Delete blog"
+                message={confirmDelete.blog ? `Are you sure you want to delete blog "${confirmDelete.blog.title}"?` : ''}
+                confirmLabel="Delete"
+                onConfirm={handleConfirmDelete}
+                onCancel={() => setConfirmDelete({ open: false, blog: null })}
+            />
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
                 <div>
