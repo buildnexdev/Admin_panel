@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchServices, addService, updateService, deleteService, clearMessages } from '../../store/slices/buildersSlice';
 import type { AppDispatch, RootState } from '../../store/store';
 import { Img_Url, contentCMSService } from '../../services/api';
+import ConfirmModal from '../../components/ConfirmModal';
 import { Layout, Plus, X, Edit2, Trash2 } from 'lucide-react';
 
 const ServiceUpload = () => {
@@ -18,6 +19,7 @@ const ServiceUpload = () => {
     const [description, setDescription] = useState('');
     const [photo, setPhoto] = useState<File | null>(null);
     const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+    const [confirmDelete, setConfirmDelete] = useState<{ open: boolean; service: any }>({ open: false, service: null });
 
     useEffect(() => {
         if (showAddForm) {
@@ -94,9 +96,13 @@ const ServiceUpload = () => {
 
     const handleDeleteClick = (service: any) => {
         if (!user?.companyID) return;
-        if (window.confirm(`Are you sure you want to delete service "${service.title || service.name}"?`)) {
-            dispatch(deleteService({ id: service.id, companyID: user.companyID }));
+        setConfirmDelete({ open: true, service });
+    };
+    const handleConfirmDelete = () => {
+        if (confirmDelete.service && user?.companyID) {
+            dispatch(deleteService({ id: confirmDelete.service.id, companyID: user.companyID }));
         }
+        setConfirmDelete({ open: false, service: null });
     };
 
     const handleToggleActive = (service: any) => {
@@ -150,6 +156,14 @@ const ServiceUpload = () => {
             </div>
 
 
+            <ConfirmModal
+                open={confirmDelete.open}
+                title="Delete service"
+                message={confirmDelete.service ? `Are you sure you want to delete service "${confirmDelete.service.title || confirmDelete.service.name}"?` : ''}
+                confirmLabel="Delete"
+                onConfirm={handleConfirmDelete}
+                onCancel={() => setConfirmDelete({ open: false, service: null })}
+            />
             {/* Add/Edit Modal – portal so scroll works */}
             {showAddForm && createPortal(
                 <div

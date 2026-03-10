@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchBanners, updateBanner, addSingleBanner, deleteBanner } from '../../store/slices/buildersSlice';
 import { Img_Url, contentCMSService } from '../../services/api';
 import type { AppDispatch, RootState } from '../../store/store';
+import ConfirmModal from '../../components/ConfirmModal';
 import { Plus, Upload, X, Edit2, Trash2 } from 'lucide-react';
 
 const MAX_PUBLISHED_BANNERS = 5;
@@ -30,6 +31,7 @@ const HomeBannerUpload = () => {
     const [editBannerId, setEditBannerId] = useState<number | null>(null);
     const [editImageFile, setEditImageFile] = useState<File | null>(null);
     const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
+    const [confirmDelete, setConfirmDelete] = useState<{ open: boolean; banner: any }>({ open: false, banner: null });
 
     useEffect(() => {
         if (showEditForm) {
@@ -97,9 +99,13 @@ const HomeBannerUpload = () => {
 
     const handleDeleteClick = (banner: any) => {
         if (!companyID) return;
-        if (window.confirm(`Are you sure you want to delete this banner?`)) {
-            dispatch(deleteBanner({ id: banner.id, companyID, category: CATEGORY }));
+        setConfirmDelete({ open: true, banner });
+    };
+    const handleConfirmDelete = () => {
+        if (confirmDelete.banner && companyID) {
+            dispatch(deleteBanner({ id: confirmDelete.banner.id, companyID, category: CATEGORY }));
         }
+        setConfirmDelete({ open: false, banner: null });
     };
 
     const handleUpdateBanner = async (e: React.FormEvent) => {
@@ -122,6 +128,14 @@ const HomeBannerUpload = () => {
 
     return (
         <div style={{ padding: '0 0.5rem', maxWidth: '1400px', margin: '0 auto' }}>
+            <ConfirmModal
+                open={confirmDelete.open}
+                title="Delete banner"
+                message="Are you sure you want to delete this banner?"
+                confirmLabel="Delete"
+                onConfirm={handleConfirmDelete}
+                onCancel={() => setConfirmDelete({ open: false, banner: null })}
+            />
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
                 <div>

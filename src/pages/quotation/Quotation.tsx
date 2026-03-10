@@ -5,6 +5,7 @@ import { createQuotation, clearQuotationLink, fetchQuotationList, updateQuotatio
 import { getQuotationViewCount } from "../../services/api";
 import type { RootState } from "../../store/store";
 import type { QuotationListItem } from "../../store/slices/quotationSlice";
+import ConfirmModal from "../../components/ConfirmModal";
 import { Copy, Edit2, MessageCircle, MousePointerClick, Plus, RefreshCw, Trash2, X } from "lucide-react";
 
 const origin = typeof window !== "undefined" ? window.location.origin : "";
@@ -26,7 +27,7 @@ function QuotationPage() {
 
   const [editMode, setEditMode] = useState(false);
   const [editToken, setEditToken] = useState<string | null>(null);
-
+  const [confirmDelete, setConfirmDelete] = useState<{ open: boolean; token: string | null }>({ open: false, token: null });
 
   useEffect(() => {
     dispatch(fetchQuotationList({ userId: user?.userId, category: user?.category ?? undefined }) as any);
@@ -93,9 +94,13 @@ function QuotationPage() {
   };
 
   const handleDeleteClick = (token: string) => {
-    if (window.confirm("Are you sure you want to delete this quotation?")) {
-      dispatch(deleteQuotation(token) as any);
+    setConfirmDelete({ open: true, token });
+  };
+  const handleConfirmDelete = () => {
+    if (confirmDelete.token) {
+      dispatch(deleteQuotation(confirmDelete.token) as any);
     }
+    setConfirmDelete({ open: false, token: null });
   };
 
   const handleCopyLink = (token: string) => {
@@ -135,6 +140,14 @@ function QuotationPage() {
 
   return (
     <div style={{ padding: "0 0.5rem", maxWidth: "960px", margin: "0 auto" }}>
+      <ConfirmModal
+        open={confirmDelete.open}
+        title="Delete quotation"
+        message="Are you sure you want to delete this quotation?"
+        confirmLabel="Delete"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmDelete({ open: false, token: null })}
+      />
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem", marginBottom: "1.5rem" }}>
         <h1 style={{ fontSize: "1.75rem", fontWeight: "600", color: "#0f172a", margin: 0 }}>
           Quotations

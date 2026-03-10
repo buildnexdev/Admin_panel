@@ -5,6 +5,7 @@ import { fetchProjects, addSingleProject, updateProject, deleteProject, clearMes
 import { getCategories } from '../../store/slices/categorySlice';
 import { Img_Url } from '../../services/api';
 import type { AppDispatch, RootState } from '../../store/store';
+import ConfirmModal from '../../components/ConfirmModal';
 import { Plus, X, Edit2, Trash2 } from 'lucide-react';
 
 const FALLBACK_CATEGORIES = ['Residential', 'Commercial', 'Industrial'];
@@ -33,6 +34,7 @@ const ProjectGallery = () => {
     const [title, setTitle] = useState('');
     const [image, setImage] = useState<File | null>(null);
     const [preview, setPreview] = useState<string | null>(null);
+    const [confirmDelete, setConfirmDelete] = useState<{ open: boolean; project: any }>({ open: false, project: null });
 
     useEffect(() => {
         if (showUpload) {
@@ -120,9 +122,13 @@ const ProjectGallery = () => {
 
     const handleDeleteClick = (project: any) => {
         if (!companyID) return;
-        if (window.confirm(`Are you sure you want to delete project "${project.title}"?`)) {
-            dispatch(deleteProject({ id: project.id, companyID }));
+        setConfirmDelete({ open: true, project });
+    };
+    const handleConfirmDelete = () => {
+        if (confirmDelete.project && companyID) {
+            dispatch(deleteProject({ id: confirmDelete.project.id, companyID }));
         }
+        setConfirmDelete({ open: false, project: null });
     };
 
     const handleToggleStatus = (project: any) => {
@@ -145,6 +151,14 @@ const ProjectGallery = () => {
 
     return (
         <div style={{ padding: '0 0.5rem', maxWidth: '1400px', margin: '0 auto' }}>
+            <ConfirmModal
+                open={confirmDelete.open}
+                title="Delete project"
+                message={confirmDelete.project ? `Are you sure you want to delete project "${confirmDelete.project.title}"?` : ''}
+                confirmLabel="Delete"
+                onConfirm={handleConfirmDelete}
+                onCancel={() => setConfirmDelete({ open: false, project: null })}
+            />
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
                 <div>
