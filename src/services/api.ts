@@ -412,3 +412,42 @@ export const deleteQuotation = async (token: string) => {
     const response = await axios.delete(`${API_URL}quotation/${token}`);
     return response.data;
 };
+
+// ─── SRS Images ─────────────────────────────────────────────────────────────
+/** List SRS images for company. Expects array in res.data or res.data.data */
+export const getSrsImagesList = async (params?: { companyID?: number; userId?: number }) => {
+    const response = await axios.get(`${API_URL}srs-images`, { params: params ?? {} });
+    const data = response?.data?.data ?? response?.data;
+    return Array.isArray(data) ? data : [];
+};
+
+/** Create one SRS images record. Backend receives array of image URLs (upload to S3 first, one by one). */
+export const createSrsImages = async (payload: {
+    title: string;
+    description?: string;
+    location?: string;
+    images: string[];
+    companyID?: number;
+    userId?: number;
+}) => {
+    const response = await axios.post(`${API_URL}srs-images`, payload);
+    return response.data;
+};
+
+/** Update SRS image record by id */
+export const updateSrsImage = async (
+    id: number,
+    payload: { title?: string; disc?: string; description?: string; location?: string; imageUrl?: string; images?: string[] }
+) => {
+    const body: Record<string, unknown> = { ...payload };
+    if (payload.description !== undefined && payload.disc === undefined) body.disc = payload.description;
+    if (body.description !== undefined) delete body.description;
+    const response = await axios.put(`${API_URL}srs-images/${id}`, body);
+    return response.data;
+};
+
+/** Delete SRS image record by id */
+export const deleteSrsImage = async (id: number) => {
+    const response = await axios.delete(`${API_URL}srs-images/${id}`);
+    return response.data;
+};

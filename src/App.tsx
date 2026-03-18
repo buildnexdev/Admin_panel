@@ -27,6 +27,7 @@ const ServiceUpload = lazy(() => import('./pages/menu-pages/ServiceUpload'));
 const BlogUpload = lazy(() => import('./pages/menu-pages/BlogUpload'));
 const Quotations = lazy(() => import('./pages/quotation/Quotation'));
 const QuotationView = lazy(() => import('./pages/quotation/QuotationView'));
+const SrsImages = lazy(() => import('./pages/menu-pages/SrsImages'));
 const ContactMessages = lazy(() => import('./pages/unWanted/builders/ContactMessages'));
 
 function App() {
@@ -75,6 +76,7 @@ function App() {
               <Route path="services" element={<BuildersProtectedRoute><ServiceUpload /></BuildersProtectedRoute>} />
               <Route path="blog" element={<BuildersProtectedRoute><BlogUpload /></BuildersProtectedRoute>} />
               <Route path="quotation" element={<BuildersProtectedRoute><Quotations /></BuildersProtectedRoute>} />
+              <Route path="srs-images" element={<BuildersProtectedRoute><SrsImages /></BuildersProtectedRoute>} />
             </Route>
           </Route>
         </Routes>
