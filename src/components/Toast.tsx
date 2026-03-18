@@ -6,6 +6,7 @@ import type { RootState } from '../store/store';
 import { clearMessages } from '../store/slices/buildersSlice';
 import { clearAuthError } from '../store/slices/authSlice';
 import { clearQuotationMessages } from '../store/slices/quotationSlice';
+import { clearSrsMessages } from '../store/slices/srsImagesSlice';
 
 const Toast = () => {
     const dispatch = useDispatch();
@@ -13,19 +14,20 @@ const Toast = () => {
     const { error: authError } = useSelector((state: RootState) => state.auth);
     const { error: menuError } = useSelector((state: RootState) => state.menu);
     const { successMessage: quotationSuccess, error: quotationError } = useSelector((state: RootState) => state.quotation);
+    const { successMessage: srsSuccess, error: srsError } = useSelector((state: RootState) => state.srsImages);
 
     const [isVisible, setIsVisible] = useState(false);
     const [message, setMessage] = useState('');
     const [type, setType] = useState<'success' | 'error'>('success');
 
     useEffect(() => {
-        const msg = buildersSuccess || quotationSuccess || buildersError || quotationError || authError || menuError;
+        const msg = buildersSuccess || quotationSuccess || srsSuccess || buildersError || quotationError || srsError || authError || menuError;
         if (msg) {
             setMessage(msg);
-            setType(buildersSuccess || quotationSuccess ? 'success' : 'error');
+            setType(buildersSuccess || quotationSuccess || srsSuccess ? 'success' : 'error');
             setIsVisible(true);
         }
-    }, [buildersSuccess, quotationSuccess, buildersError, quotationError, authError, menuError]);
+    }, [buildersSuccess, quotationSuccess, srsSuccess, buildersError, quotationError, srsError, authError, menuError]);
 
     const handleClose = () => {
         setIsVisible(false);
@@ -33,6 +35,7 @@ const Toast = () => {
             dispatch(clearMessages());
             dispatch(clearAuthError());
             dispatch(clearQuotationMessages());
+            dispatch(clearSrsMessages());
         }, 200);
     };
 

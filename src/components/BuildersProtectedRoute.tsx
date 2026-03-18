@@ -11,8 +11,7 @@ const BuildersProtectedRoute: FC<BuildersProtectedRouteProps> = ({ children }) =
     const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
     const location = useLocation();
 
-    if (!isAuthenticated || user?.category !== 'Builders') {
-        // Save the location they were trying to access
+    if (!isAuthenticated || !user) {
         return <Navigate to="/login" state={{ from: location }} replace />;
     }
 

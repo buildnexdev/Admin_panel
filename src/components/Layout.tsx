@@ -66,6 +66,7 @@ const Layout = () => {
         { name: 'Services', path: '/services', icon: <Briefcase size={20} />, configKey: 'service' },
         { name: 'Blog', path: '/blog', icon: <FileText size={20} />, configKey: 'blog' },
         { name: 'Quotations', path: '/quotation', icon: <DollarSign size={20} />, configKey: 'quotation' },
+        { name: 'SRS Images', path: '/srs-images', icon: <ImageIcon size={20} />, configKey: 'srsImages' },
     ];
     const businessNav = [
         { name: 'Company Details', path: '/company-details', icon: <Building size={20} />, configKey: 'company' },

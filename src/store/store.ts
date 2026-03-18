@@ -6,6 +6,7 @@ import authReducer from './slices/authSlice';
 import quotationReducer from './slices/quotationSlice';
 import menuReducer from './slices/menuSlice';
 import categoryReducer from './slices/categorySlice';
+import srsImagesReducer from './slices/srsImagesSlice';
 
 export const store = configureStore({
     reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
         quotation: quotationReducer,
         menu: menuReducer,
         category: categoryReducer,
+        srsImages: srsImagesReducer,
     },
 });
 
