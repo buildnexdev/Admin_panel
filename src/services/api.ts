@@ -421,16 +421,25 @@ export const getSrsImagesList = async (params?: { companyID?: number; userId?: n
     return Array.isArray(data) ? data : [];
 };
 
-/** Create one SRS images record. Backend receives array of image URLs (upload to S3 first, one by one). */
+/** Create one SRS images record. Backend receives array of image URLs (upload to S3 first, one by one). Sends description as `disc`. */
 export const createSrsImages = async (payload: {
     title: string;
     description?: string;
+    disc?: string;
     location?: string;
     images: string[];
     companyID?: number;
     userId?: number;
 }) => {
-    const response = await axios.post(`${API_URL}srs-images`, payload);
+    const body = {
+        title: payload.title,
+        disc: payload.disc ?? payload.description,
+        location: payload.location,
+        images: payload.images,
+        companyID: payload.companyID,
+        userId: payload.userId,
+    };
+    const response = await axios.post(`${API_URL}srs-images`, body);
     return response.data;
 };
 

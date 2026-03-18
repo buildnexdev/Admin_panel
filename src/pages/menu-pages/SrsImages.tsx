@@ -7,7 +7,7 @@ import type { AppDispatch, RootState } from '../../store/store';
 import ConfirmModal from '../../components/ConfirmModal';
 import { Plus, Upload, X, Edit2, Trash2 } from 'lucide-react';
 
-const MAX_IMAGES = 10;
+const MAX_IMAGES = 5;
 const MAX_IMAGES_EDIT = 5;
 
 const SrsImages = () => {

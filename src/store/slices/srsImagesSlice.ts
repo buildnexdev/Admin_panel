@@ -80,7 +80,7 @@ export const createSrsImages = createAsyncThunk(
 
         await createSrsImagesApi({
             title: payload.title,
-            description: payload.description,
+            disc: payload.description,
             location: payload.location,
             images: uploadedPaths,
             companyID: user.companyID,
