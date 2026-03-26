@@ -12,6 +12,7 @@ const Dashboard = lazy(() => import('./pages/dashboard/Dashboard'));
 const Login = lazy(() => import('./pages/main-pages/Login'));
 const Settings = lazy(() => import('./pages/main-pages/Settings'));
 const Profile = lazy(() => import('./pages/main-pages/Profile'));
+const PublicReview = lazy(() => import('./pages/main-pages/PublicReview'));
 
 const CompanyDetails = lazy(() => import('./pages/menu-pages/CompanyDetails'));
 const ContactInfo = lazy(() => import('./pages/menu-pages/ContactInfo'));
@@ -29,6 +30,7 @@ const Quotations = lazy(() => import('./pages/quotation/Quotation'));
 const QuotationView = lazy(() => import('./pages/quotation/QuotationView'));
 const SrsImages = lazy(() => import('./pages/menu-pages/SrsImages'));
 const ContactMessages = lazy(() => import('./pages/unWanted/builders/ContactMessages'));
+const GoogleReviews = lazy(() => import('./pages/menu-pages/GoogleReviews'));
 
 function App() {
   const user = useSelector((state: RootState) => state.auth.user);
@@ -44,17 +46,20 @@ function App() {
     return () => clearTimeout(timer);
   }, []);
 
-  const isQuotationLink = window.location.pathname.includes('quotation');
+  const isPublicLink = window.location.pathname.includes('quotation') || window.location.pathname.includes('buildnexdevreview');
 
   return (
     <Router>
-      {loading && !isQuotationLink && <Preloader />}
+      {loading && !isPublicLink && <Preloader />}
       <Suspense fallback={<GlobalLoader />}>
         <Routes>
           <Route path="login" element={<Login />} />
           {/* Public: client opens this link to view quotation (no login) */}
           <Route path="quotation/:token" element={<Suspense fallback={<GlobalLoader />}><QuotationView /></Suspense>} />
           <Route path="waasphotographyandevents.quotationlink/:token" element={<Suspense fallback={<GlobalLoader />}><QuotationView /></Suspense>} />
+          
+          {/* Public: client opens this link to submit a review (no login) */}
+          <Route path="buildnexdevreview" element={<Suspense fallback={<GlobalLoader />}><PublicReview /></Suspense>} />
 
           {/* / shows login when not authenticated, dashboard when authenticated */}
           <Route path="/" element={<RootGate />}>
@@ -77,6 +82,7 @@ function App() {
               <Route path="blog" element={<BuildersProtectedRoute><BlogUpload /></BuildersProtectedRoute>} />
               <Route path="quotation" element={<BuildersProtectedRoute><Quotations /></BuildersProtectedRoute>} />
               <Route path="srs-images" element={<BuildersProtectedRoute><SrsImages /></BuildersProtectedRoute>} />
+              <Route path="google-reviews" element={isAdmin ? <BuildersProtectedRoute><GoogleReviews /></BuildersProtectedRoute> : <div style={{ padding: '2rem', color: 'white' }}>Unauthorized Access</div>} />
             </Route>
           </Route>
         </Routes>

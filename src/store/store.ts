@@ -7,6 +7,7 @@ import quotationReducer from './slices/quotationSlice';
 import menuReducer from './slices/menuSlice';
 import categoryReducer from './slices/categorySlice';
 import srsImagesReducer from './slices/srsImagesSlice';
+import reviewReducer from './slices/reviewSlice';
 
 export const store = configureStore({
     reducer: {
@@ -18,6 +19,7 @@ export const store = configureStore({
         menu: menuReducer,
         category: categoryReducer,
         srsImages: srsImagesReducer,
+        reviews: reviewReducer,
     },
 });
 

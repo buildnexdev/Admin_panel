@@ -1,6 +1,6 @@
 import axios from 'axios';
-// export const API_URL = 'http://localhost:3000/';
-export const API_URL = 'https://bulidnex.xyz/';
+export const API_URL = 'http://localhost:3000/';
+// export const API_URL = 'https://bulidnex.xyz/';
 export const Img_Url = 'https://s3.eu-north-1.amazonaws.com/buildnex-dev-bucket/';
 
 // User login Service
@@ -14,6 +14,7 @@ export const UserloginService = {
     }
 };
 
+// SCHOOL SERVICE
 export const schoolService = {
     uploadContent: async (data: any) => {
         const response = await axios.post(API_URL + 'school/upload-content', data); return response.data;
@@ -23,12 +24,14 @@ export const schoolService = {
     }
 };
 
+// PHOTO SERVICE
 export const photoService = {
     uploadGalleryItem: async (file: File, category: string) => {
         const response = await axios.post(API_URL + 'photo/upload-gallery-item', { file, category }); return response.data;
     }
 };
 
+// BUILDERS SERVICE
 export const buildersService = {
     uploadProject: async (data: any, file: File) => {
         const response = await axios.post(API_URL + 'builders/upload-project', { data, file }); return response.data;
@@ -38,6 +41,7 @@ export const buildersService = {
     }
 }
 
+// HOME PAGE IMAGE UPLOAD SERVICE
 export const homePageImageUpload = async (userId: number, companyId: number, category: string, file: File) => {
     const response = await axios.post(API_URL + 'home-page/upload-image', {
         file,

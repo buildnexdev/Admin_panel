@@ -3,13 +3,22 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
     Tag, Image as ImageIcon, Briefcase, FileText,
     Building, Phone, DollarSign, FolderOpen, ChevronDown, ChevronUp, LogOut, Loader2, LayoutGrid,
-    User, Sparkles, Menu, X as XIcon
+    User, Sparkles, Menu, X as XIcon, Star
 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { logoutUser } from '../store/slices/authSlice';
 import { fetchMenu } from '../store/slices/menuSlice';
 import type { AppDispatch, RootState } from '../store/store';
 import Toast from './Toast';
+
+interface NavItem {
+    name: string;
+    path?: string;
+    icon: React.ReactNode;
+    configKey: string;
+    role?: string;
+    subItems?: { name: string; path: string }[];
+}
 
 export const GlobalLoader = () => (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: '100%' }}>
@@ -50,7 +59,7 @@ const Layout = () => {
         }
     }, [dispatch, user?.companyID, menuConfig]);
 
-    const contentNav = [
+    const contentNav: NavItem[] = [
         {
             name: 'Projects',
             icon: <FolderOpen size={20} />,
@@ -67,8 +76,9 @@ const Layout = () => {
         { name: 'Blog', path: '/blog', icon: <FileText size={20} />, configKey: 'blog' },
         { name: 'Quotations', path: '/quotation', icon: <DollarSign size={20} />, configKey: 'quotation' },
         { name: 'SRS Images', path: '/srs-images', icon: <ImageIcon size={20} />, configKey: 'srsImages' },
+        { name: 'Google Reviews', path: '/google-reviews', icon: <Star size={20} />, configKey: 'googleReviews', role: 'admin' },
     ];
-    const businessNav = [
+    const businessNav: NavItem[] = [
         { name: 'Company Details', path: '/company-details', icon: <Building size={20} />, configKey: 'company' },
         { name: 'Contact Info', path: '/contact-info', icon: <Phone size={20} />, configKey: 'contact' },
         { name: 'Revenue Report', path: '/revenue-report', icon: <DollarSign size={20} />, configKey: 'revenueReport' },
@@ -82,8 +92,8 @@ const Layout = () => {
         return menuConfig[key] != 0;
     };
 
-    const contentNavFiltered = contentNav.filter(item => isVisible(item.configKey));
-    const businessNavFiltered = businessNav.filter(item => isVisible(item.configKey));
+    const contentNavFiltered = contentNav.filter(item => isVisible(item.configKey) && (!item.role || user?.role === item.role));
+    const businessNavFiltered = businessNav.filter(item => isVisible(item.configKey) && (!item.role || user?.role === item.role));
 
     return (
         <div style={{ display: 'flex', height: '100vh', backgroundColor: 'var(--bg-dark)', overflow: 'hidden', position: 'relative' }}>
