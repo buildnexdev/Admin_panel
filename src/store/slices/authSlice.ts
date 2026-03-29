@@ -6,6 +6,7 @@ interface User {
     name: string;
     phoneNumber: string;
     companyID: number;
+    companyName?: string;
     location: string;
     isActive: number;
     role: string;

@@ -8,6 +8,7 @@ import menuReducer from './slices/menuSlice';
 import categoryReducer from './slices/categorySlice';
 import srsImagesReducer from './slices/srsImagesSlice';
 import reviewReducer from './slices/reviewSlice';
+import teamReducer from './slices/teamSlice';
 
 export const store = configureStore({
     reducer: {
@@ -20,6 +21,7 @@ export const store = configureStore({
         category: categoryReducer,
         srsImages: srsImagesReducer,
         reviews: reviewReducer,
+        team: teamReducer,
     },
 });
 

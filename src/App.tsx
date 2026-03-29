@@ -31,6 +31,8 @@ const QuotationView = lazy(() => import('./pages/quotation/QuotationView'));
 const SrsImages = lazy(() => import('./pages/menu-pages/SrsImages'));
 const ContactMessages = lazy(() => import('./pages/unWanted/builders/ContactMessages'));
 const GoogleReviews = lazy(() => import('./pages/menu-pages/GoogleReviews'));
+const TeamMembers = lazy(() => import('./pages/menu-pages/TeamMembers'));
+
 
 function App() {
   const user = useSelector((state: RootState) => state.auth.user);
@@ -83,6 +85,8 @@ function App() {
               <Route path="quotation" element={<BuildersProtectedRoute><Quotations /></BuildersProtectedRoute>} />
               <Route path="srs-images" element={<BuildersProtectedRoute><SrsImages /></BuildersProtectedRoute>} />
               <Route path="google-reviews" element={isAdmin ? <BuildersProtectedRoute><GoogleReviews /></BuildersProtectedRoute> : <div style={{ padding: '2rem', color: 'white' }}>Unauthorized Access</div>} />
+              <Route path="team-members" element={<BuildersProtectedRoute><TeamMembers /></BuildersProtectedRoute>} />
+
             </Route>
           </Route>
         </Routes>

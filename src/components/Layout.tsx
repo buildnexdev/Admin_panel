@@ -3,7 +3,7 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
     Tag, Image as ImageIcon, Briefcase, FileText,
     Building, Phone, DollarSign, FolderOpen, ChevronDown, ChevronUp, LogOut, Loader2, LayoutGrid,
-    User, Sparkles, Menu, X as XIcon, Star
+    User, Sparkles, Menu, X as XIcon, Star, UserPlus
 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { logoutUser } from '../store/slices/authSlice';
@@ -76,10 +76,11 @@ const Layout = () => {
         { name: 'Blog', path: '/blog', icon: <FileText size={20} />, configKey: 'blog' },
         { name: 'Quotations', path: '/quotation', icon: <DollarSign size={20} />, configKey: 'quotation' },
         { name: 'SRS Images', path: '/srs-images', icon: <ImageIcon size={20} />, configKey: 'srsImages' },
-        { name: 'Google Reviews', path: '/google-reviews', icon: <Star size={20} />, configKey: 'googleReviews', role: 'admin' },
+        { name: 'Google Reviews', path: '/google-reviews', icon: <Star size={20} />, configKey: 'googlereview', role: 'admin' },
+        { name: 'Team Members', path: '/team-members', icon: <UserPlus size={20} />, configKey: 'srsteampage' },
     ];
     const businessNav: NavItem[] = [
-        { name: 'Company Details', path: '/company-details', icon: <Building size={20} />, configKey: 'company' },
+        { name: 'Company Details', path: '/company-details', icon: <Building size={20} />, configKey: 'company', role: 'admin' },
         { name: 'Contact Info', path: '/contact-info', icon: <Phone size={20} />, configKey: 'contact' },
         { name: 'Revenue Report', path: '/revenue-report', icon: <DollarSign size={20} />, configKey: 'revenueReport' },
     ];
@@ -310,38 +311,37 @@ const Layout = () => {
                         >
                             <Menu size={24} />
                         </button>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', color: 'var(--text-muted)', fontSize: '0.95rem', fontWeight: '600' }}>
-                            <Sparkles size={18} color="var(--primary-color)" />
-                            <span className="header-tagline" style={{ color: 'var(--text-main)' }}>
-                                Customize your website architecture
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                            <Building size={18} color="var(--primary-color)" />
+                            <span style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-main)', letterSpacing: '-0.01em' }}>
+                                {user?.companyName || 'Corporate Office'}
                             </span>
                         </div>
                     </div>
                     <div style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '1rem',
-                        padding: '0.6rem 1.25rem',
-                        borderRadius: '100px',
-                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                        boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
+                        gap: '0.75rem',
+                        padding: '0.5rem 1rem',
+                        borderRadius: '12px',
+                        backgroundColor: '#f8fafc',
+                        border: '1px solid #f1f5f9'
                     }}>
-                        <span style={{ fontSize: '0.95rem', fontWeight: '700', color: 'var(--text-main)' }}>
+                        <span style={{ fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-main)' }}>
                             {user?.name || 'Admin'}
                         </span>
                         <div style={{
-                            width: '36px',
-                            height: '36px',
+                            width: '32px',
+                            height: '32px',
                             borderRadius: '50%',
-                            backgroundColor: 'var(--primary-color)',
+                            backgroundColor: 'white',
+                            border: '1px solid #e2e8f0',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            color: 'white',
-                            boxShadow: '0 0 10px var(--primary-glow)'
+                            color: '#64748b'
                         }}>
-                            <User size={20} />
+                            <User size={16} />
                         </div>
                     </div>
                 </header>
