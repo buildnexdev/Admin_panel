@@ -1,122 +1,255 @@
-import { useState } from 'react';
-import { Tag, Edit, Trash2, Plus } from 'lucide-react';
+import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useSelector } from 'react-redux';
+import { Plus, Tag, Pencil, Trash2, RefreshCw } from 'lucide-react';
+import apiClient from '../../../services/apiClient';
+import type { RootState } from '../../../store/store';
+import PageShell, { DataTable, ErrorState, StatusBadge } from '../../../components/PageShell';
+import ConfirmModal from '../../../components/ConfirmModal';
+
+type CategoryRow = {
+    id: number;
+    name: string;
+    companyID?: number;
+    isActive?: number;
+    CreatedOn?: string;
+};
+
+const emptyForm = { name: '', isActive: 1 };
 
 const Categories = () => {
-    const categories = [
-        { id: 1, name: 'Residential', description: 'Residential construction projects', tag: 'residential', tagColor: '#a855f7', tagBg: '#faf5ff', count: 45 },
-        { id: 2, name: 'Commercial', description: 'Commercial building projects', tag: 'commercial', tagColor: '#3b82f6', tagBg: '#eff6ff', count: 32 },
-        { id: 3, name: 'Industrial', description: 'Industrial facilities', tag: 'industrial', tagColor: '#f97316', tagBg: '#fff7ed', count: 18 },
-        { id: 4, name: 'Infrastructure', description: 'Infrastructure development', tag: 'infrastructure', tagColor: '#14b8a6', tagBg: '#f0fdfa', count: 25 },
-        { id: 5, name: 'Renovation', description: 'Renovation and remodeling', tag: 'renovation', tagColor: '#ec4899', tagBg: '#fdf2f8', count: 15 },
-        { id: 6, name: 'Interior Design', description: 'Interior design projects', tag: 'interior', tagColor: '#06b6d4', tagBg: '#ecfeff', count: 10 },
-    ];
+    const { user } = useSelector((state: RootState) => state.auth);
+    const [rows, setRows] = useState<CategoryRow[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [saving, setSaving] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [editing, setEditing] = useState<CategoryRow | null>(null);
+    const [form, setForm] = useState(emptyForm);
+    const [formError, setFormError] = useState<string | null>(null);
+    const [confirmDelete, setConfirmDelete] = useState<{ open: boolean; row: CategoryRow | null }>({
+        open: false,
+        row: null,
+    });
+
+    const load = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const res = await apiClient.get('category/');
+            const data = res.data?.data ?? res.data ?? [];
+            setRows(Array.isArray(data) ? data : []);
+        } catch (e: any) {
+            setError(e.response?.data?.message || e.message || 'Unable to load categories');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        load();
+    }, [load]);
+
+    const openCreate = () => {
+        setEditing(null);
+        setForm(emptyForm);
+        setFormError(null);
+        setModalOpen(true);
+    };
+
+    const openEdit = (row: CategoryRow) => {
+        setEditing(row);
+        setForm({ name: row.name || '', isActive: Number(row.isActive) !== 0 ? 1 : 0 });
+        setFormError(null);
+        setModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setModalOpen(false);
+        setEditing(null);
+        setForm(emptyForm);
+        setFormError(null);
+    };
+
+    const handleSubmit = async (e: FormEvent) => {
+        e.preventDefault();
+        const name = form.name.trim();
+        if (!name) {
+            setFormError('Name is required');
+            return;
+        }
+        setSaving(true);
+        setFormError(null);
+        try {
+            if (editing) {
+                await apiClient.put(`category/${editing.id}`, {
+                    name,
+                    isActive: form.isActive,
+                });
+            } else {
+                if (!user?.companyID) {
+                    setFormError('Missing company context — please re-login');
+                    return;
+                }
+                await apiClient.post('category/', {
+                    name,
+                    isActive: form.isActive,
+                    companyID: user.companyID,
+                });
+            }
+            closeModal();
+            await load();
+        } catch (err: any) {
+            setFormError(err.response?.data?.message || err.message || 'Save failed');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!confirmDelete.row) return;
+        try {
+            await apiClient.delete(`category/${confirmDelete.row.id}`);
+            await load();
+        } catch (err: any) {
+            setError(err.response?.data?.message || err.message || 'Delete failed');
+        }
+    };
 
     return (
-        <div style={{ padding: '0 0.5rem', maxWidth: '1400px', margin: '0 auto' }}>
-            {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-                <div>
-                    <h1 style={{ fontSize: '1.8rem', fontWeight: '600', color: '#0f172a', marginBottom: '0.4rem', letterSpacing: '-0.02em' }}>
-                        Manage Categories
-                    </h1>
-                    <p style={{ color: '#64748b', fontSize: '0.95rem' }}>
-                        Organize your projects with categories
-                    </p>
-                </div>
-                <button style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    backgroundColor: '#0f172a',
-                    color: 'white',
-                    padding: '0.6rem 1.2rem',
-                    borderRadius: '8px',
-                    border: 'none',
-                    fontWeight: '500',
-                    fontSize: '0.9rem',
-                    cursor: 'pointer'
-                }}>
-                    <Plus size={18} /> Add Category
-                </button>
-            </div>
+        <PageShell
+            title="Categories"
+            subtitle="Company-scoped project categories — create, edit, and remove."
+            icon={<Tag size={22} />}
+            accent="emerald"
+            actions={
+                <>
+                    <button className="ui-btn ui-btn--secondary" type="button" onClick={load}>
+                        <RefreshCw size={16} className={loading ? 'dash-spin' : ''} /> Refresh
+                    </button>
+                    <button className="ui-btn ui-btn--primary" type="button" onClick={openCreate}>
+                        <Plus size={16} /> Add category
+                    </button>
+                </>
+            }
+        >
+            <ConfirmModal
+                open={confirmDelete.open}
+                title="Delete category"
+                message={
+                    confirmDelete.row
+                        ? `Delete category "${confirmDelete.row.name}"? This cannot be undone.`
+                        : ''
+                }
+                confirmLabel="Delete"
+                onConfirm={handleConfirmDelete}
+                onCancel={() => setConfirmDelete({ open: false, row: null })}
+            />
 
-            {/* Grid */}
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-                gap: '1.5rem'
-            }}>
-                {categories.map(cat => (
-                    <div key={cat.id} style={{
-                        backgroundColor: 'white',
-                        borderRadius: '16px',
-                        padding: '1.5rem',
-                        border: '1px solid #f1f5f9',
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+            {error ? (
+                <ErrorState message={error} onRetry={load} />
+            ) : (
+                <DataTable
+                    loading={loading}
+                    headers={['Name', 'Status', 'Created', 'Actions']}
+                    rows={rows.map((row) => [
+                        <strong key="n">{row.name}</strong>,
+                        <StatusBadge key="s" status={Number(row.isActive) === 0 ? 'Inactive' : 'Active'} />,
+                        row.CreatedOn ? new Date(row.CreatedOn).toLocaleDateString() : '—',
+                        <span key="a" style={{ display: 'inline-flex', gap: '0.4rem' }}>
+                            <button
+                                type="button"
+                                className="ui-btn ui-btn--secondary"
+                                style={{ padding: '0.35rem 0.65rem' }}
+                                onClick={() => openEdit(row)}
+                            >
+                                <Pencil size={14} /> Edit
+                            </button>
+                            <button
+                                type="button"
+                                className="ui-btn"
+                                style={{
+                                    padding: '0.35rem 0.65rem',
+                                    background: 'var(--danger-light)',
+                                    color: '#be123c',
+                                    border: '1px solid #fecdd3',
+                                }}
+                                onClick={() => setConfirmDelete({ open: true, row })}
+                            >
+                                <Trash2 size={14} />
+                            </button>
+                        </span>,
+                    ])}
+                    empty="No categories yet for this company."
+                />
+            )}
+
+            {modalOpen && (
+                <div
+                    className="ui-modal-backdrop"
+                    style={{
+                        position: 'fixed',
+                        inset: 0,
+                        zIndex: 9000,
+                        background: 'rgba(10, 34, 20, 0.45)',
                         display: 'flex',
-                        flexDirection: 'column'
-                    }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                            <Tag size={20} color="#94a3b8" style={{ transform: 'rotate(-45deg)' }} />
-                            <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#0f172a', margin: 0 }}>{cat.name}</h3>
-                        </div>
-                        <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '1.5rem', flex: 1 }}>{cat.description}</p>
-
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                            <span style={{
-                                backgroundColor: cat.tagBg,
-                                color: cat.tagColor,
-                                padding: '0.2rem 0.8rem',
-                                borderRadius: '16px',
-                                fontSize: '0.75rem',
-                                fontWeight: '600'
-                            }}>
-                                {cat.tag}
-                            </span>
-                            <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: '500' }}>{cat.count} projects</span>
-                        </div>
-
-                        <div style={{
-                            display: 'flex',
-                            gap: '0.5rem',
-                            borderTop: '1px solid #f8fafc',
-                            paddingTop: '1rem'
-                        }}>
-                            <button style={{
-                                flex: 1,
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                padding: '0.5rem',
-                                backgroundColor: '#f8fafc',
-                                border: '1px solid #f1f5f9',
-                                borderRadius: '8px',
-                                color: '#475569',
-                                fontWeight: '500',
-                                fontSize: '0.875rem',
-                                cursor: 'pointer'
-                            }}>
-                                <Edit size={16} /> Edit
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '1rem',
+                    }}
+                    onClick={closeModal}
+                >
+                    <form
+                        onSubmit={handleSubmit}
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                            width: '100%',
+                            maxWidth: 420,
+                            background: '#fff',
+                            borderRadius: 14,
+                            padding: '1.5rem',
+                            border: '1px solid var(--border)',
+                            boxShadow: '0 24px 48px rgba(10, 34, 20, 0.2)',
+                        }}
+                    >
+                        <h2 style={{ margin: '0 0 1rem', fontSize: '1.15rem', color: 'var(--text-primary)' }}>
+                            {editing ? 'Edit category' : 'Add category'}
+                        </h2>
+                        {formError && (
+                            <p style={{ margin: '0 0 0.75rem', color: '#be123c', fontSize: '0.85rem' }}>{formError}</p>
+                        )}
+                        <label className="ui-label" htmlFor="cat-name">Name</label>
+                        <input
+                            id="cat-name"
+                            className="ui-input"
+                            value={form.name}
+                            onChange={(e) => setForm({ ...form, name: e.target.value })}
+                            required
+                            autoFocus
+                        />
+                        <label className="ui-label" htmlFor="cat-active" style={{ marginTop: '0.85rem', display: 'block' }}>
+                            Status
+                        </label>
+                        <select
+                            id="cat-active"
+                            className="ui-input"
+                            value={form.isActive}
+                            onChange={(e) => setForm({ ...form, isActive: Number(e.target.value) })}
+                        >
+                            <option value={1}>Active</option>
+                            <option value={0}>Inactive</option>
+                        </select>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem', marginTop: '1.25rem' }}>
+                            <button type="button" className="ui-btn ui-btn--secondary" onClick={closeModal}>
+                                Cancel
                             </button>
-                            <button style={{
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                padding: '0.5rem 1rem',
-                                backgroundColor: '#fef2f2',
-                                border: '1px solid #fee2e2',
-                                borderRadius: '8px',
-                                color: '#ef4444',
-                                cursor: 'pointer'
-                            }}>
-                                <Trash2 size={16} />
+                            <button type="submit" className="ui-btn ui-btn--primary" disabled={saving}>
+                                {saving ? 'Saving…' : editing ? 'Update' : 'Create'}
                             </button>
                         </div>
-                    </div>
-                ))}
-            </div>
-        </div>
+                    </form>
+                </div>
+            )}
+        </PageShell>
     );
 };
 

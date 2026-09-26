@@ -1,5 +1,4 @@
-import axios from 'axios';
-import { API_URL } from './api';
+import apiClient from './apiClient';
 
 export interface StaffData {
     userId: number;
@@ -8,7 +7,8 @@ export interface StaffData {
     phoneNumber: string;
 }
 
+/** Fetch staff for the authenticated user's company. */
 export const fetchStaffList = async () => {
-    const response = await axios.get(`${API_URL}users/staff`);
+    const response = await apiClient.get('users/staff');
     return response.data;
 };

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { createQuotation, clearQuotationLink, fetchQuotationList, updateQuotation, deleteQuotation } from "../../store/slices/quotationSlice";
 import { getQuotationViewCount } from "../../services/api";
@@ -149,28 +150,48 @@ function QuotationPage() {
         onCancel={() => setConfirmDelete({ open: false, token: null })}
       />
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem", marginBottom: "1.5rem" }}>
-        <h1 style={{ fontSize: "1.75rem", fontWeight: "600", color: "#0f172a", margin: 0 }}>
+        <h1 style={{ fontSize: "1.75rem", fontWeight: "600", color: "var(--text-primary)", margin: 0 }}>
           Quotations
         </h1>
-        <button
-          type="button"
-          onClick={() => setShowForm(true)}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem",
-            padding: "0.6rem 1.1rem",
-            backgroundColor: "#0f172a",
-            color: "white",
-            border: "none",
-            borderRadius: "8px",
-            fontWeight: "600",
-            fontSize: "0.9rem",
-            cursor: "pointer",
-          }}
-        >
-          <Plus size={18} /> Create new quotation
-        </button>
+        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+          <Link
+            to="/quotation-create"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              padding: "0.6rem 1.1rem",
+              backgroundColor: "var(--primary)",
+              color: "white",
+              border: "none",
+              borderRadius: "8px",
+              fontWeight: "600",
+              fontSize: "0.9rem",
+              textDecoration: "none",
+            }}
+          >
+            <Plus size={18} /> Full create page
+          </Link>
+          <button
+            type="button"
+            onClick={() => setShowForm(true)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              padding: "0.6rem 1.1rem",
+              background: 'var(--gradient-brand)',
+              color: "white",
+              border: "none",
+              borderRadius: "8px",
+              fontWeight: "600",
+              fontSize: "0.9rem",
+              cursor: "pointer",
+            }}
+          >
+            <Plus size={18} /> Quick create
+          </button>
+        </div>
       </div>
 
       {showForm && createPortal(
@@ -207,18 +228,18 @@ function QuotationPage() {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ padding: "1.5rem", borderBottom: "1px solid #f1f5f9", display: "flex", justifyContent: "space-between", alignItems: "center", background: "linear-gradient(to right, #f8fafc, #ffffff)" }}>
-              <h2 style={{ fontSize: "1.25rem", fontWeight: "700", color: "#0f172a", margin: 0 }}>
+            <div style={{ padding: "1.5rem", borderBottom: "1px solid var(--surface-secondary)", display: "flex", justifyContent: "space-between", alignItems: "center", background: "linear-gradient(to right, var(--background), #ffffff)" }}>
+              <h2 style={{ fontSize: "1.25rem", fontWeight: "700", color: "var(--text-primary)", margin: 0 }}>
                 {editMode ? "Edit quotation" : "New quotation"}
               </h2>
-              <button type="button" onClick={resetForm} style={{ background: "none", border: "none", cursor: "pointer", padding: "0.25rem", color: "#64748b" }}>
+              <button type="button" onClick={resetForm} style={{ background: "none", border: "none", cursor: "pointer", padding: "0.25rem", color: "var(--text-secondary)" }}>
                 <X size={20} />
               </button>
             </div>
             <div style={{ padding: "2rem" }}>
               <form onSubmit={handleCreate} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
                 {error && (
-                  <div style={{ padding: "0.75rem", backgroundColor: "#fef2f2", color: "#991b1b", borderRadius: "8px", fontSize: "0.9rem" }}>
+                  <div style={{ padding: "0.75rem", backgroundColor: "var(--danger-light)", color: "#991b1b", borderRadius: "8px", fontSize: "0.9rem" }}>
                     {error}
                   </div>
                 )}
@@ -261,7 +282,7 @@ function QuotationPage() {
                     disabled={loading}
                     style={{
                       padding: "0.75rem 1.25rem",
-                      backgroundColor: loading ? "#94a3b8" : "#0f172a",
+                      backgroundColor: loading ? "var(--text-muted)" : "var(--text-primary)",
                       color: "white",
                       border: "none",
                       borderRadius: "8px",
@@ -278,8 +299,8 @@ function QuotationPage() {
                     style={{
                       padding: "0.75rem 1.25rem",
                       backgroundColor: "transparent",
-                      color: "#64748b",
-                      border: "1px solid #e2e8f0",
+                      color: "var(--text-secondary)",
+                      border: "1px solid var(--border)",
                       borderRadius: "8px",
                       fontSize: "0.95rem",
                       cursor: "pointer",
@@ -295,15 +316,15 @@ function QuotationPage() {
         document.body
       )}
 
-      <div style={{ overflowX: "auto", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+      <div style={{ overflowX: "auto", borderRadius: "8px", border: "1px solid var(--border)" }}>
         {listLoading ? (
-          <div style={{ padding: "2rem", textAlign: "center", color: "#64748b" }}>Loading quotations…</div>
+          <div style={{ padding: "2rem", textAlign: "center", color: "var(--text-secondary)" }}>Loading quotations…</div>
         ) : list.length === 0 ? (
-          <div style={{ padding: "2rem", textAlign: "center", color: "#64748b" }}>No quotations yet. Click &quot;Create new quotation&quot; to add one.</div>
+          <div style={{ padding: "2rem", textAlign: "center", color: "var(--text-secondary)" }}>No quotations yet. Click &quot;Create new quotation&quot; to add one.</div>
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.9rem" }}>
             <thead>
-              <tr style={{ backgroundColor: "#f1f5f9", borderBottom: "2px solid #e2e8f0" }}>
+              <tr style={{ backgroundColor: "var(--surface-secondary)", borderBottom: "2px solid var(--border)" }}>
                 <th style={{ textAlign: "left", padding: "0.75rem", fontWeight: "600", color: "#334155" }}>Client</th>
                 <th style={{ textAlign: "left", padding: "0.75rem", fontWeight: "600", color: "#334155" }}>Price (₹)</th>
                 <th style={{ textAlign: "left", padding: "0.75rem", fontWeight: "600", color: "#334155" }}>Link</th>
@@ -317,13 +338,13 @@ function QuotationPage() {
                 const token = getToken(row);
                 const views = viewCounts[token] ?? row.view_count ?? row.viewCount ?? null;
                 return (
-                  <tr key={token} style={{ borderBottom: "1px solid #e2e8f0", backgroundColor: "#fff" }}>
-                    <td style={{ padding: "0.75rem", color: "#0f172a", verticalAlign: "top" }}>{row.client_name}</td>
-                    <td style={{ padding: "0.75rem", color: "#475569", verticalAlign: "top" }}>{Number(row.price).toLocaleString()}</td>
+                  <tr key={token} style={{ borderBottom: "1px solid var(--border)", backgroundColor: "#fff" }}>
+                    <td style={{ padding: "0.75rem", color: "var(--text-primary)", verticalAlign: "top" }}>{row.client_name}</td>
+                    <td style={{ padding: "0.75rem", color: "var(--text-secondary)", verticalAlign: "top" }}>{Number(row.price).toLocaleString()}</td>
                     <td style={{ padding: "0.75rem", verticalAlign: "top" }}>
                       <span
                         onClick={() => handleCopyLink(token)}
-                        style={{ color: "#2563eb", cursor: "pointer", textDecoration: "underline", fontSize: "0.85rem", fontWeight: "500" }}
+                        style={{ color: "var(--primary)", cursor: "pointer", textDecoration: "underline", fontSize: "0.85rem", fontWeight: "500" }}
                         title="Click to copy link"
                       >
                         {copiedToken === token ? "Copied!" : "Quotation link"}
@@ -344,14 +365,14 @@ function QuotationPage() {
                         "…"
                       ) : views !== null ? (
                         <span style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
-                          <MousePointerClick size={14} style={{ color: "#2563eb" }} />
+                          <MousePointerClick size={14} style={{ color: "var(--primary)" }} />
                           {views} time{views !== 1 ? "s" : ""}
                         </span>
                       ) : (
                         <button
                           type="button"
                           onClick={() => fetchViewCountForToken(token)}
-                          style={{ padding: "0.25rem 0.5rem", fontSize: "0.8rem", backgroundColor: "#eff6ff", color: "#2563eb", border: "none", borderRadius: "6px", cursor: "pointer" }}
+                          style={{ padding: "0.25rem 0.5rem", fontSize: "0.8rem", backgroundColor: "#eff6ff", color: "var(--primary)", border: "none", borderRadius: "6px", cursor: "pointer" }}
                         >
                           <RefreshCw size={12} /> Load
                         </button>
@@ -362,7 +383,7 @@ function QuotationPage() {
                         <button
                           type="button"
                           onClick={() => handleCopyLink(token)}
-                          style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", padding: "0.4rem 0.65rem", backgroundColor: "#0f172a", color: "white", border: "none", borderRadius: "6px", fontSize: "0.8rem", cursor: "pointer" }}
+                          style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", padding: "0.4rem 0.65rem", background: 'var(--gradient-brand)', color: "white", border: "none", borderRadius: "6px", fontSize: "0.8rem", cursor: "pointer" }}
                         >
                           <Copy size={14} /> {copiedToken === token ? "Copied!" : "Link"}
                         </button>
@@ -376,14 +397,14 @@ function QuotationPage() {
                         <button
                           type="button"
                           onClick={() => handleEditClick(row)}
-                          style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", padding: "0.4rem 0.65rem", backgroundColor: "#f1f5f9", color: "#475569", border: "1px solid #e2e8f0", borderRadius: "6px", fontSize: "0.8rem", cursor: "pointer" }}
+                          style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", padding: "0.4rem 0.65rem", backgroundColor: "var(--surface-secondary)", color: "var(--text-secondary)", border: "1px solid var(--border)", borderRadius: "6px", fontSize: "0.8rem", cursor: "pointer" }}
                         >
                           <Edit2 size={14} /> Edit
                         </button>
                         <button
                           type="button"
                           onClick={() => handleDeleteClick(token)}
-                          style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", padding: "0.4rem 0.65rem", backgroundColor: "#fef2f2", color: "#ef4444", border: "1px solid #fee2e2", borderRadius: "6px", fontSize: "0.8rem", cursor: "pointer" }}
+                          style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", padding: "0.4rem 0.65rem", backgroundColor: "var(--danger-light)", color: "#ef4444", border: "1px solid var(--danger-light)", borderRadius: "6px", fontSize: "0.8rem", cursor: "pointer" }}
                         >
                           <Trash2 size={14} /> Trash
                         </button>

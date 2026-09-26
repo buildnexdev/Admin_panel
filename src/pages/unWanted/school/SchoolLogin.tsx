@@ -35,7 +35,7 @@ const SchoolLogin = () => {
                     <School size={32} color="#3b82f6" />
                     <h2 style={{ textAlign: 'center', color: '#1f2937', margin: 0 }}>School Login</h2>
                 </div>
-                {error && <div style={{ color: 'red', marginBottom: '1rem', textAlign: 'center', padding: '0.75rem', backgroundColor: '#fee2e2', borderRadius: '4px' }}>{error}</div>}
+                {error && <div style={{ color: 'red', marginBottom: '1rem', textAlign: 'center', padding: '0.75rem', backgroundColor: 'var(--danger-light)', borderRadius: '4px' }}>{error}</div>}
                 <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     <input
                         type="tel"
@@ -70,7 +70,7 @@ const SchoolLogin = () => {
                         disabled={loading}
                         style={{
                             padding: '0.75rem',
-                            backgroundColor: loading ? '#93c5fd' : '#3b82f6',
+                            backgroundColor: loading ? '#C4B5FD' : '#3b82f6',
                             color: 'white',
                             border: 'none',
                             borderRadius: '4px',

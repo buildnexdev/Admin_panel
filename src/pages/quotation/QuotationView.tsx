@@ -4,7 +4,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { getQuotation } from "../../store/slices/quotationSlice";
 import { recordQuotationView, getQuotationViewCount } from "../../services/api";
 import type { RootState } from "../../store/store";
-import { FileText, Eye } from "lucide-react";
+import { Eye } from "lucide-react";
+import BrandLogo, { BrandTagline } from "../../components/BrandLogo";
 
 /**
  * Public page: client opens /quotation/:token to view their quotation (no login required).
@@ -32,22 +33,22 @@ function QuotationView() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "system-ui, sans-serif" }}>
-        <div style={{ textAlign: "center", color: "#64748b" }}>Loading quotation...</div>
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'DM Sans', system-ui, sans-serif", background: "var(--background)" }}>
+        <div style={{ textAlign: "center", color: "var(--text-secondary)" }}>Loading quotation...</div>
       </div>
     );
   }
   if (error) {
     return (
-      <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "system-ui, sans-serif" }}>
-        <div style={{ textAlign: "center", color: "#dc2626", padding: "24px" }}>Error: {error}</div>
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'DM Sans', system-ui, sans-serif", background: "var(--background)" }}>
+        <div style={{ textAlign: "center", color: "var(--danger)", padding: "24px" }}>Error: {error}</div>
       </div>
     );
   }
   if (!data) {
     return (
-      <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "system-ui, sans-serif" }}>
-        <div style={{ textAlign: "center", color: "#64748b" }}>No quotation found.</div>
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'DM Sans', system-ui, sans-serif", background: "var(--background)" }}>
+        <div style={{ textAlign: "center", color: "var(--text-secondary)" }}>No quotation found.</div>
       </div>
     );
   }
@@ -61,9 +62,9 @@ function QuotationView() {
     <div
       style={{
         minHeight: "100vh",
-        background: "linear-gradient(145deg, #f8fafc 0%, #e2e8f0 100%)",
-        fontFamily: "system-ui, sans-serif",
-        padding: "24px 16px",
+        background: "linear-gradient(160deg, var(--background) 0%, #E8EEF7 100%)",
+        fontFamily: "'DM Sans', system-ui, sans-serif",
+        padding: "28px 16px",
       }}
     >
       <div
@@ -72,52 +73,61 @@ function QuotationView() {
           margin: "0 auto",
           backgroundColor: "#fff",
           borderRadius: "16px",
-          boxShadow: "0 4px 24px rgba(15, 23, 42, 0.08)",
+          boxShadow: "0 8px 30px rgba(22, 24, 43, 0.1)",
           overflow: "hidden",
+          border: "1px solid var(--border)",
         }}
       >
-        <div style={{ padding: "28px 24px", borderBottom: "1px solid #e2e8f0" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <div style={{ width: "44px", height: "44px", borderRadius: "12px", backgroundColor: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <FileText size={24} color="#fff" />
+        <div style={{
+          padding: "1.5rem 1.5rem 1.25rem",
+          borderBottom: "1px solid var(--border)",
+          background: "linear-gradient(180deg, #fff 0%, var(--background) 100%)",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "12px", marginBottom: "1rem" }}>
+            <BrandLogo height={52} />
+            {viewCount != null && (
+              <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "0.8rem", color: "var(--text-secondary)" }}>
+                <Eye size={14} /> {viewCount} views
               </div>
-              <div>
-                <h1 style={{ margin: 0, fontSize: "1.5rem", fontWeight: "700", color: "#0f172a" }}>Quotation</h1>
-                <p style={{ margin: "4px 0 0", fontSize: "0.875rem", color: "#64748b" }}>
-                  {companyName ? `From ${companyName} · Your quote details` : "Your quote details"}
-                </p>
-              </div>
-            </div>
+            )}
           </div>
+          <div style={{ maxWidth: 240, marginBottom: "0.85rem" }}>
+            <BrandTagline />
+          </div>
+          <h1 style={{ margin: 0, fontSize: "1.35rem", fontWeight: 800, color: "var(--text-primary)", fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: "-0.02em" }}>
+            Project Quotation
+          </h1>
+          <p style={{ margin: "6px 0 0", fontSize: "0.875rem", color: "var(--text-secondary)" }}>
+            {companyName ? `Prepared by ${companyName}` : "Your quote details"}
+          </p>
         </div>
 
         <div style={{ padding: "24px" }}>
           <div
             style={{
-              marginBottom: "20px",
+              marginBottom: "16px",
               padding: "16px",
-              backgroundColor: "#f8fafc",
+              backgroundColor: "var(--background)",
               borderRadius: "12px",
-              border: "1px solid #e2e8f0",
+              border: "1px solid var(--border)",
             }}
           >
-            <div style={{ fontSize: "0.75rem", fontWeight: "600", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "6px" }}>
+            <div style={{ fontSize: "0.7rem", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "6px" }}>
               Client Name
             </div>
-            <div style={{ fontSize: "1rem", fontWeight: "600", color: "#0f172a" }}>{clientName || "—"}</div>
+            <div style={{ fontSize: "1rem", fontWeight: 600, color: "var(--text-primary)" }}>{clientName || "—"}</div>
           </div>
 
           <div
             style={{
-              marginBottom: "20px",
+              marginBottom: "16px",
               padding: "16px",
-              backgroundColor: "#f8fafc",
+              backgroundColor: "var(--background)",
               borderRadius: "12px",
-              border: "1px solid #e2e8f0",
+              border: "1px solid var(--border)",
             }}
           >
-            <div style={{ fontSize: "0.75rem", fontWeight: "600", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" }}>
+            <div style={{ fontSize: "0.7rem", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "8px" }}>
               Project Details
             </div>
             <p style={{ whiteSpace: "pre-wrap", margin: 0, fontSize: "0.95rem", color: "#334155", lineHeight: 1.6 }}>{projectDetails || "—"}</p>
@@ -126,18 +136,22 @@ function QuotationView() {
           <div
             style={{
               padding: "20px",
-              backgroundColor: "#0f172a",
+              background: "linear-gradient(135deg, var(--text-primary) 0%, #132F52 100%)",
               borderRadius: "12px",
               textAlign: "center",
             }}
           >
-            <div style={{ fontSize: "0.75rem", fontWeight: "600", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>
+            <div style={{ fontSize: "0.7rem", fontWeight: 700, color: "rgba(148,163,184,0.95)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "4px" }}>
               Total Price
             </div>
-            <div style={{ fontSize: "1.75rem", fontWeight: "700", color: "#fff" }}>
+            <div style={{ fontSize: "1.75rem", fontWeight: 800, color: "#fff", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
               ₹{typeof price === "number" ? price.toLocaleString("en-IN") : price}
             </div>
           </div>
+        </div>
+
+        <div style={{ padding: "14px 20px", textAlign: "center", borderTop: "1px solid var(--border)", background: "var(--background)", fontSize: "0.75rem", color: "var(--text-muted)" }}>
+          © {new Date().getFullYear()} BuildNexDev — Building Digital Growth
         </div>
       </div>
     </div>

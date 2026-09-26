@@ -53,8 +53,8 @@ const SchoolDashboard = () => {
                                 Login Required
                             </div>
                         )}
-                        <div style={{ padding: '0.75rem', backgroundColor: '#dbeafe', borderRadius: '50%' }}>
-                            <FileText size={24} color="#2563eb" />
+                        <div style={{ padding: '0.75rem', backgroundColor: 'var(--info-light)', borderRadius: '50%' }}>
+                            <FileText size={24} color="var(--primary)" />
                         </div>
                         <div style={{ flex: 1 }}>
                             <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#1f2937', marginBottom: '0.25rem' }}>Upload Content</h3>
@@ -71,8 +71,8 @@ const SchoolDashboard = () => {
                                 Login Required
                             </div>
                         )}
-                        <div style={{ padding: '0.75rem', backgroundColor: '#dcfce7', borderRadius: '50%' }}>
-                            <Image size={24} color="#16a34a" />
+                        <div style={{ padding: '0.75rem', backgroundColor: 'var(--success-light)', borderRadius: '50%' }}>
+                            <Image size={24} color="var(--success)" />
                         </div>
                         <div style={{ flex: 1 }}>
                             <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#1f2937', marginBottom: '0.25rem' }}>Upload Images</h3>

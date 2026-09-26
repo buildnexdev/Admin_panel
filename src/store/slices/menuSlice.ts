@@ -1,10 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-import { API_URL } from '../../services/api';
+import apiClient from '../../services/apiClient';
 
 export interface MenuConfig {
     companyID?: number;
-    projects?: number;   // 1 = show, 0 = hide
+    projects?: number;
     company?: number;
     banners?: number;
     blog?: number;
@@ -26,12 +25,12 @@ const initialState: MenuState = {
     error: null,
 };
 
+/** Load company menu feature flags (authenticated). */
 export const fetchMenu = createAsyncThunk(
     'menu/fetchMenu',
     async (companyID: number, { rejectWithValue }) => {
         try {
-            const response = await axios.get(`${API_URL}menu/${companyID}`);
-            // API returns { success: true, data: { companyID, projects, banners, ... } }
+            const response = await apiClient.get(`menu/${companyID}`);
             const data = response?.data?.data ?? response?.data;
             return data as MenuConfig;
         } catch (error: any) {

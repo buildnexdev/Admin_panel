@@ -1,5 +1,4 @@
-import axios from 'axios';
-import { API_URL } from './api';
+import apiClient from './apiClient';
 
 export interface CompanyData {
     companyID: number;
@@ -15,7 +14,7 @@ export interface CompanyData {
     productType: string;
     website?: string;
     sellingPrice?: string;
-    staff?: string; // JSON string
+    staff?: string;
     adminName?: string;
     adminPhone?: number;
     adminLocation?: string;
@@ -23,22 +22,24 @@ export interface CompanyData {
     isActive: number;
 }
 
+/** Fetch a single company by ID (Bearer via apiClient). */
 export const fetchCompanyDetails = async (companyID: number) => {
-    const response = await axios.get(`${API_URL}companies/${companyID}`);
+    const response = await apiClient.get(`companies/${companyID}`);
     return response.data;
 };
 
+/** List companies — Super Admin only on backend. */
 export const fetchAllCompanies = async () => {
-    const response = await axios.get(`${API_URL}companies`);
+    const response = await apiClient.get('companies');
     return response.data;
 };
 
 export const updateCompanyDetails = async (companyID: number, data: any) => {
-    const response = await axios.put(`${API_URL}companies/${companyID}`, data);
+    const response = await apiClient.put(`companies/${companyID}`, data);
     return response.data;
 };
 
 export const createCompanyDetails = async (data: any) => {
-    const response = await axios.post(`${API_URL}companies`, data);
+    const response = await apiClient.post('companies', data);
     return response.data;
 };

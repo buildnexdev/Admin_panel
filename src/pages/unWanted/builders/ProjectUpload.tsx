@@ -65,10 +65,10 @@ const ProjectUpload = () => {
         <div style={{ padding: '0 0.5rem', maxWidth: '1000px', margin: '0 auto' }}>
             {/* Header */}
             <div style={{ marginBottom: '2.5rem' }}>
-                <h1 style={{ fontSize: '1.8rem', fontWeight: '600', color: '#0f172a', marginBottom: '0.4rem', letterSpacing: '-0.02em' }}>
+                <h1 className="page-title-xl">
                     Upload Project
                 </h1>
-                <p style={{ color: '#64748b', fontSize: '0.95rem' }}>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
                     Add new construction project with details and images
                 </p>
             </div>
@@ -76,22 +76,22 @@ const ProjectUpload = () => {
 
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                 {/* Images Section */}
-                <div style={{ backgroundColor: 'white', padding: '2rem', borderRadius: '12px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
-                    <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#0f172a', marginBottom: '0.25rem' }}>Project Images</h3>
-                    <p style={{ color: '#64748b', fontSize: '0.85rem', marginBottom: '1.5rem' }}>Upload high-quality images of your project</p>
+                <div style={{ backgroundColor: 'white', padding: '2rem', borderRadius: '12px', border: '1px solid var(--surface-secondary)', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>Project Images</h3>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>Upload high-quality images of your project</p>
 
-                    <div style={{ border: '1px dashed #cbd5e1', borderRadius: '12px', padding: preview ? '1rem' : '4rem 2rem', textAlign: 'center', cursor: 'pointer', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ border: '1px dashed var(--border-strong)', borderRadius: '12px', padding: preview ? '1rem' : '4rem 2rem', textAlign: 'center', cursor: 'pointer', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                         <input type="file" accept="image/*" onChange={handleImageChange} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', zIndex: 2 }} />
                         {preview ? (
                             <div style={{ position: 'relative', width: 'fit-content' }}>
                                 <img src={preview} alt="Preview" style={{ maxHeight: '200px', objectFit: 'cover', borderRadius: '8px' }} />
-                                <button type="button" onClick={(e) => { e.preventDefault(); setPreview(null); setImage(null); }} style={{ position: 'absolute', top: '-10px', right: '-10px', backgroundColor: 'white', borderRadius: '50%', padding: '4px', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', cursor: 'pointer', zIndex: 3 }}>
+                                <button type="button" onClick={(e) => { e.preventDefault(); setPreview(null); setImage(null); }} style={{ position: 'absolute', top: '-10px', right: '-10px', backgroundColor: 'white', borderRadius: '50%', padding: '4px', border: '1px solid var(--border)', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', cursor: 'pointer', zIndex: 3 }}>
                                     <X size={16} color="#ef4444" />
                                 </button>
                             </div>
                         ) : (
-                            <div style={{ color: '#94a3b8', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                <div style={{ marginBottom: '1rem', color: '#94a3b8' }}>
+                            <div style={{ color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                <div style={{ marginBottom: '1rem', color: 'var(--text-muted)' }}>
                                     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                                         <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                                         <circle cx="8.5" cy="8.5" r="1.5"></circle>
@@ -99,37 +99,37 @@ const ProjectUpload = () => {
                                     </svg>
                                 </div>
                                 <p style={{ fontWeight: '500', fontSize: '1rem', color: '#334155', margin: '0 0 0.5rem 0' }}>Drop images here or click to upload</p>
-                                <p style={{ fontSize: '0.85rem', margin: 0, color: '#94a3b8' }}>Support for JPG, PNG, WEBP (Max 10MB each)</p>
+                                <p style={{ fontSize: '0.85rem', margin: 0, color: 'var(--text-muted)' }}>Support for JPG, PNG, WEBP (Max 10MB each)</p>
                             </div>
                         )}
                     </div>
                 </div>
 
                 {/* Details Section */}
-                <div style={{ backgroundColor: 'white', padding: '2rem', borderRadius: '12px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
-                    <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#0f172a', marginBottom: '0.25rem' }}>Project Details</h3>
-                    <p style={{ color: '#64748b', fontSize: '0.85rem', marginBottom: '1.5rem' }}>Enter comprehensive project information</p>
+                <div style={{ backgroundColor: 'white', padding: '2rem', borderRadius: '12px', border: '1px solid var(--surface-secondary)', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>Project Details</h3>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>Enter comprehensive project information</p>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#0f172a' }}>Project Title *</label>
+                            <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-primary)' }}>Project Title *</label>
                             <input
                                 type="text"
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                                 required
                                 placeholder="e.g., Luxury Villa Project"
-                                style={{ padding: '0.75rem 1rem', borderRadius: '8px', border: 'none', backgroundColor: '#f8fafc', fontSize: '0.9rem', outline: 'none', color: '#334155' }}
+                                style={{ padding: '0.75rem 1rem', borderRadius: '8px', border: 'none', backgroundColor: 'var(--background)', fontSize: '0.9rem', outline: 'none', color: '#334155' }}
                             />
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#0f172a' }}>Category *</label>
+                            <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-primary)' }}>Category *</label>
                             <select
                                 value={category}
                                 onChange={(e) => setCategory(e.target.value)}
                                 required
-                                style={{ padding: '0.75rem 1rem', borderRadius: '8px', border: 'none', backgroundColor: '#f8fafc', fontSize: '0.9rem', outline: 'none', color: '#334155', appearance: 'none' }}
+                                style={{ padding: '0.75rem 1rem', borderRadius: '8px', border: 'none', backgroundColor: 'var(--background)', fontSize: '0.9rem', outline: 'none', color: '#334155', appearance: 'none' }}
                             >
                                 <option value="" disabled>Select category</option>
                                 <option value="Residential">Residential</option>
@@ -142,33 +142,33 @@ const ProjectUpload = () => {
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#0f172a' }}>Location</label>
+                            <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-primary)' }}>Location</label>
                             <input
                                 type="text"
                                 value={locationInput}
                                 onChange={(e) => setLocationInput(e.target.value)}
                                 placeholder="City, State"
-                                style={{ padding: '0.75rem 1rem', borderRadius: '8px', border: 'none', backgroundColor: '#f8fafc', fontSize: '0.9rem', outline: 'none', color: '#334155' }}
+                                style={{ padding: '0.75rem 1rem', borderRadius: '8px', border: 'none', backgroundColor: 'var(--background)', fontSize: '0.9rem', outline: 'none', color: '#334155' }}
                             />
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#0f172a' }}>Area (sq ft)</label>
+                            <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-primary)' }}>Area (sq ft)</label>
                             <input
                                 type="number"
                                 value={area}
                                 onChange={(e) => setArea(e.target.value)}
                                 placeholder="5000"
-                                style={{ padding: '0.75rem 1rem', borderRadius: '8px', border: 'none', backgroundColor: '#f8fafc', fontSize: '0.9rem', outline: 'none', color: '#334155' }}
+                                style={{ padding: '0.75rem 1rem', borderRadius: '8px', border: 'none', backgroundColor: 'var(--background)', fontSize: '0.9rem', outline: 'none', color: '#334155' }}
                             />
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#0f172a' }}>Project Status</label>
+                            <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-primary)' }}>Project Status</label>
                             <select
                                 value={status}
                                 onChange={(e) => setStatus(e.target.value)}
-                                style={{ padding: '0.75rem 1rem', borderRadius: '8px', border: 'none', backgroundColor: '#f8fafc', fontSize: '0.9rem', outline: 'none', color: '#334155', appearance: 'none' }}
+                                style={{ padding: '0.75rem 1rem', borderRadius: '8px', border: 'none', backgroundColor: 'var(--background)', fontSize: '0.9rem', outline: 'none', color: '#334155', appearance: 'none' }}
                             >
                                 <option value="" disabled>Select status</option>
                                 <option value="Planning">Planning</option>
@@ -178,33 +178,33 @@ const ProjectUpload = () => {
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#0f172a' }}>Budget</label>
+                            <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-primary)' }}>Budget</label>
                             <input
                                 type="text"
                                 value={budget}
                                 onChange={(e) => setBudget(e.target.value)}
                                 placeholder="$500,000"
-                                style={{ padding: '0.75rem 1rem', borderRadius: '8px', border: 'none', backgroundColor: '#f8fafc', fontSize: '0.9rem', outline: 'none', color: '#334155' }}
+                                style={{ padding: '0.75rem 1rem', borderRadius: '8px', border: 'none', backgroundColor: 'var(--background)', fontSize: '0.9rem', outline: 'none', color: '#334155' }}
                             />
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#0f172a' }}>Start Date</label>
+                            <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-primary)' }}>Start Date</label>
                             <input
                                 type="date"
                                 value={startDate}
                                 onChange={(e) => setStartDate(e.target.value)}
-                                style={{ padding: '0.75rem 1rem', borderRadius: '8px', border: 'none', backgroundColor: '#f8fafc', fontSize: '0.9rem', outline: 'none', color: startDate ? '#334155' : '#94a3b8' }}
+                                style={{ padding: '0.75rem 1rem', borderRadius: '8px', border: 'none', backgroundColor: 'var(--background)', fontSize: '0.9rem', outline: 'none', color: startDate ? '#334155' : 'var(--text-muted)' }}
                             />
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#0f172a' }}>End Date</label>
+                            <label style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-primary)' }}>End Date</label>
                             <input
                                 type="date"
                                 value={endDate}
                                 onChange={(e) => setEndDate(e.target.value)}
-                                style={{ padding: '0.75rem 1rem', borderRadius: '8px', border: 'none', backgroundColor: '#f8fafc', fontSize: '0.9rem', outline: 'none', color: endDate ? '#334155' : '#94a3b8' }}
+                                style={{ padding: '0.75rem 1rem', borderRadius: '8px', border: 'none', backgroundColor: 'var(--background)', fontSize: '0.9rem', outline: 'none', color: endDate ? '#334155' : 'var(--text-muted)' }}
                             />
                         </div>
                     </div>
@@ -216,7 +216,7 @@ const ProjectUpload = () => {
                         disabled={loading || !image || !title || !category}
                         style={{
                             padding: '0.75rem 2rem',
-                            backgroundColor: (loading || !image || !title || !category) ? '#94a3b8' : '#0f172a',
+                            backgroundColor: (loading || !image || !title || !category) ? 'var(--text-muted)' : 'var(--text-primary)',
                             color: 'white',
                             border: 'none',
                             borderRadius: '8px',

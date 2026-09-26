@@ -107,7 +107,7 @@ const TeamMembers = () => {
                 <div style={{
                     position: 'fixed', top: '1.5rem', right: '1.5rem', zIndex: 99999,
                     padding: '0.875rem 1.5rem', borderRadius: '12px',
-                    backgroundColor: toast.type === 'success' ? '#059669' : '#dc2626',
+                    backgroundColor: toast.type === 'success' ? '#059669' : 'var(--danger)',
                     color: 'white', fontWeight: '500', fontSize: '0.9rem',
                     boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
                     display: 'flex', alignItems: 'center', gap: '0.5rem'
@@ -130,17 +130,17 @@ const TeamMembers = () => {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.4rem' }}>
                         <div style={{
                             width: '40px', height: '40px', borderRadius: '10px',
-                            background: 'linear-gradient(135deg, #0f172a, #334155)',
+                            background: 'linear-gradient(135deg, var(--text-primary), #334155)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                             boxShadow: '0 4px 12px rgba(15,23,42,0.2)'
                         }}>
                             <UserPlus size={22} color="white" />
                         </div>
-                        <h1 style={{ fontSize: '1.8rem', fontWeight: '700', color: '#0f172a', letterSpacing: '-0.03em', margin: 0 }}>
+                        <h1 className="page-title-xl">
                             SRS Team Management
                         </h1>
                     </div>
-                    <p style={{ color: '#64748b', fontSize: '0.95rem', marginLeft: '3.25rem' }}>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', marginLeft: '3.25rem' }}>
                         Add and manage your leadership and team members
                     </p>
                 </div>
@@ -148,7 +148,7 @@ const TeamMembers = () => {
                     onClick={() => { resetForm(); setShowForm(true); }}
                     style={{
                         display: 'flex', alignItems: 'center', gap: '0.5rem',
-                        background: '#0f172a',
+                        background: 'var(--text-primary)',
                         color: 'white', padding: '0.7rem 1.4rem', borderRadius: '10px',
                         border: 'none', fontWeight: '600', fontSize: '0.9rem', cursor: 'pointer',
                         boxShadow: '0 4px 14px rgba(0,0,0,0.2)',
@@ -173,26 +173,26 @@ const TeamMembers = () => {
                                 backgroundColor: 'white',
                                 borderRadius: '20px',
                                 overflow: 'hidden',
-                                border: '1px solid #e2e8f0',
+                                border: '1px solid var(--border)',
                                 boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
                                 transition: 'all 0.3s ease',
                                 display: 'flex', flexDirection: 'column'
                             }}
                         >
-                            <div style={{ height: '140px', position: 'relative', overflow: 'hidden', backgroundColor: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div style={{ height: '140px', position: 'relative', overflow: 'hidden', backgroundColor: 'var(--background)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <div style={{ 
                                     padding: '1.5rem 1.25rem', 
                                     textAlign: 'center'
                                 }}>
-                                    <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '700', color: '#0f172a' }}>{member.name}</h3>
-                                    <p style={{ margin: '0.4rem 0 0', color: '#64748b', fontSize: '0.9rem', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{member.designation}</p>
+                                    <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-primary)' }}>{member.name}</h3>
+                                    <p style={{ margin: '0.4rem 0 0', color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{member.designation}</p>
                                 </div>
                             </div>
 
                             <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                 {member.bio && (
                                     <p style={{ 
-                                        margin: 0, fontSize: '0.875rem', color: '#475569', 
+                                        margin: 0, fontSize: '0.875rem', color: 'var(--text-secondary)', 
                                         lineHeight: 1.5, display: '-webkit-box', 
                                         WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' 
                                     }}>
@@ -201,7 +201,7 @@ const TeamMembers = () => {
                                 )}
                                 
                                 {member.phoneNumber && (
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#64748b', fontSize: '0.85rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
                                         <Phone size={14} /> {member.phoneNumber}
                                     </div>
                                 )}
@@ -211,7 +211,7 @@ const TeamMembers = () => {
                                         {member.tags.split(',').map((tag: string, i: number) => (
                                             <span key={i} style={{ 
                                                 fontSize: '0.7rem', fontWeight: '600', 
-                                                padding: '0.2rem 0.6rem', backgroundColor: '#f1f5f9', 
+                                                padding: '0.2rem 0.6rem', backgroundColor: 'var(--surface-secondary)', 
                                                 color: '#334155', borderRadius: '100px' 
                                             }}>
                                                 {tag.trim()}
@@ -221,14 +221,14 @@ const TeamMembers = () => {
                                 )}
 
 
-                                <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', paddingTop: '1rem', borderTop: '1px solid #f1f5f9' }}>
+                                <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', paddingTop: '1rem', borderTop: '1px solid var(--surface-secondary)' }}>
                                     <button 
                                         onClick={() => handleEdit(member)}
                                         style={{ 
-                                            padding: '0.4rem 0.8rem', border: '1px solid #e2e8f0', 
+                                            padding: '0.4rem 0.8rem', border: '1px solid var(--border)', 
                                             borderRadius: '8px', cursor: 'pointer', display: 'flex', 
                                             alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem',
-                                            backgroundColor: 'white', color: '#475569'
+                                            backgroundColor: 'white', color: 'var(--text-secondary)'
                                         }}
                                     >
                                         <Edit2 size={14} /> Edit
@@ -236,10 +236,10 @@ const TeamMembers = () => {
                                     <button 
                                         onClick={() => handleDeleteClick(member)}
                                         style={{ 
-                                            padding: '0.4rem 0.8rem', border: '1px solid #fee2e2', 
+                                            padding: '0.4rem 0.8rem', border: '1px solid var(--danger-light)', 
                                             borderRadius: '8px', cursor: 'pointer', display: 'flex', 
                                             alignItems: 'center', gap: '0.3rem', fontSize: '0.8rem',
-                                            backgroundColor: '#fef2f2', color: '#ef4444'
+                                            backgroundColor: 'var(--danger-light)', color: '#ef4444'
                                         }}
                                     >
                                         <Trash2 size={14} /> Delete
@@ -251,13 +251,13 @@ const TeamMembers = () => {
                 ) : (
                     <div style={{ 
                         gridColumn: '1 / -1', padding: '4rem 2rem', textAlign: 'center', 
-                        backgroundColor: '#f8fafc', borderRadius: '20px', border: '2px dashed #cbd5e1' 
+                        backgroundColor: 'var(--background)', borderRadius: '20px', border: '2px dashed var(--border-strong)' 
                     }}>
-                        <div style={{ width: '64px', height: '64px', borderRadius: '50%', margin: '0 auto 1rem', backgroundColor: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <User size={32} color="#94a3b8" />
+                        <div style={{ width: '64px', height: '64px', borderRadius: '50%', margin: '0 auto 1rem', backgroundColor: 'var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <User size={32} color="var(--text-muted)" />
                         </div>
                         <h3>No team members yet</h3>
-                        <p style={{ color: '#64748b' }}>Click "Add Member" to build your team page content.</p>
+                        <p style={{ color: 'var(--text-secondary)' }}>Click "Add Member" to build your team page content.</p>
                     </div>
                 )}
             </div>
@@ -279,9 +279,9 @@ const TeamMembers = () => {
                         }}
                         onClick={e => e.stopPropagation()}
                     >
-                        <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid var(--surface-secondary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <h2 style={{ fontSize: '1.25rem', fontWeight: '700', margin: 0 }}>{editMode ? 'Edit Member' : 'Add New Member'}</h2>
-                            <button onClick={resetForm} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}><X size={24} /></button>
+                            <button onClick={resetForm} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}><X size={24} /></button>
                         </div>
 
                         <div style={{ padding: '2rem' }}>
@@ -289,48 +289,48 @@ const TeamMembers = () => {
 
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                     <div>
-                                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#475569', marginBottom: '0.5rem' }}>Full Name *</label>
+                                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Full Name *</label>
                                         <input 
                                             type="text" value={name} onChange={e => setName(e.target.value)} required
                                             placeholder="e.g. Soban Prabhu"
-                                            style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '1.5px solid #e2e8f0', outline: 'none' }} 
+                                            style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '1.5px solid var(--border)', outline: 'none' }} 
                                         />
                                     </div>
                                     <div>
-                                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#475569', marginBottom: '0.5rem' }}>Designation *</label>
+                                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Designation *</label>
                                         <input 
                                             type="text" value={designation} onChange={e => setDesignation(e.target.value)} required
                                             placeholder="e.g. PROPRIETOR"
-                                            style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '1.5px solid #e2e8f0', outline: 'none' }} 
+                                            style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '1.5px solid var(--border)', outline: 'none' }} 
                                         />
                                     </div>
                                 </div>
 
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                     <div>
-                                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#475569', marginBottom: '0.5rem' }}>Phone Number</label>
+                                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Phone Number</label>
                                         <input 
                                             type="text" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)}
                                             placeholder="e.g. +91 9876543210"
-                                            style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '1.5px solid #e2e8f0', outline: 'none' }} 
+                                            style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '1.5px solid var(--border)', outline: 'none' }} 
                                         />
                                     </div>
                                     <div>
-                                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#475569', marginBottom: '0.5rem' }}>Skills / Tags</label>
+                                        <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Skills / Tags</label>
                                         <input 
                                             type="text" value={tags} onChange={e => setTags(e.target.value)}
                                             placeholder="Separate with commas"
-                                            style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '1.5px solid #e2e8f0', outline: 'none' }} 
+                                            style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '1.5px solid var(--border)', outline: 'none' }} 
                                         />
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#475569', marginBottom: '0.5rem' }}>Biography / Content</label>
+                                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Biography / Content</label>
                                     <textarea 
                                         value={bio} onChange={e => setBio(e.target.value)} rows={4}
                                         placeholder="Briefly describe roles and experience..."
-                                        style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '1.5px solid #e2e8f0', outline: 'none', resize: 'vertical' }} 
+                                        style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '1.5px solid var(--border)', outline: 'none', resize: 'vertical' }} 
                                     />
                                 </div>
 
@@ -338,7 +338,7 @@ const TeamMembers = () => {
                                     <button 
                                         type="submit" disabled={loading}
                                         style={{ 
-                                            flex: 1, padding: '0.875rem', backgroundColor: '#0f172a', color: 'white', 
+                                            flex: 1, padding: '0.875rem', background: 'var(--gradient-brand)', color: 'white', 
                                             border: 'none', borderRadius: '12px', fontWeight: '600', cursor: loading ? 'not-allowed' : 'pointer',
                                             boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
                                         }}
@@ -348,7 +348,7 @@ const TeamMembers = () => {
                                     <button 
                                         type="button" onClick={resetForm}
                                         style={{ 
-                                            flex: 0.5, padding: '0.875rem', backgroundColor: '#f1f5f9', color: '#475569', 
+                                            flex: 0.5, padding: '0.875rem', backgroundColor: 'var(--surface-secondary)', color: 'var(--text-secondary)', 
                                             border: 'none', borderRadius: '12px', fontWeight: '600', cursor: 'pointer'
                                         }}
                                     >

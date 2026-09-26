@@ -177,10 +177,10 @@ const SrsImages = () => {
             />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
                 <div>
-                    <h1 style={{ fontSize: '1.8rem', fontWeight: '600', color: '#0f172a', marginBottom: '0.4rem', letterSpacing: '-0.02em' }}>
+                    <h1 className="page-title-xl">
                         SRS Images
                     </h1>
-                    <p style={{ color: '#64748b', fontSize: '0.95rem' }}>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
                         Upload title, description, location and up to {MAX_IMAGES} images per record
                     </p>
                 </div>
@@ -207,53 +207,53 @@ const SrsImages = () => {
             </div>
 
             {error && (
-                <div style={{ padding: '0.75rem', marginBottom: '1rem', backgroundColor: '#fef2f2', color: '#b91c1c', borderRadius: '8px', fontSize: '0.9rem' }}>
+                <div style={{ padding: '0.75rem', marginBottom: '1rem', backgroundColor: 'var(--danger-light)', color: '#b91c1c', borderRadius: '8px', fontSize: '0.9rem' }}>
                     {error}
                 </div>
             )}
 
             {/* List table */}
-            <div style={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+            <div style={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid var(--border)', overflow: 'hidden' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
-                        <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                            <th style={{ textAlign: 'left', padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: '600', color: '#64748b' }}>Title</th>
-                            <th style={{ textAlign: 'left', padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: '600', color: '#64748b' }}>Description</th>
-                            <th style={{ textAlign: 'left', padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: '600', color: '#64748b' }}>Location</th>
-                            <th style={{ textAlign: 'left', padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: '600', color: '#64748b' }}>Image</th>
-                            <th style={{ textAlign: 'right', padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: '600', color: '#64748b' }}>Actions</th>
+                        <tr style={{ backgroundColor: 'var(--background)', borderBottom: '1px solid var(--border)' }}>
+                            <th style={{ textAlign: 'left', padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)' }}>Title</th>
+                            <th style={{ textAlign: 'left', padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)' }}>Description</th>
+                            <th style={{ textAlign: 'left', padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)' }}>Location</th>
+                            <th style={{ textAlign: 'left', padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)' }}>Image</th>
+                            <th style={{ textAlign: 'right', padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)' }}>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {loading && displayList.length === 0 ? (
                             <tr>
-                                <td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>Loading...</td>
+                                <td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>Loading...</td>
                             </tr>
                         ) : displayList.length === 0 ? (
                             <tr>
-                                <td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>No SRS images yet. Add one to get started.</td>
+                                <td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>No SRS images yet. Add one to get started.</td>
                             </tr>
                         ) : (
                             displayList.map((row: any) => {
                                 const imgs = imageUrls(row);
                                 return (
-                                    <tr key={row.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                                        <td style={{ padding: '0.75rem 1rem', fontSize: '0.9rem', color: '#0f172a' }}>{cellText(row.title)}</td>
-                                        <td style={{ padding: '0.75rem 1rem', fontSize: '0.85rem', color: '#475569', maxWidth: '200px' }}>{descText(row)}</td>
-                                        <td style={{ padding: '0.75rem 1rem', fontSize: '0.85rem', color: '#475569' }}>{cellText(row.location)}</td>
+                                    <tr key={row.id} style={{ borderBottom: '1px solid var(--surface-secondary)' }}>
+                                        <td style={{ padding: '0.75rem 1rem', fontSize: '0.9rem', color: 'var(--text-primary)' }}>{cellText(row.title)}</td>
+                                        <td style={{ padding: '0.75rem 1rem', fontSize: '0.85rem', color: 'var(--text-secondary)', maxWidth: '200px' }}>{descText(row)}</td>
+                                        <td style={{ padding: '0.75rem 1rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{cellText(row.location)}</td>
                                         <td style={{ padding: '0.75rem 1rem' }}>
                                             {imgs.length > 0 ? (
                                                 <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
                                                     {imgs.slice(0, 3).map((url: string, i: number) => (
                                                         <img key={i} src={url.startsWith('http') ? url : Img_Url + url} alt="" style={{ width: 36, height: 36, objectFit: 'cover', borderRadius: 6 }} />
                                                     ))}
-                                                    {imgs.length > 3 && <span style={{ fontSize: '0.8rem', color: '#64748b' }}>+{imgs.length - 3}</span>}
+                                                    {imgs.length > 3 && <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>+{imgs.length - 3}</span>}
                                                 </div>
                                             ) : '-'}
                                         </td>
                                         <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>
                                             <button type="button" onClick={() => openEdit(row)} style={{ ...iconBtnStyle, marginRight: '0.5rem' }} title="Edit"><Edit2 size={16} /></button>
-                                            <button type="button" onClick={() => setConfirmDelete({ open: true, id: row.id })} style={{ ...iconBtnStyle, color: '#dc2626' }} title="Delete"><Trash2 size={16} /></button>
+                                            <button type="button" onClick={() => setConfirmDelete({ open: true, id: row.id })} style={{ ...iconBtnStyle, color: 'var(--danger)' }} title="Delete"><Trash2 size={16} /></button>
                                         </td>
                                     </tr>
                                 );
@@ -295,8 +295,8 @@ const SrsImages = () => {
                                 onClick={(e) => e.stopPropagation()}
                             >
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                                    <h3 style={{ fontSize: '1.2rem', fontWeight: '600', color: '#0f172a' }}>Add SRS Images</h3>
-                                    <button type="button" onClick={() => setShowForm(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', color: '#64748b' }}><X size={22} /></button>
+                                    <h3 style={{ fontSize: '1.2rem', fontWeight: '600', color: 'var(--text-primary)' }}>Add SRS Images</h3>
+                                    <button type="button" onClick={() => setShowForm(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', color: 'var(--text-secondary)' }}><X size={22} /></button>
                                 </div>
                                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                     <div>
@@ -314,7 +314,7 @@ const SrsImages = () => {
                                     <div>
                                         <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#334155', marginBottom: '0.35rem' }}>Images (max {MAX_IMAGES}) *</label>
                                         <input type="file" accept="image/*" multiple onChange={handleFileChange} style={{ display: 'none' }} id="srs-file-input" />
-                                        <label htmlFor="srs-file-input" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '8px', border: '1px dashed #cbd5e1', cursor: 'pointer', fontSize: '0.9rem', color: '#475569' }}>
+                                        <label htmlFor="srs-file-input" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '8px', border: '1px dashed var(--border-strong)', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                                             <Upload size={18} /> Choose files
                                         </label>
                                         {previews.length > 0 && (
@@ -327,10 +327,10 @@ const SrsImages = () => {
                                                 ))}
                                             </div>
                                         )}
-                                        <p style={{ marginTop: '0.35rem', fontSize: '0.8rem', color: '#64748b' }}>{files.length} / {MAX_IMAGES} selected</p>
+                                        <p style={{ marginTop: '0.35rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{files.length} / {MAX_IMAGES} selected</p>
                                     </div>
                                     <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
-                                        <button type="button" onClick={() => setShowForm(false)} style={{ ...btnStyle, backgroundColor: '#e2e8f0', color: '#475569' }}>Cancel</button>
+                                        <button type="button" onClick={() => setShowForm(false)} style={{ ...btnStyle, backgroundColor: 'var(--border)', color: 'var(--text-secondary)' }}>Cancel</button>
                                         <button type="submit" disabled={loading || !title.trim() || files.length === 0} style={{ ...btnStyle, opacity: (loading || !title.trim() || files.length === 0) ? 0.6 : 1 }}>
                                             {loading ? 'Uploading…' : 'Upload'}
                                         </button>
@@ -375,8 +375,8 @@ const SrsImages = () => {
                                 onClick={(e) => e.stopPropagation()}
                             >
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                                    <h3 style={{ fontSize: '1.2rem', fontWeight: '600', color: '#0f172a' }}>Edit SRS Image</h3>
-                                    <button type="button" onClick={() => setShowEdit(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', color: '#64748b' }}><X size={22} /></button>
+                                    <h3 style={{ fontSize: '1.2rem', fontWeight: '600', color: 'var(--text-primary)' }}>Edit SRS Image</h3>
+                                    <button type="button" onClick={() => setShowEdit(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', color: 'var(--text-secondary)' }}><X size={22} /></button>
                                 </div>
                                 <form onSubmit={handleUpdateSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                     <div>
@@ -395,7 +395,7 @@ const SrsImages = () => {
                                         <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#334155', marginBottom: '0.35rem' }}>Images (max {MAX_IMAGES_EDIT} total)</label>
                                         {editExistingImageUrls.length > 0 && (
                                             <div style={{ marginBottom: '0.75rem' }}>
-                                                <span style={{ fontSize: '0.8rem', color: '#64748b', display: 'block', marginBottom: '0.35rem' }}>Existing – click × to remove</span>
+                                                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>Existing – click × to remove</span>
                                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                                                     {editExistingImageUrls.map((url, i) => (
                                                         <div key={i} style={{ position: 'relative' }}>
@@ -406,9 +406,9 @@ const SrsImages = () => {
                                                 </div>
                                             </div>
                                         )}
-                                        <span style={{ fontSize: '0.8rem', color: '#64748b', display: 'block', marginBottom: '0.35rem' }}>Add images (up to {maxNewInEdit} more)</span>
+                                        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>Add images (up to {maxNewInEdit} more)</span>
                                         <input type="file" accept="image/*" multiple onChange={handleEditNewFilesChange} style={{ display: 'none' }} id="srs-edit-file" />
-                                        <label htmlFor="srs-edit-file" style={{ display: editNewFiles.length >= maxNewInEdit ? 'none' : 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '8px', border: '1px dashed #cbd5e1', cursor: 'pointer', fontSize: '0.9rem', color: '#475569' }}>
+                                        <label htmlFor="srs-edit-file" style={{ display: editNewFiles.length >= maxNewInEdit ? 'none' : 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '8px', border: '1px dashed var(--border-strong)', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                                             <Upload size={18} /> Choose images
                                         </label>
                                         {editNewPreviews.length > 0 && (
@@ -421,10 +421,10 @@ const SrsImages = () => {
                                                 ))}
                                             </div>
                                         )}
-                                        <p style={{ marginTop: '0.35rem', fontSize: '0.8rem', color: '#64748b' }}>{editExistingImageUrls.length + editNewFiles.length} / {MAX_IMAGES_EDIT} images</p>
+                                        <p style={{ marginTop: '0.35rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{editExistingImageUrls.length + editNewFiles.length} / {MAX_IMAGES_EDIT} images</p>
                                     </div>
                                     <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
-                                        <button type="button" onClick={() => setShowEdit(false)} style={{ ...btnStyle, backgroundColor: '#e2e8f0', color: '#475569' }}>Cancel</button>
+                                        <button type="button" onClick={() => setShowEdit(false)} style={{ ...btnStyle, backgroundColor: 'var(--border)', color: 'var(--text-secondary)' }}>Cancel</button>
                                         <button type="submit" disabled={loading || editExistingImageUrls.length + editNewFiles.length === 0} style={{ ...btnStyle, opacity: (loading || editExistingImageUrls.length + editNewFiles.length === 0) ? 0.6 : 1 }}>{loading ? 'Saving…' : 'Update'}</button>
                                     </div>
                                 </form>
@@ -442,8 +442,8 @@ const inputStyle: React.CSSProperties = {
     width: '100%',
     padding: '0.65rem 0.9rem',
     borderRadius: '8px',
-    border: '1px solid #e2e8f0',
-    backgroundColor: '#f8fafc',
+    border: '1px solid var(--border)',
+    backgroundColor: 'var(--background)',
     fontSize: '0.9rem',
     outline: 'none',
     color: '#334155',
@@ -466,7 +466,7 @@ const iconBtnStyle: React.CSSProperties = {
     border: 'none',
     borderRadius: '8px',
     backgroundColor: 'transparent',
-    color: '#64748b',
+    color: 'var(--text-secondary)',
     cursor: 'pointer',
 };
 

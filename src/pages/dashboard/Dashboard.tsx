@@ -1,190 +1,296 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import {
+    FolderOpen, Briefcase, FileText, DollarSign, LayoutGrid, ArrowUpRight,
+    Mail, Users, Ticket, RefreshCw, Clock, Plus, Building2, CalendarDays,
+} from 'lucide-react';
 import type { AppDispatch, RootState } from '../../store/store';
 import { fetchMenu } from '../../store/slices/menuSlice';
+import { contentCMSService, getQuotationList } from '../../services/api';
+import { CountUp, ErrorState } from '../../components/PageShell';
 import './Dashboard.css';
 
-const SERVICES = [
-    { id: '01', title: 'Web Applications', desc: 'Complex, scalable web apps built with modern stacks. React, Node, cloud-ready.', tag: 'Full Stack' },
-    { id: '02', title: 'Website Design', desc: 'Conversion-focused websites with cinematic UI and pixel-perfect execution.', tag: 'UI/UX' },
-    { id: '03', title: 'Mobile Apps', desc: 'iOS & Android apps with fluid interfaces and native performance.', tag: 'Mobile' },
-    { id: '04', title: 'SaaS Products', desc: 'End-to-end product development — wireframe to launch-ready platform.', tag: 'Product' },
-    { id: '05', title: 'API & Backend', desc: 'Robust REST APIs, microservices, and database architecture that scales.', tag: 'Backend' },
-    { id: '06', title: 'UI/UX Design', desc: 'Research-driven design systems and prototypes that users love.', tag: 'Design' },
+const QUICK_LINKS = [
+    { name: 'Upload Project', path: '/upload-project', icon: FolderOpen },
+    { name: 'Create Quote', path: '/quotation-create', icon: DollarSign },
+    { name: 'Banners', path: '/upload-home-banners', icon: LayoutGrid },
+    { name: 'Write Blog', path: '/blog', icon: FileText },
+    { name: 'Services', path: '/services', icon: Briefcase },
+    { name: 'Staff', path: '/staff', icon: Users },
+    { name: 'Tickets', path: '/tickets', icon: Ticket },
+    { name: 'Enquiries', path: '/contact-info', icon: Mail },
 ];
 
-const SOCIALS = [
-    {
-        name: 'Instagram', handle: '@buildnex.dev', href: 'https://www.instagram.com/buildnexdev?igsh=MTQzenF4cXpkOTMwag==',
-        icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="16" height="16"><rect x="2" y="2" width="20" height="20" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="0.8" fill="currentColor" stroke="none" /></svg>,
-    },
-    {
-        name: 'LinkedIn', handle: 'BuildNex', href: 'https://www.linkedin.com/in/buildnex-dev-3518a93ab',
-        icon: <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z" /><circle cx="4" cy="4" r="2" /></svg>,
-    },
-    {
-        name: 'GitHub', handle: 'buildnexdev', href: 'https://github.com/buildnexdev',
-        icon: <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" /></svg>,
-    },
-    {
-        name: 'Portfolio', handle: 'buildnexdev.co.in', href: 'https://buildnexdev.co.in/',
-        icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="16" height="16"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>,
-    },
-];
+type Counts = {
+    projects: number;
+    banners: number;
+    services: number;
+    blogs: number;
+    quotations: number;
+    messages: number;
+    quoteValue: number;
+    recentQuotes: { name: string; price: number; date?: string }[];
+    recentProjects: { title: string; category?: string; date?: string }[];
+};
 
-const STATS = [
-    { value: '50+', label: 'Projects' },
-    { value: '30+', label: 'Clients' },
-    { value: '5★', label: 'Rating' },
-    { value: '3yr', label: 'Experience' },
-];
+const EMPTY: Counts = {
+    projects: 0, banners: 0, services: 0, blogs: 0, quotations: 0, messages: 0,
+    quoteValue: 0, recentQuotes: [], recentProjects: [],
+};
 
-/* ── Geometric logo: interlocking squares with emerald accent ── */
-const BnxLogo = () => (
-    <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-        {/* back square — offset */}
-        <rect x="10" y="10" width="24" height="24" rx="4" fill="rgba(37, 99, 235, 0.08)" stroke="#2563EB" strokeWidth="1.5" />
-        {/* front square — offset */}
-        <rect x="4" y="4" width="24" height="24" rx="4" fill="#ffffff" stroke="#2563EB" strokeWidth="2" />
-        {/* inner accent square */}
-        <rect x="9" y="9" width="14" height="14" rx="2.5" fill="#2563EB" />
-        {/* white B letter */}
-        <text x="11.5" y="21" fontFamily="'Bebas Neue',sans-serif" fontSize="12" fill="#ffffff" letterSpacing="0">B</text>
-        {/* corner dot */}
-        <circle cx="39" cy="5" r="3" fill="#2563EB" />
-        <circle cx="39" cy="5" r="5" fill="none" stroke="#2563EB" strokeWidth="1" opacity="0.35" />
-    </svg>
-);
+const asArray = (res: any): any[] => {
+    if (Array.isArray(res)) return res;
+    if (Array.isArray(res?.data)) return res.data;
+    if (Array.isArray(res?.data?.data)) return res.data.data;
+    if (Array.isArray(res?.result)) return res.result;
+    return [];
+};
 
-const ArrowDiag = () => (
-    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" width="12" height="12">
-        <path d="M2 12L12 2M12 2H5M12 2v7" />
-    </svg>
-);
+const inr = (n: number) =>
+    n >= 10000000 ? `₹${(n / 10000000).toFixed(1)}Cr`
+        : n >= 100000 ? `₹${(n / 100000).toFixed(1)}L`
+            : n >= 1000 ? `₹${Math.round(n / 1000)}K`
+                : `₹${n}`;
 
 export default function Dashboard() {
     const dispatch = useDispatch<AppDispatch>();
     const { user } = useSelector((state: RootState) => state.auth);
     const name = user?.name?.split(' ')[0] || 'there';
-    const [activeService, setActiveService] = useState(0);
+    const companyID = user?.companyID;
 
-    // Fetch menu items on first load
+    const [counts, setCounts] = useState<Counts>(EMPTY);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
     useEffect(() => {
-        if (user?.companyID) {
-            dispatch(fetchMenu(user.companyID));
+        if (companyID) dispatch(fetchMenu(companyID));
+    }, [dispatch, companyID]);
+
+    const load = useCallback(async () => {
+        if (!companyID) { setLoading(false); return; }
+        setLoading(true);
+        setError(null);
+        try {
+            const [projects, banners, services, blogs, quotes, messages] = await Promise.allSettled([
+                contentCMSService.getProjects(companyID),
+                contentCMSService.getBanners(companyID),
+                contentCMSService.getServices(companyID),
+                contentCMSService.getBlogs(companyID),
+                getQuotationList({ userId: user?.userId }),
+                contentCMSService.getContactMessages(companyID),
+            ]);
+
+            const projectList = projects.status === 'fulfilled' ? asArray(projects.value) : [];
+            const bannerList = banners.status === 'fulfilled' ? asArray(banners.value) : [];
+            const serviceList = services.status === 'fulfilled' ? asArray(services.value) : [];
+            const blogList = blogs.status === 'fulfilled' ? asArray(blogs.value) : [];
+            const quoteList = quotes.status === 'fulfilled' ? asArray(quotes.value) : [];
+            const messageList = messages.status === 'fulfilled' ? asArray(messages.value) : [];
+
+            const quoteValue = quoteList.reduce((sum, q) => sum + (Number(q.grandTotal ?? q.total ?? q.price) || 0), 0);
+            const recentQuotes = quoteList.slice(0, 5).map((q) => ({
+                name: q.clientName || q.name || q.customerName || 'Client',
+                price: Number(q.grandTotal ?? q.total ?? q.price) || 0,
+                date: q.createdOn || q.createdAt || q.date,
+            }));
+            const recentProjects = projectList.slice(0, 5).map((p) => ({
+                title: p.title || p.projectName || p.name || 'Untitled',
+                category: p.category || p.categoryName,
+                date: p.createdOn || p.createdAt || p.date,
+            }));
+
+            setCounts({
+                projects: projectList.length,
+                banners: bannerList.length,
+                services: serviceList.length,
+                blogs: blogList.length,
+                quotations: quoteList.length,
+                messages: messageList.length,
+                quoteValue,
+                recentQuotes,
+                recentProjects,
+            });
+        } catch (e: any) {
+            setError(e?.message || 'Failed to load dashboard');
+        } finally {
+            setLoading(false);
         }
-    }, [dispatch, user?.companyID]);
+    }, [companyID, user?.userId]);
+
+    useEffect(() => { load(); }, [load]);
+
+    const kpis = useMemo(() => [
+        { label: 'PROJECTS', value: counts.projects, icon: <FolderOpen size={18} />, to: '/manage-projects', highlight: true },
+        { label: 'QUOTATIONS', value: counts.quotations, icon: <DollarSign size={18} />, to: '/quotation', highlight: false },
+        { label: 'SERVICES', value: counts.services, icon: <Briefcase size={18} />, to: '/services', highlight: false },
+        { label: 'ENQUIRIES', value: counts.messages, icon: <Mail size={18} />, to: '/contact-info', highlight: false },
+    ], [counts]);
+
+    const contentMix = useMemo(() => {
+        const rows = [
+            { label: 'Projects', value: counts.projects },
+            { label: 'Banners', value: counts.banners },
+            { label: 'Services', value: counts.services },
+            { label: 'Blogs', value: counts.blogs },
+        ];
+        const max = Math.max(1, ...rows.map((r) => r.value));
+        return rows.map((r) => ({ ...r, pct: Math.round((r.value / max) * 100) }));
+    }, [counts]);
 
     const greeting = () => {
         const h = new Date().getHours();
-        if (h < 12) return 'Morning';
-        if (h < 18) return 'Afternoon';
-        return 'Evening';
+        if (h < 12) return 'Good morning';
+        if (h < 18) return 'Good afternoon';
+        return 'Good evening';
     };
 
     return (
-        <div className="bnx-wrap">
+        <div className="dash page-enter">
+            <div className="dash-intro">
+                <div>
+                    <p className="dash-intro__hello">{greeting()}, {name}</p>
+                    <p className="dash-intro__sub">
+                        {user?.companyName || 'Your company'} · live workspace overview
+                    </p>
+                </div>
+                <button type="button" className="ui-btn ui-btn--secondary ui-btn--sm" onClick={load} disabled={loading}>
+                    <RefreshCw size={14} className={loading ? 'dash-spin' : ''} /> Refresh
+                </button>
+            </div>
 
-            {/* TICKER */}
-            <div className="bnx-ticker">
-                <div className="bnx-ticker-track">
-                    {[...Array(2)].flatMap((_, ri) =>
-                        ['Web Apps', 'Mobile', 'SaaS Platforms', 'UI/UX', 'Backend', 'Websites', 'APIs', 'Design Systems'].map((t, i) => (
-                            <span key={`${ri}-${i}`} className="bnx-ticker-item">
-                                <span className="bnx-ticker-dot" />{t}
-                            </span>
+            {error && (
+                <div style={{ marginBottom: '1rem' }}>
+                    <ErrorState message={error} onRetry={load} />
+                </div>
+            )}
+
+            <section className="dash-kpis">
+                {kpis.map((k) => (
+                    <Link key={k.label} to={k.to} className={`dash-kpi${k.highlight ? ' is-hot' : ''}`}>
+                        <span className="dash-kpi__top">
+                            <span className="dash-kpi__icon">{k.icon}</span>
+                            <span className="dash-kpi__label">{k.label}</span>
+                        </span>
+                        <span className="dash-kpi__val">
+                            {loading ? '—' : <CountUp value={k.value} />}
+                        </span>
+                    </Link>
+                ))}
+            </section>
+
+            <section className="dash-grid">
+                <div className="dash-card dash-card--wide">
+                    <div className="dash-card__head">
+                        <h3>Content mix</h3>
+                    </div>
+                    <div className="dash-bars">
+                        {contentMix.map((row) => (
+                            <div key={row.label} className="dash-bar">
+                                <div className="dash-bar__top">
+                                    <span>{row.label}</span>
+                                    <strong>{loading ? '—' : row.value}</strong>
+                                </div>
+                                <div className="dash-bar__track">
+                                    <span style={{ width: loading ? '8%' : `${Math.max(4, row.pct)}%` }} />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="dash-card">
+                    <div className="dash-card__head">
+                        <h3>Pipeline</h3>
+                    </div>
+                    <div className="dash-pipeline">
+                        <Building2 size={18} />
+                        <div>
+                            <strong>{loading ? '—' : inr(counts.quoteValue)}</strong>
+                            <p>Quotation value</p>
+                        </div>
+                    </div>
+                    <div className="dash-pipeline dash-pipeline--muted">
+                        <CalendarDays size={18} />
+                        <div>
+                            <strong>{loading ? '—' : counts.banners}</strong>
+                            <p>Active banners</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section className="dash-grid">
+                <div className="dash-card dash-card--wide">
+                    <div className="dash-card__head">
+                        <h3>Quick actions</h3>
+                    </div>
+                    <div className="dash-actions">
+                        {QUICK_LINKS.map((item) => {
+                            const Icon = item.icon;
+                            return (
+                                <Link key={item.path} to={item.path} className="dash-action">
+                                    <span className="dash-action__icon"><Icon size={16} /></span>
+                                    <span>{item.name}</span>
+                                    <ArrowUpRight size={14} className="dash-action__arrow" />
+                                </Link>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                <div className="dash-card">
+                    <div className="dash-card__head">
+                        <h3>Recent quotations</h3>
+                        <Link to="/quotation-create" className="dash-card__link"><Plus size={12} /> New</Link>
+                    </div>
+                    <ul className="dash-list">
+                        {loading ? (
+                            <li className="dash-list__empty">Loading…</li>
+                        ) : counts.recentQuotes.length === 0 ? (
+                            <li className="dash-list__empty">No recent quotations.</li>
+                        ) : (
+                            counts.recentQuotes.map((q, i) => (
+                                <li key={`${q.name}-${i}`}>
+                                    <span className="dash-list__avatar">{q.name.charAt(0).toUpperCase()}</span>
+                                    <span className="dash-list__body">
+                                        <strong>{q.name}</strong>
+                                        <span><Clock size={11} /> {q.date ? new Date(q.date).toLocaleDateString('en-IN') : 'Recent'}</span>
+                                    </span>
+                                    <em>{inr(q.price)}</em>
+                                </li>
+                            ))
+                        )}
+                    </ul>
+                </div>
+            </section>
+
+            <section className="dash-card">
+                <div className="dash-card__head">
+                    <h3>Latest projects</h3>
+                    <Link to="/manage-projects" className="dash-card__link">View all</Link>
+                </div>
+                <div className="dash-projects">
+                    {loading ? (
+                        <p className="dash-list__empty">Loading…</p>
+                    ) : counts.recentProjects.length === 0 ? (
+                        <p className="dash-list__empty">No projects yet.</p>
+                    ) : (
+                        counts.recentProjects.map((p, i) => (
+                            <div key={`${p.title}-${i}`} className="dash-project">
+                                <span>{(p.category || 'General').toString()}</span>
+                                <strong>{p.title}</strong>
+                                <p>{p.date ? new Date(p.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}</p>
+                            </div>
                         ))
                     )}
                 </div>
-            </div>
+            </section>
 
-            {/* BODY */}
-            <div className="bnx-body">
-
-                {/* ── LEFT ── */}
-                <div className="bnx-left">
-
-                    {/* Brand */}
-                    <div className="bnx-brand-header">
-                        <BnxLogo />
-                        <div>
-                            <div className="bnx-brand-name">
-                                <span className="bnx-name-build">BUILD</span><span className="bnx-name-nex">NEX</span>
-                            </div>
-                            <div className="bnx-brand-sub">Digital Product Studio</div>
-                        </div>
-                    </div>
-
-                    <div className="bnx-rule" />
-
-                    {/* Greeting */}
-                    <div>
-                        <div className="bnx-eyebrow">Good {greeting()}, {name}</div>
-                        <p className="bnx-tagline">
-                            We craft digital experiences that convert visitors into customers — and turn ideas into shipped products.
-                        </p>
-                    </div>
-
-                    {/* Stats */}
-                    <div className="bnx-stats-row">
-                        {STATS.map((s, i) => (
-                            <div key={i} className="bnx-stat">
-                                <span className="bnx-stat-val">{s.value}</span>
-                                <span className="bnx-stat-lbl">{s.label}</span>
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="bnx-rule" />
-
-                    {/* Socials */}
-                    <div className="bnx-section-label">Connect with us</div>
-                    <div className="bnx-socials">
-                        {SOCIALS.map((s) => (
-                            <a key={s.name} href={s.href} target="_blank" rel="noreferrer" className="bnx-social-pill">
-                                <span className="bnx-social-icon">{s.icon}</span>
-                                <span className="bnx-social-info">
-                                    <span className="bnx-social-name">{s.name}</span>
-                                    <span className="bnx-social-handle">{s.handle}</span>
-                                </span>
-                                <span className="bnx-social-arrow"><ArrowDiag /></span>
-                            </a>
-                        ))}
-                    </div>
-                </div>
-
-                {/* ── RIGHT ── */}
-                <div className="bnx-right">
-                    <div className="bnx-section-label">What we build</div>
-
-                    <div className="bnx-services">
-                        {SERVICES.map((svc, i) => (
-                            <div
-                                key={svc.id}
-                                className={`bnx-svc-row${activeService === i ? ' active' : ''}`}
-                                onMouseEnter={() => setActiveService(i)}
-                                style={{ animationDelay: `${i * 0.07}s` }}
-                            >
-                                <span className="bnx-svc-num">{svc.id}</span>
-                                <div className="bnx-svc-body">
-                                    <div className="bnx-svc-title">{svc.title}</div>
-                                    <div className="bnx-svc-desc">{svc.desc}</div>
-                                </div>
-                                <span className="bnx-svc-tag">{svc.tag}</span>
-                            </div>
-                        ))}
-                    </div>
-
-                    <a href="mailto:buildnexdev@gmail.com" className="bnx-cta">
-                        <div className="bnx-cta-left">
-                            <span className="bnx-cta-label">Ready to build something great?</span>
-                            <span className="bnx-cta-email">buildnexdev@gmail.com</span>
-                        </div>
-                        <span className="bnx-cta-icon"><ArrowDiag /></span>
-                    </a>
-                </div>
-
-            </div>
+            <footer className="dash-foot">
+                <span>© {new Date().getFullYear()} BuildNexDev</span>
+                <span>ADMIN PANEL · INTERNAL</span>
+            </footer>
         </div>
     );
 }

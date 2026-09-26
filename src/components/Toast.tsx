@@ -1,12 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { createPortal } from 'react-dom';
-import { CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle2, XCircle, X } from 'lucide-react';
 import type { RootState } from '../store/store';
 import { clearMessages } from '../store/slices/buildersSlice';
 import { clearAuthError } from '../store/slices/authSlice';
 import { clearQuotationMessages } from '../store/slices/quotationSlice';
 import { clearSrsMessages } from '../store/slices/srsImagesSlice';
+
+const AUTO_DISMISS_MS = 5000;
 
 const Toast = () => {
     const dispatch = useDispatch();
@@ -17,95 +19,153 @@ const Toast = () => {
     const { successMessage: srsSuccess, error: srsError } = useSelector((state: RootState) => state.srsImages);
 
     const [isVisible, setIsVisible] = useState(false);
+    const [closing, setClosing] = useState(false);
     const [message, setMessage] = useState('');
     const [type, setType] = useState<'success' | 'error'>('success');
+    const timer = useRef<number | undefined>(undefined);
 
-    useEffect(() => {
-        const msg = buildersSuccess || quotationSuccess || srsSuccess || buildersError || quotationError || srsError || authError || menuError;
-        if (msg) {
-            setMessage(msg);
-            setType(buildersSuccess || quotationSuccess || srsSuccess ? 'success' : 'error');
-            setIsVisible(true);
-        }
-    }, [buildersSuccess, quotationSuccess, srsSuccess, buildersError, quotationError, srsError, authError, menuError]);
-
-    const handleClose = () => {
-        setIsVisible(false);
-        setTimeout(() => {
+    const handleClose = useCallback(() => {
+        window.clearTimeout(timer.current);
+        setClosing(true);
+        window.setTimeout(() => {
+            setIsVisible(false);
+            setClosing(false);
             dispatch(clearMessages());
             dispatch(clearAuthError());
             dispatch(clearQuotationMessages());
             dispatch(clearSrsMessages());
-        }, 200);
-    };
+        }, 250);
+    }, [dispatch]);
+
+    useEffect(() => {
+        const msg = buildersSuccess || quotationSuccess || srsSuccess || buildersError || quotationError || srsError || authError || menuError;
+        if (!msg) return;
+        setMessage(msg);
+        setType(buildersSuccess || quotationSuccess || srsSuccess ? 'success' : 'error');
+        setIsVisible(true);
+        setClosing(false);
+        window.clearTimeout(timer.current);
+        timer.current = window.setTimeout(handleClose, AUTO_DISMISS_MS);
+        return () => window.clearTimeout(timer.current);
+    }, [buildersSuccess, quotationSuccess, srsSuccess, buildersError, quotationError, srsError, authError, menuError, handleClose]);
 
     if (!isVisible) return null;
 
-    const modal = (
-        <div
-            style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                zIndex: 10001,
-                backgroundColor: 'rgba(0, 0, 0, 0.4)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '1rem',
-                boxSizing: 'border-box',
-            }}
-            onClick={handleClose}
-        >
-            <div
-                style={{
-                    width: '100%',
-                    maxWidth: '400px',
-                    backgroundColor: 'white',
-                    borderRadius: '16px',
-                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-                    padding: '1.5rem 1.5rem',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '1rem',
-                    border: `1px solid ${type === 'success' ? '#d1fae5' : '#fecaca'}`,
-                }}
-                onClick={(e) => e.stopPropagation()}
-            >
-                <div style={{ color: type === 'success' ? '#10b981' : '#ef4444' }}>
-                    {type === 'success' ? <CheckCircle size={48} /> : <XCircle size={48} />}
+    const isSuccess = type === 'success';
+
+    const toast = (
+        <div className={`bnx-toast-wrap${closing ? ' bnx-toast-wrap--out' : ''}`} role="status" aria-live="polite">
+            <div className={`bnx-toast bnx-toast--${isSuccess ? 'success' : 'error'}`}>
+                <span className="bnx-toast__bar" />
+                <span className="bnx-toast__icon">
+                    {isSuccess ? <CheckCircle2 size={20} /> : <XCircle size={20} />}
+                </span>
+                <div className="bnx-toast__body">
+                    <strong>{isSuccess ? 'Success' : 'Something went wrong'}</strong>
+                    <p>{message}</p>
                 </div>
-                <div style={{ fontWeight: '700', color: '#111827', fontSize: '1.125rem' }}>
-                    {type === 'success' ? 'Success' : 'Error'}
-                </div>
-                <div style={{ color: '#6b7280', fontSize: '0.95rem', textAlign: 'center' }}>
-                    {message}
-                </div>
-                <button
-                    type="button"
-                    onClick={handleClose}
-                    style={{
-                        marginTop: '0.5rem',
-                        padding: '0.6rem 1.5rem',
-                        backgroundColor: type === 'success' ? '#10b981' : '#ef4444',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '10px',
-                        fontWeight: '600',
-                        fontSize: '0.95rem',
-                        cursor: 'pointer',
-                    }}
-                >
-                    OK
+                <button type="button" className="bnx-toast__close" onClick={handleClose} aria-label="Dismiss notification">
+                    <X size={15} />
                 </button>
+                <span className="bnx-toast__progress" />
             </div>
+
+            <style>{`
+                .bnx-toast-wrap {
+                    position: fixed;
+                    top: 1rem;
+                    right: 1rem;
+                    z-index: 10001;
+                    max-width: min(400px, calc(100vw - 2rem));
+                    animation: bnxToastIn 0.35s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+                }
+                .bnx-toast-wrap--out { animation: bnxToastOut 0.25s ease both; }
+                .bnx-toast {
+                    position: relative;
+                    overflow: hidden;
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 0.75rem;
+                    padding: 0.9rem 1rem 0.9rem 1.2rem;
+                    border-radius: var(--radius-lg);
+                    background: var(--surface);
+                    border: 1px solid var(--border);
+                    box-shadow: 0 18px 40px rgba(22, 24, 43, 0.16);
+                }
+                .bnx-toast__bar {
+                    position: absolute;
+                    left: 0; top: 0; bottom: 0;
+                    width: 5px;
+                }
+                .bnx-toast--success .bnx-toast__bar { background: var(--gradient-forest); }
+                .bnx-toast--error .bnx-toast__bar { background: var(--gradient-sunset); }
+                .bnx-toast__icon {
+                    flex-shrink: 0;
+                    width: 34px; height: 34px;
+                    border-radius: 10px;
+                    display: flex; align-items: center; justify-content: center;
+                    color: #fff;
+                }
+                .bnx-toast--success .bnx-toast__icon { background: var(--gradient-forest); }
+                .bnx-toast--error .bnx-toast__icon { background: var(--gradient-sunset); }
+                .bnx-toast__body { flex: 1; min-width: 0; }
+                .bnx-toast__body strong {
+                    display: block;
+                    font-family: var(--font-display);
+                    font-size: 0.92rem;
+                    font-weight: 700;
+                    color: var(--text-primary);
+                    margin-bottom: 0.15rem;
+                }
+                .bnx-toast__body p {
+                    margin: 0;
+                    font-size: 0.85rem;
+                    line-height: 1.45;
+                    color: var(--text-secondary);
+                    word-break: break-word;
+                }
+                .bnx-toast__close {
+                    flex-shrink: 0;
+                    background: var(--surface-secondary);
+                    border: none;
+                    border-radius: 7px;
+                    padding: 0.3rem;
+                    color: var(--text-muted);
+                    cursor: pointer;
+                    display: flex;
+                    transition: background 0.18s, color 0.18s;
+                }
+                .bnx-toast__close:hover { background: var(--border); color: var(--text-primary); }
+                .bnx-toast__progress {
+                    position: absolute;
+                    left: 0; bottom: 0;
+                    height: 3px;
+                    width: 100%;
+                    transform-origin: left;
+                    animation: bnxToastProgress ${AUTO_DISMISS_MS}ms linear forwards;
+                }
+                .bnx-toast--success .bnx-toast__progress { background: var(--gradient-forest); }
+                .bnx-toast--error .bnx-toast__progress { background: var(--gradient-sunset); }
+
+                @keyframes bnxToastIn {
+                    from { opacity: 0; transform: translateX(28px) scale(0.96); }
+                    to { opacity: 1; transform: translateX(0) scale(1); }
+                }
+                @keyframes bnxToastOut {
+                    to { opacity: 0; transform: translateX(28px) scale(0.96); }
+                }
+                @keyframes bnxToastProgress {
+                    from { transform: scaleX(1); }
+                    to { transform: scaleX(0); }
+                }
+                @media (max-width: 520px) {
+                    .bnx-toast-wrap { left: 0.75rem; right: 0.75rem; max-width: none; }
+                }
+            `}</style>
         </div>
     );
 
-    return createPortal(modal, document.body);
+    return createPortal(toast, document.body);
 };
 
 export default Toast;

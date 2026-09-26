@@ -16,7 +16,7 @@ const renderStars = (rating: number, size = 16, interactive = false, onSelect?: 
                     key={i}
                     size={size}
                     fill={i <= rating ? '#FBBC04' : 'none'}
-                    color={i <= rating ? '#FBBC04' : '#cbd5e1'}
+                    color={i <= rating ? '#FBBC04' : 'var(--border-strong)'}
                     strokeWidth={1.5}
                     style={{ cursor: interactive ? 'pointer' : 'default', transition: 'all 0.2s' }}
                     onClick={() => interactive && onSelect?.(i)}
@@ -147,7 +147,7 @@ const GoogleReviews = () => {
                 <div style={{
                     position: 'fixed', top: '1.5rem', right: '1.5rem', zIndex: 99999,
                     padding: '0.875rem 1.5rem', borderRadius: '12px',
-                    backgroundColor: toast.type === 'success' ? '#059669' : '#dc2626',
+                    backgroundColor: toast.type === 'success' ? '#059669' : 'var(--danger)',
                     color: 'white', fontWeight: '500', fontSize: '0.9rem',
                     boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
                     animation: 'slideInRight 0.4s cubic-bezier(0.23, 1, 0.32, 1)',
@@ -183,11 +183,11 @@ const GoogleReviews = () => {
                                 <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                             </svg>
                         </div>
-                        <h1 style={{ fontSize: '1.8rem', fontWeight: '700', color: '#0f172a', letterSpacing: '-0.03em', margin: 0 }}>
+                        <h1 className="page-title-xl">
                             Google Reviews
                         </h1>
                     </div>
-                    <p style={{ color: '#64748b', fontSize: '0.95rem', marginLeft: '3.25rem' }}>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', marginLeft: '3.25rem' }}>
                         Manage and showcase customer reviews
                     </p>
                 </div>
@@ -213,22 +213,22 @@ const GoogleReviews = () => {
                 display: 'grid', gridTemplateColumns: 'auto 1fr',
                 gap: '2rem', marginBottom: '2.5rem',
                 backgroundColor: 'white', borderRadius: '16px', padding: '2rem',
-                border: '1px solid #e2e8f0',
+                border: '1px solid var(--border)',
                 boxShadow: '0 4px 6px -1px rgba(0,0,0,0.06), 0 2px 4px -2px rgba(0,0,0,0.04)',
             }}>
                 {/* Left: big average */}
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 1rem' }}>
                     <span style={{ fontSize: '3.5rem', fontWeight: '700', color: '#1a1a1a', lineHeight: 1 }}>{avgRating}</span>
                     <div style={{ margin: '0.5rem 0' }}>{renderStars(Math.round(Number(avgRating)), 20)}</div>
-                    <span style={{ fontSize: '0.875rem', color: '#64748b' }}>{totalReviews} review{totalReviews !== 1 ? 's' : ''}</span>
+                    <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{totalReviews} review{totalReviews !== 1 ? 's' : ''}</span>
                 </div>
                 {/* Right: breakdown bars */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', justifyContent: 'center' }}>
                     {ratingBreakdown.map(({ star, count, pct }) => (
                         <div key={star} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                            <span style={{ fontSize: '0.8rem', fontWeight: '600', color: '#475569', width: '12px', textAlign: 'right' }}>{star}</span>
+                            <span style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', width: '12px', textAlign: 'right' }}>{star}</span>
                             <Star size={13} fill="#FBBC04" color="#FBBC04" />
-                            <div style={{ flex: 1, height: '8px', backgroundColor: '#f1f5f9', borderRadius: '4px', overflow: 'hidden' }}>
+                            <div style={{ flex: 1, height: '8px', backgroundColor: 'var(--surface-secondary)', borderRadius: '4px', overflow: 'hidden' }}>
                                 <div style={{
                                     width: `${pct}%`, height: '100%', borderRadius: '4px',
                                     background: star >= 4 ? 'linear-gradient(90deg, #34A853, #0F9D58)' :
@@ -237,7 +237,7 @@ const GoogleReviews = () => {
                                     transition: 'width 0.6s cubic-bezier(0.23, 1, 0.32, 1)'
                                 }} />
                             </div>
-                            <span style={{ fontSize: '0.8rem', color: '#94a3b8', width: '24px' }}>{count}</span>
+                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', width: '24px' }}>{count}</span>
                         </div>
                     ))}
                 </div>
@@ -266,7 +266,7 @@ const GoogleReviews = () => {
                     >
                         {/* Modal header */}
                         <div style={{
-                            padding: '1.5rem 2rem', borderBottom: '1px solid #f1f5f9',
+                            padding: '1.5rem 2rem', borderBottom: '1px solid var(--surface-secondary)',
                             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                             background: 'linear-gradient(135deg, #f8f9ff, #f0f4ff)',
                             borderRadius: '20px 20px 0 0',
@@ -279,17 +279,17 @@ const GoogleReviews = () => {
                                 }}>
                                     <Star size={18} color="white" fill="white" />
                                 </div>
-                                <h2 style={{ fontSize: '1.2rem', fontWeight: '700', color: '#0f172a', margin: 0 }}>
+                                <h2 style={{ fontSize: '1.2rem', fontWeight: '700', color: 'var(--text-primary)', margin: 0 }}>
                                     {editMode ? 'Edit Review' : 'Add New Review'}
                                 </h2>
                             </div>
                             <button type="button" onClick={resetForm} style={{
                                 background: 'none', border: 'none', cursor: 'pointer', padding: '0.35rem',
-                                color: '#64748b', borderRadius: '8px', display: 'flex',
+                                color: 'var(--text-secondary)', borderRadius: '8px', display: 'flex',
                                 transition: 'all 0.2s'
                             }}
-                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#fee2e2'; e.currentTarget.style.color = '#ef4444'; }}
-                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#64748b'; }}
+                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--danger-light)'; e.currentTarget.style.color = '#ef4444'; }}
+                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
                             >
                                 <X size={20} />
                             </button>
@@ -300,7 +300,7 @@ const GoogleReviews = () => {
                             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                                 {/* Reviewer Name */}
                                 <div>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: '600', color: '#475569', marginBottom: '0.5rem' }}>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
                                         <User size={14} /> Reviewer Name
                                     </label>
                                     <input
@@ -308,17 +308,17 @@ const GoogleReviews = () => {
                                         placeholder="Enter reviewer's name" required
                                         style={{
                                             width: '100%', padding: '0.75rem 1rem', borderRadius: '10px',
-                                            border: '1.5px solid #e2e8f0', fontSize: '0.95rem',
+                                            border: '1.5px solid var(--border)', fontSize: '0.95rem',
                                             transition: 'all 0.2s', outline: 'none',
                                         }}
                                         onFocus={e => { e.currentTarget.style.borderColor = '#4285F4'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(66,133,244,0.1)'; }}
-                                        onBlur={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.boxShadow = 'none'; }}
+                                        onBlur={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.boxShadow = 'none'; }}
                                     />
                                 </div>
 
                                 {/* Star Rating */}
                                 <div>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: '600', color: '#475569', marginBottom: '0.5rem' }}>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
                                         <Star size={14} /> Rating
                                     </label>
                                     <div style={{
@@ -333,7 +333,7 @@ const GoogleReviews = () => {
 
                                 {/* Review Text */}
                                 <div>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: '600', color: '#475569', marginBottom: '0.5rem' }}>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
                                         <MessageSquare size={14} /> Review Text
                                     </label>
                                     <textarea
@@ -342,17 +342,17 @@ const GoogleReviews = () => {
                                         rows={4}
                                         style={{
                                             width: '100%', padding: '0.75rem 1rem', borderRadius: '10px',
-                                            border: '1.5px solid #e2e8f0', fontSize: '0.95rem', resize: 'vertical',
+                                            border: '1.5px solid var(--border)', fontSize: '0.95rem', resize: 'vertical',
                                             transition: 'all 0.2s', outline: 'none', fontFamily: 'inherit',
                                         }}
                                         onFocus={e => { e.currentTarget.style.borderColor = '#4285F4'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(66,133,244,0.1)'; }}
-                                        onBlur={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.boxShadow = 'none'; }}
+                                        onBlur={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.boxShadow = 'none'; }}
                                     />
                                 </div>
 
                                 {/* Social Media Link */}
                                 <div>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: '600', color: '#475569', marginBottom: '0.5rem' }}>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
                                         <Link2 size={14} /> Social Media Link
                                     </label>
                                     <input
@@ -360,11 +360,11 @@ const GoogleReviews = () => {
                                         placeholder="https://g.co/kgs/reviewer-profile"
                                         style={{
                                             width: '100%', padding: '0.75rem 1rem', borderRadius: '10px',
-                                            border: '1.5px solid #e2e8f0', fontSize: '0.95rem',
+                                            border: '1.5px solid var(--border)', fontSize: '0.95rem',
                                             transition: 'all 0.2s', outline: 'none',
                                         }}
                                         onFocus={e => { e.currentTarget.style.borderColor = '#4285F4'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(66,133,244,0.1)'; }}
-                                        onBlur={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.boxShadow = 'none'; }}
+                                        onBlur={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.boxShadow = 'none'; }}
                                     />
                                 </div>
 
@@ -384,8 +384,8 @@ const GoogleReviews = () => {
                                     </button>
                                     <button type="button" onClick={resetForm} style={{
                                         flex: 1, padding: '0.875rem',
-                                        backgroundColor: '#f1f5f9', color: '#475569',
-                                        border: '1px solid #e2e8f0', borderRadius: '12px',
+                                        backgroundColor: 'var(--surface-secondary)', color: 'var(--text-secondary)',
+                                        border: '1px solid var(--border)', borderRadius: '12px',
                                         fontWeight: '600', cursor: 'pointer',
                                         transition: 'all 0.2s',
                                     }}>Cancel</button>
@@ -505,27 +505,27 @@ const GoogleReviews = () => {
                                         margin: 0, display: '-webkit-box',
                                         WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden'
                                     }}>
-                                        {text || <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>No review text provided.</span>}
+                                        {text || <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>No review text provided.</span>}
                                     </p>
                                 </div>
 
                                 {/* Actions */}
                                 <div style={{
                                     display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
-                                    padding: '0.75rem 1.25rem', borderTop: '1px solid #f1f5f9',
+                                    padding: '0.75rem 1.25rem', borderTop: '1px solid var(--surface-secondary)',
                                     gap: '0.5rem',
                                 }}>
                                     <button
                                         onClick={() => handleEdit(review)}
                                         style={{
-                                            padding: '0.4rem 0.85rem', border: '1px solid #e2e8f0',
-                                            backgroundColor: '#f8fafc', color: '#475569', borderRadius: '8px',
+                                            padding: '0.4rem 0.85rem', border: '1px solid var(--border)',
+                                            backgroundColor: 'var(--background)', color: 'var(--text-secondary)', borderRadius: '8px',
                                             cursor: 'pointer', display: 'flex', alignItems: 'center',
                                             gap: '0.3rem', fontSize: '0.8rem', fontWeight: '500',
                                             transition: 'all 0.2s',
                                         }}
-                                        onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#eff6ff'; e.currentTarget.style.borderColor = '#93c5fd'; e.currentTarget.style.color = '#2563eb'; }}
-                                        onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#f8fafc'; e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#475569'; }}
+                                        onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#eff6ff'; e.currentTarget.style.borderColor = '#C4B5FD'; e.currentTarget.style.color = 'var(--primary)'; }}
+                                        onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'var(--background)'; e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
                                     >
                                         <Edit2 size={13} /> Edit
                                     </button>
@@ -533,13 +533,13 @@ const GoogleReviews = () => {
                                         onClick={() => handleDeleteClick(review)}
                                         style={{
                                             padding: '0.4rem 0.85rem', border: '1px solid #fecaca',
-                                            backgroundColor: '#fef2f2', color: '#ef4444', borderRadius: '8px',
+                                            backgroundColor: 'var(--danger-light)', color: '#ef4444', borderRadius: '8px',
                                             cursor: 'pointer', display: 'flex', alignItems: 'center',
                                             gap: '0.3rem', fontSize: '0.8rem', fontWeight: '500',
                                             transition: 'all 0.2s',
                                         }}
-                                        onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#fee2e2'; e.currentTarget.style.borderColor = '#f87171'; }}
-                                        onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#fef2f2'; e.currentTarget.style.borderColor = '#fecaca'; }}
+                                        onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--danger-light)'; e.currentTarget.style.borderColor = '#f87171'; }}
+                                        onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'var(--danger-light)'; e.currentTarget.style.borderColor = '#fecaca'; }}
                                     >
                                         <Trash2 size={13} /> Delete
                                     </button>
@@ -550,8 +550,8 @@ const GoogleReviews = () => {
                 ) : (
                     <div style={{
                         gridColumn: '1 / -1', padding: '4rem 2rem', textAlign: 'center',
-                        backgroundColor: '#f8fafc', borderRadius: '20px',
-                        border: '2px dashed #cbd5e1',
+                        backgroundColor: 'var(--background)', borderRadius: '20px',
+                        border: '2px dashed var(--border-strong)',
                     }}>
                         <div style={{
                             width: '72px', height: '72px', borderRadius: '50%', margin: '0 auto 1.25rem',
@@ -564,7 +564,7 @@ const GoogleReviews = () => {
                         <h3 style={{ fontSize: '1.2rem', fontWeight: '600', color: '#334155', marginBottom: '0.5rem' }}>
                             No reviews yet
                         </h3>
-                        <p style={{ color: '#64748b', fontWeight: '400', maxWidth: '320px', margin: '0 auto' }}>
+                        <p style={{ color: 'var(--text-secondary)', fontWeight: '400', maxWidth: '320px', margin: '0 auto' }}>
                             Add your first Google review to showcase customer feedback.
                         </p>
                     </div>

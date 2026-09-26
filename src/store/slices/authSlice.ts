@@ -11,6 +11,8 @@ interface User {
     isActive: number;
     role: string;
     category: 'Builders' | 'Photography' | 'School' | null;
+    /** Effective permission codes from backend RBAC (may be empty until Wave C). */
+    permissions?: string[];
 }
 
 interface AuthState {
@@ -37,10 +39,14 @@ export const loginUser = createAsyncThunk<
     'auth/login',
     async (credentials, { rejectWithValue }) => {
         try {
-            const response = await UserloginService.login(credentials) as { token: string; data: User };
+            const response = await UserloginService.login(credentials) as { token: string; data: User; permissions?: string[] };
+            const data = {
+                ...response.data,
+                permissions: response.data.permissions || (response as any).permissions || [],
+            };
             localStorage.setItem('auth_token', response.token);
-            localStorage.setItem('auth_user', JSON.stringify(response.data));
-            return response;
+            localStorage.setItem('auth_user', JSON.stringify(data));
+            return { token: response.token, data };
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Login failed');
         }
@@ -63,22 +69,6 @@ const authSlice = createSlice({
         clearAuthError: (state) => {
             state.error = null;
         },
-        setDemoAuth: (state) => {
-            state.isAuthenticated = true;
-            state.user = {
-                userId: 999,
-                name: 'Demo Admin',
-                phoneNumber: '1234567890',
-                companyID: 1,
-                location: 'Demo City',
-                isActive: 1,
-                role: 'admin',
-                category: 'Builders'
-            };
-            state.token = 'demo-token';
-            localStorage.setItem('auth_token', 'demo-token');
-            localStorage.setItem('auth_user', JSON.stringify(state.user));
-        }
     },
     extraReducers: (builder) => {
         builder
@@ -104,5 +94,5 @@ const authSlice = createSlice({
     },
 });
 
-export const { clearAuthError, setDemoAuth } = authSlice.actions;
+export const { clearAuthError } = authSlice.actions;
 export default authSlice.reducer;

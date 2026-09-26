@@ -1,177 +1,243 @@
-import { Eye, Trash2, Phone, Mail, MapPin, Link as LinkIcon, AlertCircle } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
+import {
+    Phone, Mail, MessageSquare, Search, RefreshCw, Inbox, Building2, Clock, AtSign,
+} from 'lucide-react';
+import type { RootState } from '../../store/store';
+import { contentCMSService } from '../../services/api';
+import PageShell, { DataTable, StatGrid, ErrorState, SectionCard } from '../../components/PageShell';
 
-const ContactInfo = () => {
-    return (
-        <div style={{ padding: '0 0.5rem', maxWidth: '1200px', margin: '0 auto' }}>
-            {/* Header */}
-            <div style={{ marginBottom: '2.5rem' }}>
-                <h1 style={{ fontSize: '1.8rem', fontWeight: '600', color: '#0f172a', marginBottom: '0.4rem', letterSpacing: '-0.02em' }}>
-                    Contact Details
-                </h1>
-                <p style={{ color: '#64748b', fontSize: '0.95rem' }}>
-                    Manage contact details and inquiries
-                </p>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '2rem', alignItems: 'start' }}>
-                {/* Left Form */}
-                <div style={{ backgroundColor: 'white', padding: '2rem', borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
-                    <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#0f172a', marginBottom: '0.25rem' }}>Contact Details</h3>
-                    <p style={{ color: '#64748b', fontSize: '0.85rem', marginBottom: '1.5rem' }}>Update your contact information</p>
-
-                    <form style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#334155' }}>Main Phone *</label>
-                            <div style={{ position: 'relative' }}>
-                                <div style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}>
-                                    <Phone size={18} />
-                                </div>
-                                <input type="text" defaultValue="+1 (555) 123-4567" style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 2.5rem', borderRadius: '8px', border: 'none', backgroundColor: '#f8fafc', fontSize: '0.9rem', outline: 'none', color: '#334155' }} />
-                            </div>
-                        </div>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#334155' }}>Alternative Phone</label>
-                            <div style={{ position: 'relative' }}>
-                                <div style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}>
-                                    <Phone size={18} />
-                                </div>
-                                <input type="text" defaultValue="+1 (555) 123-4568" style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 2.5rem', borderRadius: '8px', border: 'none', backgroundColor: '#f8fafc', fontSize: '0.9rem', outline: 'none', color: '#334155' }} />
-                            </div>
-                        </div>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#334155' }}>Main Email *</label>
-                            <div style={{ position: 'relative' }}>
-                                <div style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}>
-                                    <Mail size={18} />
-                                </div>
-                                <input type="email" defaultValue="info@company.com" style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 2.5rem', borderRadius: '8px', border: 'none', backgroundColor: '#f8fafc', fontSize: '0.9rem', outline: 'none', color: '#334155' }} />
-                            </div>
-                        </div>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#334155' }}>Support Email</label>
-                            <div style={{ position: 'relative' }}>
-                                <div style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}>
-                                    <Mail size={18} />
-                                </div>
-                                <input type="email" defaultValue="support@company.com" style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 2.5rem', borderRadius: '8px', border: 'none', backgroundColor: '#f8fafc', fontSize: '0.9rem', outline: 'none', color: '#334155' }} />
-                            </div>
-                        </div>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#334155' }}>Address *</label>
-                            <div style={{ position: 'relative' }}>
-                                <div style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}>
-                                    <MapPin size={18} />
-                                </div>
-                                <input type="text" defaultValue="123 Business Street, Suite 100, New York, NY 10001" style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 2.5rem', borderRadius: '8px', border: 'none', backgroundColor: '#f8fafc', fontSize: '0.9rem', outline: 'none', color: '#334155' }} />
-                            </div>
-                        </div>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#334155' }}>Google Maps URL</label>
-                            <div style={{ position: 'relative' }}>
-                                <div style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}>
-                                    <LinkIcon size={18} />
-                                </div>
-                                <input type="url" defaultValue="https://maps.google.com/?q-New York" style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 2.5rem', borderRadius: '8px', border: 'none', backgroundColor: '#f8fafc', fontSize: '0.9rem', outline: 'none', color: '#334155' }} />
-                            </div>
-                        </div>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#334155' }}>Emergency Contact</label>
-                            <div style={{ position: 'relative' }}>
-                                <div style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}>
-                                    <AlertCircle size={18} />
-                                </div>
-                                <input type="text" placeholder="+1 (555) 999-9999" style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 2.5rem', borderRadius: '8px', border: 'none', backgroundColor: '#f8fafc', fontSize: '0.9rem', outline: 'none', color: '#334155' }} />
-                            </div>
-                        </div>
-
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
-                            <button type="button" style={{ padding: '0.75rem 1.5rem', backgroundColor: '#0f172a', color: 'white', border: 'none', borderRadius: '8px', fontWeight: '600', fontSize: '0.95rem', cursor: 'pointer' }}>
-                                Save Details
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                {/* Right Recent Inquiries */}
-                <div style={{ backgroundColor: 'white', padding: '2rem', borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
-                    <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#0f172a', marginBottom: '0.25rem' }}>Recent Inquiries</h3>
-                    <p style={{ color: '#64748b', fontSize: '0.85rem', marginBottom: '1.5rem' }}>3 total messages</p>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        {/* Card 1 */}
-                        <div style={{ border: '1px solid #f1f5f9', borderRadius: '12px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-                                    <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: '600', color: '#0f172a' }}>John Smith</h4>
-                                    <span style={{ fontSize: '0.7rem', padding: '0.1rem 0.5rem', borderRadius: '12px', backgroundColor: '#eff6ff', color: '#3b82f6', fontWeight: '600' }}>new</span>
-                                </div>
-                                <p style={{ margin: '0 0 0.25rem 0', fontSize: '0.85rem', color: '#475569' }}>Project Inquiry</p>
-                                <p style={{ margin: 0, fontSize: '0.75rem', color: '#94a3b8' }}>2/27/2026</p>
-                            </div>
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <button style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#475569', display: 'flex', alignItems: 'center' }}>
-                                    <Eye size={18} />
-                                </button>
-                                <button style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#ef4444', display: 'flex', alignItems: 'center' }}>
-                                    <Trash2 size={18} />
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Card 2 */}
-                        <div style={{ border: '1px solid #f1f5f9', borderRadius: '12px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-                                    <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: '600', color: '#0f172a' }}>Sarah Johnson</h4>
-                                    <span style={{ fontSize: '0.7rem', padding: '0.1rem 0.5rem', borderRadius: '12px', backgroundColor: '#fef3c7', color: '#d97706', fontWeight: '600' }}>read</span>
-                                </div>
-                                <p style={{ margin: '0 0 0.25rem 0', fontSize: '0.85rem', color: '#475569' }}>Quote Request</p>
-                                <p style={{ margin: 0, fontSize: '0.75rem', color: '#94a3b8' }}>2/26/2026</p>
-                            </div>
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <button style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#475569', display: 'flex', alignItems: 'center' }}>
-                                    <Eye size={18} />
-                                </button>
-                                <button style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#ef4444', display: 'flex', alignItems: 'center' }}>
-                                    <Trash2 size={18} />
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Card 3 */}
-                        <div style={{ border: '1px solid #f1f5f9', borderRadius: '12px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-                                    <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: '600', color: '#0f172a' }}>Mike Davis</h4>
-                                    <span style={{ fontSize: '0.7rem', padding: '0.1rem 0.5rem', borderRadius: '12px', backgroundColor: '#dcfce7', color: '#16a34a', fontWeight: '600' }}>replied</span>
-                                </div>
-                                <p style={{ margin: '0 0 0.25rem 0', fontSize: '0.85rem', color: '#475569' }}>General Question</p>
-                                <p style={{ margin: 0, fontSize: '0.75rem', color: '#94a3b8' }}>2/25/2026</p>
-                            </div>
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <button style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#475569', display: 'flex', alignItems: 'center' }}>
-                                    <Eye size={18} />
-                                </button>
-                                <button style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#ef4444', display: 'flex', alignItems: 'center' }}>
-                                    <Trash2 size={18} />
-                                </button>
-                            </div>
-                        </div>
-
-                    </div>
-                    <button style={{ width: '100%', marginTop: '1rem', padding: '0.75rem', backgroundColor: '#f8fafc', color: '#3b82f6', border: '1px solid #eff6ff', borderRadius: '8px', fontWeight: '600', cursor: 'pointer' }}>
-                        View All Messages
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
+type Message = {
+    id?: number;
+    name?: string;
+    email?: string;
+    subject?: string;
+    message?: string;
+    createdAt?: string;
+    created_at?: string;
 };
 
-export default ContactInfo;
+const asArray = (res: any): Message[] => {
+    if (Array.isArray(res)) return res;
+    if (Array.isArray(res?.data)) return res.data;
+    if (Array.isArray(res?.data?.data)) return res.data.data;
+    return [];
+};
+
+const startOfToday = () => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d.getTime();
+};
+
+export default function ContactInfo() {
+    const { user } = useSelector((state: RootState) => state.auth);
+    const companyID = user?.companyID;
+
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [q, setQ] = useState('');
+    const [open, setOpen] = useState<Message | null>(null);
+
+    const load = useCallback(async () => {
+        if (!companyID) {
+            setLoading(false);
+            return;
+        }
+        setLoading(true);
+        setError(null);
+        try {
+            const res = await contentCMSService.getContactMessages(companyID);
+            setMessages(asArray(res));
+        } catch (e: any) {
+            setError(e?.response?.data?.message || e?.message || 'Unable to load enquiries.');
+        } finally {
+            setLoading(false);
+        }
+    }, [companyID]);
+
+    useEffect(() => { load(); }, [load]);
+
+    const dateOf = (m: Message) => m.createdAt || m.created_at;
+
+    const filtered = useMemo(
+        () =>
+            messages.filter((m) =>
+                `${m.name || ''} ${m.email || ''} ${m.subject || ''} ${m.message || ''}`
+                    .toLowerCase()
+                    .includes(q.toLowerCase()),
+            ),
+        [messages, q],
+    );
+
+    const todayCount = messages.filter((m) => {
+        const d = dateOf(m);
+        return d ? new Date(d).getTime() >= startOfToday() : false;
+    }).length;
+    const uniqueSenders = new Set(messages.map((m) => (m.email || m.name || '').toLowerCase()).filter(Boolean)).size;
+
+    return (
+        <PageShell
+            title="Contact & enquiries"
+            subtitle="Every message submitted through your public website, isolated to your company."
+            icon={<Phone size={22} />}
+            accent="cyan"
+            actions={
+                <button className="ui-btn ui-btn--secondary" type="button" onClick={load}>
+                    <RefreshCw size={16} className={loading ? 'dash-spin' : ''} /> Refresh
+                </button>
+            }
+        >
+            <StatGrid
+                items={[
+                    { label: 'Total enquiries', value: messages.length, tone: 'cyan', icon: <Inbox size={17} /> },
+                    { label: 'Received today', value: todayCount, tone: 'emerald', icon: <Clock size={17} /> },
+                    { label: 'Unique senders', value: uniqueSenders, tone: 'violet', icon: <AtSign size={17} /> },
+                    { label: 'Company', value: user?.companyName || '—', tone: 'indigo', icon: <Building2 size={17} /> },
+                ]}
+            />
+
+            <div className="toolbar">
+                <div style={{ position: 'relative', flex: 1, minWidth: 180 }}>
+                    <Search size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                    <input
+                        className="ui-input"
+                        style={{ paddingLeft: '2.4rem' }}
+                        placeholder="Search name, email, subject or message…"
+                        value={q}
+                        onChange={(e) => setQ(e.target.value)}
+                    />
+                </div>
+                <span className="ui-badge ui-badge--primary">{filtered.length} shown</span>
+            </div>
+
+            {error ? (
+                <ErrorState message={error} onRetry={load} />
+            ) : (
+                <DataTable
+                    loading={loading}
+                    headers={['From', 'Email', 'Subject', 'Received', '']}
+                    rows={filtered.map((m, i) => [
+                        <strong key="n">{m.name || 'Anonymous'}</strong>,
+                        <a key="e" href={`mailto:${m.email || ''}`} style={{ color: 'var(--primary)', fontWeight: 600 }}>
+                            {m.email || '—'}
+                        </a>,
+                        m.subject || '—',
+                        <span key="d" style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>
+                            {dateOf(m) ? new Date(dateOf(m)!).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—'}
+                        </span>,
+                        <button
+                            key={`b-${i}`}
+                            type="button"
+                            className="ui-btn ui-btn--secondary ui-btn--sm"
+                            onClick={() => setOpen(m)}
+                        >
+                            <MessageSquare size={14} /> Read
+                        </button>,
+                    ])}
+                    empty="No enquiries yet. Messages from your website contact form will appear here."
+                />
+            )}
+
+            {open && (
+                <div className="ci-overlay" onClick={() => setOpen(null)}>
+                    <div className="ci-modal" onClick={(e) => e.stopPropagation()}>
+                        <span className="ci-modal__bar" />
+                        <h3>{open.subject || 'Enquiry'}</h3>
+                        <p className="ci-modal__meta">
+                            <span><strong>{open.name || 'Anonymous'}</strong></span>
+                            {open.email && (
+                                <a href={`mailto:${open.email}`}>
+                                    <Mail size={13} /> {open.email}
+                                </a>
+                            )}
+                        </p>
+                        <p className="ci-modal__body">{open.message || 'No message content.'}</p>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                            <button type="button" className="ui-btn ui-btn--secondary" onClick={() => setOpen(null)}>Close</button>
+                            {open.email && (
+                                <a className="ui-btn ui-btn--primary" href={`mailto:${open.email}?subject=Re: ${encodeURIComponent(open.subject || 'Your enquiry')}`}>
+                                    <Mail size={15} /> Reply
+                                </a>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div style={{ marginTop: '1.25rem' }}>
+                <SectionCard title="Where these come from" icon={<Inbox size={15} />} accent="cyan">
+                    <p style={{ margin: 0, fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                        Your public site posts to <code>POST /content/contact</code> with your company ID. This page reads
+                        them back through <code>GET /content/contact/{'{companyID}'}</code>, so nothing here is sample data —
+                        if the table is empty, no one has submitted the form yet.
+                    </p>
+                </SectionCard>
+            </div>
+
+            <style>{`
+                .ci-overlay {
+                    position: fixed;
+                    inset: 0;
+                    z-index: 10000;
+                    background: rgba(22, 24, 43, 0.5);
+                    backdrop-filter: blur(4px);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 1rem;
+                    animation: fadeIn 0.2s ease both;
+                }
+                .ci-modal {
+                    position: relative;
+                    overflow: hidden;
+                    width: 100%;
+                    max-width: 520px;
+                    background: var(--surface);
+                    border-radius: var(--radius-xl);
+                    padding: 1.6rem;
+                    box-shadow: 0 30px 60px -12px rgba(22, 24, 43, 0.35);
+                    animation: popIn 0.28s var(--ease-spring) both;
+                }
+                .ci-modal__bar {
+                    position: absolute;
+                    inset: 0 0 auto 0;
+                    height: 4px;
+                    background: linear-gradient(90deg, #22D3EE, #0891B2, #7C3AED);
+                }
+                .ci-modal h3 {
+                    margin: 0 0 0.5rem;
+                    font-size: 1.15rem;
+                    font-weight: 800;
+                }
+                .ci-modal__meta {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 0.75rem;
+                    margin: 0 0 1rem;
+                    padding-bottom: 0.85rem;
+                    border-bottom: 1px solid var(--border);
+                    font-size: 0.85rem;
+                    color: var(--text-secondary);
+                }
+                .ci-modal__meta a {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.3rem;
+                    color: var(--primary);
+                    font-weight: 600;
+                    text-decoration: none;
+                }
+                .ci-modal__body {
+                    margin: 0 0 1.35rem;
+                    font-size: 0.92rem;
+                    line-height: 1.65;
+                    color: var(--text-primary);
+                    white-space: pre-wrap;
+                    word-break: break-word;
+                }
+            `}</style>
+        </PageShell>
+    );
+}

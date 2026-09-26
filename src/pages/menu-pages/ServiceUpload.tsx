@@ -128,10 +128,10 @@ const ServiceUpload = () => {
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
                 <div>
-                    <h1 style={{ fontSize: '1.8rem', fontWeight: '600', color: '#0f172a', marginBottom: '0.4rem', letterSpacing: '-0.02em' }}>
+                    <h1 className="page-title-xl">
                         Services Management
                     </h1>
-                    <p style={{ color: '#64748b', fontSize: '0.95rem' }}>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
                         List of services you offer
                     </p>
                 </div>
@@ -141,7 +141,7 @@ const ServiceUpload = () => {
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.5rem',
-                        backgroundColor: '#0f172a',
+                        background: 'var(--gradient-brand)',
                         color: 'white',
                         padding: '0.6rem 1.2rem',
                         borderRadius: '8px',
@@ -176,14 +176,14 @@ const ServiceUpload = () => {
                     onClick={resetForm}
                 >
                     <div style={{ width: '100%', maxWidth: '600px', backgroundColor: 'white', borderRadius: '20px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', margin: 'auto', flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
-                        <div style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'linear-gradient(to right, #f8fafc, #ffffff)' }}>
-                            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#0f172a', margin: 0 }}>{editMode ? 'Edit Service' : 'Add New Service'}</h2>
-                            <button type="button" onClick={resetForm} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', color: '#64748b' }}><X size={20} /></button>
+                        <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--surface-secondary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'linear-gradient(to right, var(--background), #ffffff)' }}>
+                            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-primary)', margin: 0 }}>{editMode ? 'Edit Service' : 'Add New Service'}</h2>
+                            <button type="button" onClick={resetForm} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', color: 'var(--text-secondary)' }}><X size={20} /></button>
                         </div>
                         <div style={{ padding: '2rem' }}>
                             <form onSubmit={handleAddService} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#475569', marginBottom: '0.5rem' }}>Service name</label>
+                                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Service name</label>
                                     <input
                                         type="text"
                                         value={name}
@@ -194,7 +194,7 @@ const ServiceUpload = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#475569', marginBottom: '0.5rem' }}>Description</label>
+                                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Description</label>
                                     <textarea
                                         value={description}
                                         onChange={(e) => setDescription(e.target.value)}
@@ -204,10 +204,10 @@ const ServiceUpload = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#475569', marginBottom: '0.5rem' }}>Photo</label>
+                                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Photo</label>
                                     <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                                         {photoPreview && (
-                                            <div style={{ width: '100px', height: '100px', borderRadius: '10px', overflow: 'hidden', border: '1px solid #e2e8f0', flexShrink: 0 }}>
+                                            <div style={{ width: '100px', height: '100px', borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--border)', flexShrink: 0 }}>
                                                 <img src={photoPreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                             </div>
                                         )}
@@ -215,7 +215,7 @@ const ServiceUpload = () => {
                                             type="file"
                                             accept="image/*"
                                             onChange={handlePhotoChange}
-                                            style={{ fontSize: '0.85rem', color: '#64748b' }}
+                                            style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}
                                         />
                                     </div>
                                 </div>
@@ -223,7 +223,7 @@ const ServiceUpload = () => {
                                     <button type="submit" disabled={loading} style={{
                                         flex: 2,
                                         padding: '0.875rem',
-                                        backgroundColor: '#0f172a',
+                                        background: 'var(--gradient-brand)',
                                         color: 'white',
                                         border: 'none',
                                         borderRadius: '12px',
@@ -236,9 +236,9 @@ const ServiceUpload = () => {
                                     <button type="button" onClick={resetForm} style={{
                                         flex: 1,
                                         padding: '0.875rem',
-                                        backgroundColor: '#f1f5f9',
-                                        color: '#475569',
-                                        border: '1px solid #e2e8f0',
+                                        backgroundColor: 'var(--surface-secondary)',
+                                        color: 'var(--text-secondary)',
+                                        border: '1px solid var(--border)',
                                         borderRadius: '12px',
                                         fontWeight: '600',
                                         cursor: 'pointer'
@@ -267,13 +267,13 @@ const ServiceUpload = () => {
                                 backgroundColor: 'white',
                                 borderRadius: serviceCardRadius,
                                 overflow: 'hidden',
-                                border: '1px solid #e2e8f0',
+                                border: '1px solid var(--border)',
                                 boxShadow: '0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.05)',
                                 display: 'flex',
                                 flexDirection: 'column'
                             }}>
                                 {/* Top: full-width image (same base URL as banners so image loads) */}
-                                <div style={{ width: '100%', height: '200px', backgroundColor: '#f1f5f9', overflow: 'hidden' }}>
+                                <div style={{ width: '100%', height: '200px', backgroundColor: 'var(--surface-secondary)', overflow: 'hidden' }}>
                                     {imageUrl ? (
                                         <img
                                             src={imageUrl}
@@ -281,7 +281,7 @@ const ServiceUpload = () => {
                                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                         />
                                     ) : (
-                                        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
+                                        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
                                             <Layout size={48} />
                                         </div>
                                     )}
@@ -303,18 +303,18 @@ const ServiceUpload = () => {
                                     alignItems: 'center',
                                     justifyContent: 'space-between',
                                     padding: '1rem 1.5rem',
-                                    borderTop: '1px solid #f1f5f9'
+                                    borderTop: '1px solid var(--surface-secondary)'
                                 }}>
                                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                                         <button
                                             onClick={() => handleEditClick(service)}
-                                            style={{ padding: '0.4rem 0.8rem', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', color: '#475569', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', fontWeight: '500' }}
+                                            style={{ padding: '0.4rem 0.8rem', border: '1px solid var(--border)', backgroundColor: 'var(--background)', color: 'var(--text-secondary)', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', fontWeight: '500' }}
                                         >
                                             <Edit2 size={14} /> Edit
                                         </button>
                                         <button
                                             onClick={() => handleDeleteClick(service)}
-                                            style={{ padding: '0.4rem 0.8rem', border: '1px solid #fee2e2', backgroundColor: '#fef2f2', color: '#ef4444', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', fontWeight: '500' }}
+                                            style={{ padding: '0.4rem 0.8rem', border: '1px solid var(--danger-light)', backgroundColor: 'var(--danger-light)', color: '#ef4444', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', fontWeight: '500' }}
                                         >
                                             <Trash2 size={14} /> Trash
                                         </button>
@@ -330,7 +330,7 @@ const ServiceUpload = () => {
                                                 borderRadius: '12px',
                                                 border: 'none',
                                                 cursor: loading ? 'not-allowed' : 'pointer',
-                                                backgroundColor: (service.isActive ?? true) ? '#22c55e' : '#e2e8f0',
+                                                backgroundColor: (service.isActive ?? true) ? '#22c55e' : 'var(--border)',
                                                 position: 'relative',
                                                 transition: 'background-color 0.2s'
                                             }}
@@ -354,8 +354,8 @@ const ServiceUpload = () => {
                         );
                     })
                 ) : (
-                    <div style={{ gridColumn: '1 / -1', padding: '4rem 2rem', textAlign: 'center', backgroundColor: '#f8fafc', borderRadius: '16px', border: '1px dashed #cbd5e1' }}>
-                        <p style={{ color: '#64748b', fontWeight: '500' }}>No services published yet.</p>
+                    <div style={{ gridColumn: '1 / -1', padding: '4rem 2rem', textAlign: 'center', backgroundColor: 'var(--background)', borderRadius: '16px', border: '1px dashed var(--border-strong)' }}>
+                        <p style={{ color: 'var(--text-secondary)', fontWeight: '500' }}>No services published yet.</p>
                     </div>
                 )}
             </div>

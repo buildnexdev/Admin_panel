@@ -1,13 +1,10 @@
 import { lazy, Suspense, useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Layout, { GlobalLoader } from './components/Layout';
-import BuildersProtectedRoute from './components/BuildersProtectedRoute';
+import PermissionGuard from './components/PermissionGuard';
 import RootGate from './components/RootGate';
 import Preloader from './components/Preloader';
-import type { RootState } from './store/store';
 
-// Lazy loaded pages to enable Suspense global loader
 const Dashboard = lazy(() => import('./pages/dashboard/Dashboard'));
 const Login = lazy(() => import('./pages/main-pages/Login'));
 const Settings = lazy(() => import('./pages/main-pages/Settings'));
@@ -18,7 +15,6 @@ const CompanyDetails = lazy(() => import('./pages/menu-pages/CompanyDetails'));
 const ContactInfo = lazy(() => import('./pages/menu-pages/ContactInfo'));
 const RevenueReport = lazy(() => import('./pages/menu-pages/RevenueReport'));
 
-// Builders
 const ProjectUpload = lazy(() => import('./pages/unWanted/builders/ProjectUpload'));
 const ManageProjects = lazy(() => import('./pages/unWanted/builders/ManageProjects'));
 const ProjectGallery = lazy(() => import('./pages/menu-pages/ProjectGallery'));
@@ -27,28 +23,32 @@ const HomeBannerUpload = lazy(() => import('./pages/menu-pages/HomeBannerUpload'
 const ServiceUpload = lazy(() => import('./pages/menu-pages/ServiceUpload'));
 const BlogUpload = lazy(() => import('./pages/menu-pages/BlogUpload'));
 const Quotations = lazy(() => import('./pages/quotation/Quotation'));
+const QuotationCreate = lazy(() => import('./pages/quotation/QuotationCreate'));
 const QuotationView = lazy(() => import('./pages/quotation/QuotationView'));
 const SrsImages = lazy(() => import('./pages/menu-pages/SrsImages'));
-const ContactMessages = lazy(() => import('./pages/unWanted/builders/ContactMessages'));
 const GoogleReviews = lazy(() => import('./pages/menu-pages/GoogleReviews'));
 const TeamMembers = lazy(() => import('./pages/menu-pages/TeamMembers'));
 
+const Staff = lazy(() => import('./pages/ops/Staff'));
+const Roles = lazy(() => import('./pages/ops/Roles'));
+const ComingSoon = lazy(() => import('./pages/ops/ComingSoon'));
 
 function App() {
-  const user = useSelector((state: RootState) => state.auth.user);
-  const isAdmin = user?.role === 'admin';
+  // Short splash only — avoid forced 3s delay
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Show preloader for 3 seconds initially
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 3000);
-
+    const timer = setTimeout(() => setLoading(false), 600);
     return () => clearTimeout(timer);
   }, []);
 
-  const isPublicLink = window.location.pathname.includes('quotation') || window.location.pathname.includes('buildnexdevreview');
+  const isPublicLink =
+    window.location.pathname.includes('quotation') ||
+    window.location.pathname.includes('buildnexdevreview');
+
+  const guard = (el: React.ReactNode, permission?: string | string[]) => (
+    <PermissionGuard permission={permission}>{el}</PermissionGuard>
+  );
 
   return (
     <Router>
@@ -56,37 +56,43 @@ function App() {
       <Suspense fallback={<GlobalLoader />}>
         <Routes>
           <Route path="login" element={<Login />} />
-          {/* Public: client opens this link to view quotation (no login) */}
-          <Route path="quotation/:token" element={<Suspense fallback={<GlobalLoader />}><QuotationView /></Suspense>} />
-          <Route path="waasphotographyandevents.quotationlink/:token" element={<Suspense fallback={<GlobalLoader />}><QuotationView /></Suspense>} />
-          
-          {/* Public: client opens this link to submit a review (no login) */}
-          <Route path="buildnexdevreview" element={<Suspense fallback={<GlobalLoader />}><PublicReview /></Suspense>} />
+          <Route path="quotation/:token" element={<QuotationView />} />
+          <Route path="waasphotographyandevents.quotationlink/:token" element={<QuotationView />} />
+          <Route path="buildnexdevreview" element={<PublicReview />} />
 
-          {/* / shows login when not authenticated, dashboard when authenticated */}
           <Route path="/" element={<RootGate />}>
             <Route element={<Layout />}>
-              <Route index element={<Dashboard />} />
-              <Route path="settings" element={<Settings />} />
-              <Route path="profile" element={<Profile />} />
+              <Route index element={guard(<Dashboard />, 'DASHBOARD_VIEW')} />
+              <Route path="settings" element={guard(<Settings />, 'SETTINGS_VIEW')} />
+              <Route path="profile" element={guard(<Profile />)} />
 
-              <Route path="company-details" element={<CompanyDetails />} />
-              <Route path="contact-info" element={<ContactInfo />} />
-              <Route path="revenue-report" element={<RevenueReport />} />
-              <Route path="upload-project" element={<BuildersProtectedRoute><ProjectUpload /></BuildersProtectedRoute>} />
-              <Route path="manage-projects" element={<BuildersProtectedRoute><ManageProjects /></BuildersProtectedRoute>} />
-              <Route path="categories" element={<BuildersProtectedRoute><Categories /></BuildersProtectedRoute>} />
-              <Route path="contact" element={<BuildersProtectedRoute><ContactMessages /></BuildersProtectedRoute>} />
+              <Route path="company-details" element={guard(<CompanyDetails />, ['COMPANY_VIEW', 'COMPANY_LIST_ALL'])} />
+              <Route path="contact-info" element={guard(<ContactInfo />, 'CONTACT_VIEW')} />
+              <Route path="revenue-report" element={guard(<RevenueReport />, 'REVENUE_VIEW')} />
 
-              <Route path="project-gallery" element={<BuildersProtectedRoute><ProjectGallery /></BuildersProtectedRoute>} />
-              <Route path="upload-home-banners" element={<BuildersProtectedRoute><HomeBannerUpload /></BuildersProtectedRoute>} />
-              <Route path="services" element={<BuildersProtectedRoute><ServiceUpload /></BuildersProtectedRoute>} />
-              <Route path="blog" element={<BuildersProtectedRoute><BlogUpload /></BuildersProtectedRoute>} />
-              <Route path="quotation" element={<BuildersProtectedRoute><Quotations /></BuildersProtectedRoute>} />
-              <Route path="srs-images" element={<BuildersProtectedRoute><SrsImages /></BuildersProtectedRoute>} />
-              <Route path="google-reviews" element={isAdmin ? <BuildersProtectedRoute><GoogleReviews /></BuildersProtectedRoute> : <div style={{ padding: '2rem', color: 'white' }}>Unauthorized Access</div>} />
-              <Route path="team-members" element={<BuildersProtectedRoute><TeamMembers /></BuildersProtectedRoute>} />
+              <Route path="upload-project" element={guard(<ProjectUpload />, 'PROJECT_CREATE')} />
+              <Route path="manage-projects" element={guard(<ManageProjects />, 'PROJECT_VIEW')} />
+              <Route path="categories" element={guard(<Categories />, 'CATEGORY_VIEW')} />
+              {/* Duplicate contact route redirects to Contact Info */}
+              <Route path="contact" element={<Navigate to="/contact-info" replace />} />
 
+              <Route path="project-gallery" element={guard(<ProjectGallery />, 'PROJECT_VIEW')} />
+              <Route path="upload-home-banners" element={guard(<HomeBannerUpload />, 'BANNER_VIEW')} />
+              <Route path="services" element={guard(<ServiceUpload />, 'SERVICE_VIEW')} />
+              <Route path="blog" element={guard(<BlogUpload />, 'BLOG_VIEW')} />
+              <Route path="quotation" element={guard(<Quotations />, 'QUOTATION_VIEW')} />
+              <Route path="quotation-create" element={guard(<QuotationCreate />, 'QUOTATION_CREATE')} />
+              <Route path="srs-images" element={guard(<SrsImages />, 'SRS_VIEW')} />
+              <Route path="google-reviews" element={guard(<GoogleReviews />, 'REVIEW_VIEW')} />
+              <Route path="team-members" element={guard(<TeamMembers />, 'TEAM_VIEW')} />
+
+              <Route path="staff" element={guard(<Staff />, 'STAFF_VIEW')} />
+              <Route path="roles" element={guard(<Roles />, ['RBAC_VIEW', 'USER_MANAGE'])} />
+              {/* Fake ops modules — no demo data */}
+              <Route path="tasks" element={guard(<ComingSoon title="Tasks" />, 'TASK_VIEW')} />
+              <Route path="tickets" element={guard(<ComingSoon title="Tickets" />, 'TICKET_VIEW')} />
+              <Route path="accounts" element={guard(<ComingSoon title="Accounts" />, 'ACCOUNT_VIEW')} />
+              <Route path="reports" element={guard(<ComingSoon title="Reports" />, 'REPORT_VIEW')} />
             </Route>
           </Route>
         </Routes>

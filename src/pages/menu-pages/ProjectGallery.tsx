@@ -162,10 +162,10 @@ const ProjectGallery = () => {
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
                 <div>
-                    <h1 style={{ fontSize: '1.8rem', fontWeight: '600', color: '#0f172a', marginBottom: '0.4rem', letterSpacing: '-0.02em' }}>
+                    <h1 className="page-title-xl">
                         Project Gallery
                     </h1>
-                    <p style={{ color: '#64748b', fontSize: '0.95rem' }}>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
                         Upload projects by category (Residential, Commercial, Industrial)
                     </p>
                 </div>
@@ -176,7 +176,7 @@ const ProjectGallery = () => {
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.5rem',
-                        backgroundColor: '#0f172a',
+                        background: 'var(--gradient-brand)',
                         color: 'white',
                         padding: '0.6rem 1.2rem',
                         borderRadius: '8px',
@@ -228,16 +228,16 @@ const ProjectGallery = () => {
                     >
                         <div style={{
                             padding: '1.5rem',
-                            borderBottom: '1px solid #f1f5f9',
+                            borderBottom: '1px solid var(--surface-secondary)',
                             display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'center',
-                            background: 'linear-gradient(to right, #f8fafc, #ffffff)'
+                            background: 'linear-gradient(to right, var(--background), #ffffff)'
                         }}>
-                            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#0f172a', margin: 0 }}>
+                            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-primary)', margin: 0 }}>
                                 {editMode ? 'Edit Project' : 'Upload New Project'}
                             </h2>
-                            <button type="button" onClick={resetForm} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', color: '#64748b' }}>
+                            <button type="button" onClick={resetForm} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', color: 'var(--text-secondary)' }}>
                                 <X size={20} />
                             </button>
                         </div>
@@ -245,7 +245,7 @@ const ProjectGallery = () => {
                         <div style={{ padding: '2rem' }}>
                             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#475569', marginBottom: '0.5rem' }}>Category</label>
+                                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Category</label>
                                     <select
                                         value={category}
                                         onChange={(e) => setCategory(e.target.value)}
@@ -258,7 +258,7 @@ const ProjectGallery = () => {
                                     </select>
                                 </div>
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#475569', marginBottom: '0.5rem' }}>Title</label>
+                                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Title</label>
                                     <input
                                         type="text"
                                         value={title}
@@ -269,10 +269,10 @@ const ProjectGallery = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#475569', marginBottom: '0.5rem' }}>Project Image</label>
+                                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Project Image</label>
                                     <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                                         {preview && (
-                                            <div style={{ width: '100px', height: '100px', borderRadius: '10px', overflow: 'hidden', border: '1px solid #e2e8f0', flexShrink: 0 }}>
+                                            <div style={{ width: '100px', height: '100px', borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--border)', flexShrink: 0 }}>
                                                 <img src={preview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                             </div>
                                         )}
@@ -281,7 +281,7 @@ const ProjectGallery = () => {
                                             accept="image/*"
                                             onChange={handleImageChange}
                                             required={!editMode}
-                                            style={{ fontSize: '0.85rem', color: '#64748b' }}
+                                            style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}
                                         />
                                     </div>
                                 </div>
@@ -289,7 +289,7 @@ const ProjectGallery = () => {
                                     <button type="submit" disabled={loading} style={{
                                         flex: 2,
                                         padding: '0.875rem',
-                                        backgroundColor: '#0f172a',
+                                        background: 'var(--gradient-brand)',
                                         color: 'white',
                                         border: 'none',
                                         borderRadius: '12px',
@@ -302,9 +302,9 @@ const ProjectGallery = () => {
                                     <button type="button" onClick={resetForm} style={{
                                         flex: 1,
                                         padding: '0.875rem',
-                                        backgroundColor: '#f1f5f9',
-                                        color: '#475569',
-                                        border: '1px solid #e2e8f0',
+                                        backgroundColor: 'var(--surface-secondary)',
+                                        color: 'var(--text-secondary)',
+                                        border: '1px solid var(--border)',
                                         borderRadius: '12px',
                                         fontWeight: '600',
                                         cursor: 'pointer'
@@ -338,7 +338,7 @@ const ProjectGallery = () => {
                                 display: 'flex',
                                 flexDirection: 'column'
                             }}>
-                                <div style={{ height: '200px', position: 'relative', backgroundColor: '#f1f5f9' }}>
+                                <div style={{ height: '200px', position: 'relative', backgroundColor: 'var(--surface-secondary)' }}>
                                     {imageUrl ? (
                                         <img
                                             src={imageUrl}
@@ -346,7 +346,7 @@ const ProjectGallery = () => {
                                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                         />
                                     ) : (
-                                        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: '0.875rem' }}>
+                                        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
                                             No image
                                         </div>
                                     )}
@@ -354,7 +354,7 @@ const ProjectGallery = () => {
                                         position: 'absolute',
                                         top: '1rem',
                                         left: '1rem',
-                                        backgroundColor: isProjectActive(project) ? '#22c55e' : '#94a3b8',
+                                        backgroundColor: isProjectActive(project) ? '#22c55e' : 'var(--text-muted)',
                                         color: 'white',
                                         padding: '0.2rem 0.8rem',
                                         borderRadius: '16px',
@@ -379,21 +379,21 @@ const ProjectGallery = () => {
                                 </div>
 
                                 <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                                    <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#0f172a', marginBottom: '0.5rem' }}>
+                                    <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
                                         {project.title}
                                     </h3>
 
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid #f1f5f9' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--surface-secondary)' }}>
                                         <div style={{ display: 'flex', gap: '0.5rem', flex: 1 }}>
                                             <button
                                                 onClick={() => handleEditClick(project)}
-                                                style={{ padding: '0.4rem 0.8rem', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', color: '#475569', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', fontWeight: '500' }}
+                                                style={{ padding: '0.4rem 0.8rem', border: '1px solid var(--border)', backgroundColor: 'var(--background)', color: 'var(--text-secondary)', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', fontWeight: '500' }}
                                             >
                                                 <Edit2 size={14} /> Edit
                                             </button>
                                             <button
                                                 onClick={() => handleDeleteClick(project)}
-                                                style={{ padding: '0.4rem 0.8rem', border: '1px solid #fee2e2', backgroundColor: '#fef2f2', color: '#ef4444', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', fontWeight: '500' }}
+                                                style={{ padding: '0.4rem 0.8rem', border: '1px solid var(--danger-light)', backgroundColor: 'var(--danger-light)', color: '#ef4444', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', fontWeight: '500' }}
                                             >
                                                 <Trash2 size={14} /> Trash
                                             </button>
@@ -409,7 +409,7 @@ const ProjectGallery = () => {
                                                 borderRadius: '12px',
                                                 border: 'none',
                                                 cursor: 'pointer',
-                                                backgroundColor: isProjectActive(project) ? '#22c55e' : '#e2e8f0',
+                                                backgroundColor: isProjectActive(project) ? '#22c55e' : 'var(--border)',
                                                 position: 'relative',
                                                 flexShrink: 0
                                             }}
@@ -426,7 +426,7 @@ const ProjectGallery = () => {
                                                 transition: 'left 0.2s ease'
                                             }} />
                                         </button>
-                                        <span style={{ color: isProjectActive(project) ? '#22c55e' : '#64748b', fontWeight: '600', fontSize: '0.875rem' }}>
+                                        <span style={{ color: isProjectActive(project) ? '#22c55e' : 'var(--text-secondary)', fontWeight: '600', fontSize: '0.875rem' }}>
                                             {isProjectActive(project) ? 'Active' : 'Inactive'}
                                         </span>
                                     </div>
@@ -435,8 +435,8 @@ const ProjectGallery = () => {
                         );
                     })
                 ) : (
-                    <div style={{ gridColumn: '1 / -1', padding: '4rem 2rem', textAlign: 'center', backgroundColor: '#f8fafc', borderRadius: '16px', border: '1px dashed #cbd5e1' }}>
-                        <p style={{ color: '#64748b', fontWeight: '500' }}>No projects yet. Upload a project using the button above.</p>
+                    <div style={{ gridColumn: '1 / -1', padding: '4rem 2rem', textAlign: 'center', backgroundColor: 'var(--background)', borderRadius: '16px', border: '1px dashed var(--border-strong)' }}>
+                        <p style={{ color: 'var(--text-secondary)', fontWeight: '500' }}>No projects yet. Upload a project using the button above.</p>
                     </div>
                 )}
             </div>

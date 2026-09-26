@@ -148,10 +148,10 @@ const BlogUpload = () => {
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
                 <div>
-                    <h1 style={{ fontSize: '1.8rem', fontWeight: '600', color: '#0f172a', marginBottom: '0.4rem', letterSpacing: '-0.02em' }}>
+                    <h1 className="page-title-xl">
                         Blog Management
                     </h1>
-                    <p style={{ color: '#64748b', fontSize: '0.95rem' }}>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
                         Publish and manage blog posts
                     </p>
                 </div>
@@ -161,7 +161,7 @@ const BlogUpload = () => {
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.5rem',
-                        backgroundColor: '#0f172a',
+                        background: 'var(--gradient-brand)',
                         color: 'white',
                         padding: '0.6rem 1.2rem',
                         borderRadius: '8px',
@@ -188,34 +188,34 @@ const BlogUpload = () => {
                     onClick={resetForm}
                 >
                     <div style={{ width: '100%', maxWidth: '600px', backgroundColor: 'white', borderRadius: '20px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', margin: 'auto', flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
-                        <div style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#0f172a', margin: 0 }}>{editMode ? 'Edit Blog' : 'Add Blog'}</h2>
-                            <button type="button" onClick={resetForm} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', color: '#64748b' }}><X size={20} /></button>
+                        <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--surface-secondary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-primary)', margin: 0 }}>{editMode ? 'Edit Blog' : 'Add Blog'}</h2>
+                            <button type="button" onClick={resetForm} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', color: 'var(--text-secondary)' }}><X size={20} /></button>
                         </div>
                         <div style={{ padding: '2rem' }}>
                             <form onSubmit={handleAddBlog} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#475569', marginBottom: '0.5rem' }}>Title</label>
+                                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Title</label>
                                     <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Blog title" required style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '1px solid #d1d5db', fontSize: '0.95rem' }} />
                                 </div>
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#475569', marginBottom: '0.5rem' }}>Description</label>
+                                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Description</label>
                                     <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Content or description" rows={4} style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '1px solid #d1d5db', fontSize: '0.95rem', resize: 'vertical' }} />
                                 </div>
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#475569', marginBottom: '0.5rem' }}>Link</label>
+                                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Link</label>
                                     <input type="url" value={link} onChange={(e) => setLink(e.target.value)} placeholder="https://..." style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '1px solid #d1d5db', fontSize: '0.95rem' }} />
                                 </div>
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#475569', marginBottom: '0.5rem' }}>Cover Image</label>
+                                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Cover Image</label>
                                     <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                                        {coverPreview && <div style={{ width: '100px', height: '100px', borderRadius: '10px', overflow: 'hidden', border: '1px solid #e2e8f0', flexShrink: 0 }}><img src={coverPreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>}
-                                        <input type="file" accept="image/*" onChange={handleCoverChange} required={!editMode} style={{ fontSize: '0.85rem', color: '#64748b' }} />
+                                        {coverPreview && <div style={{ width: '100px', height: '100px', borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--border)', flexShrink: 0 }}><img src={coverPreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>}
+                                        <input type="file" accept="image/*" onChange={handleCoverChange} required={!editMode} style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }} />
                                     </div>
                                 </div>
                                 <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                                    <button type="submit" disabled={loading} style={{ flex: 2, padding: '0.875rem', backgroundColor: '#0f172a', color: 'white', border: 'none', borderRadius: '12px', fontWeight: '600', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1 }}>{loading ? (editMode ? 'Saving...' : 'Adding...') : (editMode ? 'Save Changes' : 'Add Blog')}</button>
-                                    <button type="button" onClick={resetForm} style={{ flex: 1, padding: '0.875rem', backgroundColor: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0', borderRadius: '12px', fontWeight: '600', cursor: 'pointer' }}>Cancel</button>
+                                    <button type="submit" disabled={loading} style={{ flex: 2, padding: '0.875rem', background: 'var(--gradient-brand)', color: 'white', border: 'none', borderRadius: '12px', fontWeight: '600', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1 }}>{loading ? (editMode ? 'Saving...' : 'Adding...') : (editMode ? 'Save Changes' : 'Add Blog')}</button>
+                                    <button type="button" onClick={resetForm} style={{ flex: 1, padding: '0.875rem', backgroundColor: 'var(--surface-secondary)', color: 'var(--text-secondary)', border: '1px solid var(--border)', borderRadius: '12px', fontWeight: '600', cursor: 'pointer' }}>Cancel</button>
                                 </div>
                             </form>
                         </div>
@@ -238,13 +238,13 @@ const BlogUpload = () => {
                     backgroundColor: 'white',
                     borderRadius: cardRadius,
                     overflow: 'hidden',
-                    border: '1px solid #e2e8f0',
+                    border: '1px solid var(--border)',
                     boxShadow: '0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.05)',
                     display: 'flex',
                     flexDirection: 'column'
                 }}>
                     {/* Top: cover image */}
-                    <div style={{ width: '100%', height: '200px', backgroundColor: '#f1f5f9', overflow: 'hidden' }}>
+                    <div style={{ width: '100%', height: '200px', backgroundColor: 'var(--surface-secondary)', overflow: 'hidden' }}>
                         {imageUrl ? (
                             <img
                                 src={imageUrl}
@@ -252,7 +252,7 @@ const BlogUpload = () => {
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             />
                         ) : (
-                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: '0.875rem' }}>
+                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
                                 No image
                             </div>
                         )}
@@ -268,8 +268,8 @@ const BlogUpload = () => {
                         </p>
                         {getBlogLink(blog) && (
                             <div style={{ marginTop: '0.25rem' }}>
-                                <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '600', display: 'block', marginBottom: '0.25rem' }}>Link</span>
-                                <a href={getBlogLink(blog)} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.875rem', color: '#2563eb', wordBreak: 'break-all' }}>
+                                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: '600', display: 'block', marginBottom: '0.25rem' }}>Link</span>
+                                <a href={getBlogLink(blog)} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.875rem', color: 'var(--primary)', wordBreak: 'break-all' }}>
                                     {getBlogLink(blog)}
                                 </a>
                             </div>
@@ -282,18 +282,18 @@ const BlogUpload = () => {
                         alignItems: 'center',
                         justifyContent: 'space-between',
                         padding: '1rem 1.5rem',
-                        borderTop: '1px solid #f1f5f9'
+                        borderTop: '1px solid var(--surface-secondary)'
                     }}>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                             <button
                                 onClick={() => handleEditClick(blog)}
-                                style={{ padding: '0.4rem 0.8rem', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', color: '#475569', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', fontWeight: '500' }}
+                                style={{ padding: '0.4rem 0.8rem', border: '1px solid var(--border)', backgroundColor: 'var(--background)', color: 'var(--text-secondary)', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', fontWeight: '500' }}
                             >
                                 <Edit2 size={14} /> Edit
                             </button>
                             <button
                                 onClick={() => handleDeleteClick(blog)}
-                                style={{ padding: '0.4rem 0.8rem', border: '1px solid #fee2e2', backgroundColor: '#fef2f2', color: '#ef4444', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', fontWeight: '500' }}
+                                style={{ padding: '0.4rem 0.8rem', border: '1px solid var(--danger-light)', backgroundColor: 'var(--danger-light)', color: '#ef4444', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', fontWeight: '500' }}
                             >
                                 <Trash2 size={14} /> Trash
                             </button>
@@ -310,7 +310,7 @@ const BlogUpload = () => {
                                     borderRadius: '12px',
                                     border: 'none',
                                     cursor: loading ? 'not-allowed' : 'pointer',
-                                    backgroundColor: (blog.isActive ?? true) ? '#22c55e' : '#e2e8f0',
+                                    backgroundColor: (blog.isActive ?? true) ? '#22c55e' : 'var(--border)',
                                     position: 'relative',
                                     transition: 'background-color 0.2s'
                                 }}
@@ -334,8 +334,8 @@ const BlogUpload = () => {
             );
         })
     ) : (
-        <div style={{ gridColumn: '1 / -1', padding: '4rem 2rem', textAlign: 'center', backgroundColor: '#f8fafc', borderRadius: '16px', border: '1px dashed #cbd5e1' }}>
-            <p style={{ color: '#64748b', fontWeight: '500' }}>No blog posts yet.</p>
+        <div style={{ gridColumn: '1 / -1', padding: '4rem 2rem', textAlign: 'center', backgroundColor: 'var(--background)', borderRadius: '16px', border: '1px dashed var(--border-strong)' }}>
+            <p style={{ color: 'var(--text-secondary)', fontWeight: '500' }}>No blog posts yet.</p>
         </div>
     )}
 </div>

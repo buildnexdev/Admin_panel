@@ -56,13 +56,13 @@ const UploadGallery = () => {
             <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1.5rem', borderBottom: '1px solid #e5e7eb', paddingBottom: '0.5rem' }}>Upload Gallery Photo</h3>
 
             {successMessage && (
-                <div style={{ padding: '1rem', marginBottom: '1rem', borderRadius: '4px', backgroundColor: '#dcfce7', color: '#166534' }}>
+                <div style={{ padding: '1rem', marginBottom: '1rem', borderRadius: '4px', backgroundColor: 'var(--success-light)', color: '#166534' }}>
                     {successMessage}
                 </div>
             )}
 
             {error && (
-                <div style={{ padding: '1rem', marginBottom: '1rem', borderRadius: '4px', backgroundColor: '#fee2e2', color: '#991b1b' }}>
+                <div style={{ padding: '1rem', marginBottom: '1rem', borderRadius: '4px', backgroundColor: 'var(--danger-light)', color: '#991b1b' }}>
                     {error}
                 </div>
             )}
@@ -116,7 +116,7 @@ const UploadGallery = () => {
                     style={{
                         marginTop: '1rem',
                         padding: '0.75rem',
-                        backgroundColor: (loading || uploadingS3 || !image) ? '#93c5fd' : '#2563eb',
+                        backgroundColor: (loading || uploadingS3 || !image) ? '#C4B5FD' : 'var(--primary)',
                         color: 'white',
                         border: 'none',
                         borderRadius: '4px',

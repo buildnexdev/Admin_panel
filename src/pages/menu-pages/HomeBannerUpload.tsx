@@ -139,10 +139,10 @@ const HomeBannerUpload = () => {
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
                 <div>
-                    <h1 style={{ fontSize: '1.8rem', fontWeight: '600', color: '#0f172a', marginBottom: '0.4rem', letterSpacing: '-0.02em' }}>
+                    <h1 className="page-title-xl">
                         Banner Management
                     </h1>
-                    <p style={{ color: '#64748b', fontSize: '0.95rem' }}>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
                         Manage homepage sliding banners {activeCount > 0 && `(${activeCount}/${MAX_PUBLISHED_BANNERS} active)`}
                     </p>
                 </div>
@@ -154,7 +154,7 @@ const HomeBannerUpload = () => {
                             display: 'flex',
                             alignItems: 'center',
                             gap: '0.5rem',
-                            backgroundColor: '#0f172a',
+                            background: 'var(--gradient-brand)',
                             color: 'white',
                             padding: '0.6rem 1.2rem',
                             borderRadius: '8px',
@@ -181,28 +181,28 @@ const HomeBannerUpload = () => {
                     onClick={() => setShowEditForm(false)}
                 >
                     <div style={{ width: '100%', maxWidth: '500px', backgroundColor: 'white', borderRadius: '20px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', margin: 'auto', flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
-                        <div style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'linear-gradient(to right, #f8fafc, #ffffff)' }}>
-                            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#0f172a', margin: 0 }}>Edit Banner</h2>
-                            <button type="button" onClick={() => setShowEditForm(false)} style={{ padding: '0.5rem', border: 'none', background: '#f1f5f9', borderRadius: '50%', cursor: 'pointer', color: '#64748b', display: 'flex' }}><X size={18} /></button>
+                        <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--surface-secondary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'linear-gradient(to right, var(--background), #ffffff)' }}>
+                            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-primary)', margin: 0 }}>Edit Banner</h2>
+                            <button type="button" onClick={() => setShowEditForm(false)} style={{ padding: '0.5rem', border: 'none', background: 'var(--surface-secondary)', borderRadius: '50%', cursor: 'pointer', color: 'var(--text-secondary)', display: 'flex' }}><X size={18} /></button>
                         </div>
                         <div style={{ padding: '2rem' }}>
                             <form onSubmit={handleUpdateBanner} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#475569', marginBottom: '0.75rem' }}>Banner Image</label>
+                                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>Banner Image</label>
                                     <div style={{
                                         width: '100%',
                                         aspectRatio: '16/9',
                                         borderRadius: '12px',
                                         overflow: 'hidden',
-                                        border: '2px solid #f1f5f9',
-                                        backgroundColor: '#f8fafc',
+                                        border: '2px solid var(--surface-secondary)',
+                                        backgroundColor: 'var(--background)',
                                         marginBottom: '1rem',
                                         position: 'relative'
                                     }}>
                                         {editImagePreview ? (
                                             <img src={editImagePreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                         ) : (
-                                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
+                                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
                                                 <Upload size={32} />
                                             </div>
                                         )}
@@ -215,12 +215,12 @@ const HomeBannerUpload = () => {
                                         gap: '0.5rem',
                                         padding: '0.75rem',
                                         backgroundColor: '#eff6ff',
-                                        color: '#2563eb',
+                                        color: 'var(--primary)',
                                         borderRadius: '10px',
                                         fontSize: '0.9rem',
                                         fontWeight: '600',
                                         cursor: 'pointer',
-                                        border: '1px solid #dbeafe',
+                                        border: '1px solid var(--info-light)',
                                         transition: 'all 0.2s'
                                     }}>
                                         <Plus size={18} />
@@ -247,7 +247,7 @@ const HomeBannerUpload = () => {
                                         style={{
                                             flex: 2,
                                             padding: '0.875rem',
-                                            backgroundColor: '#0f172a',
+                                            background: 'var(--gradient-brand)',
                                             color: 'white',
                                             border: 'none',
                                             borderRadius: '12px',
@@ -266,9 +266,9 @@ const HomeBannerUpload = () => {
                                         style={{
                                             flex: 1,
                                             padding: '0.875rem',
-                                            backgroundColor: '#f1f5f9',
-                                            color: '#475569',
-                                            border: '1px solid #e2e8f0',
+                                            backgroundColor: 'var(--surface-secondary)',
+                                            color: 'var(--text-secondary)',
+                                            border: '1px solid var(--border)',
                                             borderRadius: '12px',
                                             fontWeight: '600',
                                             fontSize: '0.95rem',
@@ -292,38 +292,38 @@ const HomeBannerUpload = () => {
                     padding: '1.5rem',
                     backgroundColor: 'white',
                     borderRadius: '16px',
-                    border: '1px solid #e2e8f0',
+                    border: '1px solid var(--border)',
                     boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
                 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                        <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#0f172a', margin: 0 }}>Upload new banners</h2>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: 'var(--text-primary)', margin: 0 }}>Upload new banners</h2>
                         <button
                             type="button"
                             onClick={() => { setShowUpload(false); setSelectedFiles([]); setPreviews([]); }}
-                            style={{ padding: '0.4rem', border: 'none', background: 'transparent', cursor: 'pointer', color: '#64748b' }}
+                            style={{ padding: '0.4rem', border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--text-secondary)' }}
                             aria-label="Close"
                         >
                             <X size={20} />
                         </button>
                     </div>
-                    <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '1rem' }}>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1rem' }}>
                         You can add up to {remainingSlots} more banner(s). Select image(s) then click Upload & Save.
                     </p>
                     <div>
                         <div
                             onClick={() => document.getElementById('banner-file-input')?.click()}
                             style={{
-                                border: '2px dashed #cbd5e1',
+                                border: '2px dashed var(--border-strong)',
                                 borderRadius: '12px',
                                 padding: '2rem',
                                 textAlign: 'center',
                                 cursor: 'pointer',
-                                backgroundColor: '#f8fafc',
+                                backgroundColor: 'var(--background)',
                                 marginBottom: '1rem'
                             }}
                         >
-                            <Upload size={32} style={{ color: '#94a3b8', marginBottom: '0.5rem' }} />
-                            <p style={{ color: '#475569', fontWeight: '500', margin: 0 }}>Click to select images (max {remainingSlots})</p>
+                            <Upload size={32} style={{ color: 'var(--text-muted)', marginBottom: '0.5rem' }} />
+                            <p style={{ color: 'var(--text-secondary)', fontWeight: '500', margin: 0 }}>Click to select images (max {remainingSlots})</p>
                             <input
                                 id="banner-file-input"
                                 type="file"
@@ -336,7 +336,7 @@ const HomeBannerUpload = () => {
                         {previews.length > 0 && (
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '0.75rem', marginBottom: '1rem' }}>
                                 {previews.map((url, i) => (
-                                    <div key={i} style={{ position: 'relative', aspectRatio: '16/10', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
+                                    <div key={i} style={{ position: 'relative', aspectRatio: '16/10', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border)' }}>
                                         <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                         <button
                                             type="button"
@@ -357,7 +357,7 @@ const HomeBannerUpload = () => {
                                 style={{
                                     display: 'flex', alignItems: 'center', gap: '0.5rem',
                                     padding: '0.6rem 1.2rem',
-                                    backgroundColor: (loading || selectedFiles.length === 0) ? '#94a3b8' : '#0f172a',
+                                    backgroundColor: (loading || selectedFiles.length === 0) ? 'var(--text-muted)' : 'var(--text-primary)',
                                     color: 'white', border: 'none', borderRadius: '8px', fontWeight: '500', fontSize: '0.9rem',
                                     cursor: (loading || selectedFiles.length === 0) ? 'not-allowed' : 'pointer'
                                 }}
@@ -369,8 +369,8 @@ const HomeBannerUpload = () => {
                                 onClick={() => { setShowUpload(false); setSelectedFiles([]); setPreviews([]); }}
                                 style={{
                                     padding: '0.6rem 1.2rem',
-                                    backgroundColor: '#f1f5f9',
-                                    color: '#475569',
+                                    backgroundColor: 'var(--surface-secondary)',
+                                    color: 'var(--text-secondary)',
                                     border: 'none',
                                     borderRadius: '8px',
                                     fontWeight: '500',
@@ -412,7 +412,7 @@ const HomeBannerUpload = () => {
                                     position: 'absolute',
                                     top: '1rem',
                                     left: '1rem',
-                                    backgroundColor: isBannerActive(banner) ? '#22c55e' : '#94a3b8',
+                                    backgroundColor: isBannerActive(banner) ? '#22c55e' : 'var(--text-muted)',
                                     color: 'white',
                                     padding: '0.2rem 0.8rem',
                                     borderRadius: '16px',
@@ -424,13 +424,13 @@ const HomeBannerUpload = () => {
                             </div>
 
                             <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                                <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: '#0f172a', marginBottom: '0.5rem' }}>
+                                <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
                                     Banner #{index + 1}
                                 </h3>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
                                     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', justifyContent: 'space-between' }}>
                                         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                                            <span style={{ color: '#64748b', fontWeight: '500' }}>Active:</span>
+                                            <span style={{ color: 'var(--text-secondary)', fontWeight: '500' }}>Active:</span>
                                             <button
                                                 type="button"
                                                 role="switch"
@@ -442,7 +442,7 @@ const HomeBannerUpload = () => {
                                                     borderRadius: '12px',
                                                     border: 'none',
                                                     cursor: 'pointer',
-                                                    backgroundColor: isBannerActive(banner) ? '#22c55e' : '#e2e8f0',
+                                                    backgroundColor: isBannerActive(banner) ? '#22c55e' : 'var(--border)',
                                                     position: 'relative',
                                                     flexShrink: 0
                                                 }}
@@ -459,7 +459,7 @@ const HomeBannerUpload = () => {
                                                     transition: 'left 0.2s ease'
                                                 }} />
                                             </button>
-                                            <span style={{ color: isBannerActive(banner) ? '#22c55e' : '#64748b', fontWeight: '600', fontSize: '0.875rem' }}>
+                                            <span style={{ color: isBannerActive(banner) ? '#22c55e' : 'var(--text-secondary)', fontWeight: '600', fontSize: '0.875rem' }}>
                                                 {isBannerActive(banner) ? 'Active' : 'Inactive'}
                                             </span>
                                         </div>
@@ -468,13 +468,13 @@ const HomeBannerUpload = () => {
                                     <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
                                         <button
                                             onClick={() => handleEditClick(banner)}
-                                            style={{ padding: '0.4rem 0.8rem', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', color: '#475569', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', fontWeight: '500' }}
+                                            style={{ padding: '0.4rem 0.8rem', border: '1px solid var(--border)', backgroundColor: 'var(--background)', color: 'var(--text-secondary)', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', fontWeight: '500' }}
                                         >
                                             <Edit2 size={14} /> Edit
                                         </button>
                                         <button
                                             onClick={() => handleDeleteClick(banner)}
-                                            style={{ padding: '0.4rem 0.8rem', border: '1px solid #fee2e2', backgroundColor: '#fef2f2', color: '#ef4444', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', fontWeight: '500' }}
+                                            style={{ padding: '0.4rem 0.8rem', border: '1px solid var(--danger-light)', backgroundColor: 'var(--danger-light)', color: '#ef4444', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem', fontWeight: '500' }}
                                         >
                                             <Trash2 size={14} /> Trash
                                         </button>
@@ -485,8 +485,8 @@ const HomeBannerUpload = () => {
                         </div>
                     ))
                 ) : (
-                    <div style={{ gridColumn: '1 / -1', padding: '4rem 2rem', textAlign: 'center', backgroundColor: '#f8fafc', borderRadius: '16px', border: '1px dashed #cbd5e1' }}>
-                        <p style={{ color: '#64748b', fontWeight: '500' }}>No active banners found.</p>
+                    <div style={{ gridColumn: '1 / -1', padding: '4rem 2rem', textAlign: 'center', backgroundColor: 'var(--background)', borderRadius: '16px', border: '1px dashed var(--border-strong)' }}>
+                        <p style={{ color: 'var(--text-secondary)', fontWeight: '500' }}>No active banners found.</p>
                     </div>
                 )}
             </div>

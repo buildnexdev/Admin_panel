@@ -1,120 +1,274 @@
-import { User, Mail, Phone, Lock, Home } from 'lucide-react';
+import { useState, type FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import {
+    User, Phone, Lock, Building2, Shield, BadgeCheck, Save,
+    CheckCircle2, AlertTriangle, Settings as SettingsIcon, LayoutGrid,
+} from 'lucide-react';
 import type { RootState } from '../../store/store';
+import PageShell, { SectionCard } from '../../components/PageShell';
+import { UserloginService } from '../../services/api';
 
-const Profile = () => {
+export default function Profile() {
     const { user } = useSelector((state: RootState) => state.auth);
+    const [form, setForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    const [saving, setSaving] = useState(false);
+    const [ok, setOk] = useState<string | null>(null);
+    const [err, setErr] = useState<string | null>(null);
+
+    const initial = (user?.name || 'A').trim().charAt(0).toUpperCase();
+
+    const submit = async (e: FormEvent) => {
+        e.preventDefault();
+        setOk(null);
+        setErr(null);
+
+        if (form.newPassword.length < 8) {
+            setErr('New password must be at least 8 characters long.');
+            return;
+        }
+        if (form.newPassword !== form.confirmPassword) {
+            setErr('New password and confirmation do not match.');
+            return;
+        }
+
+        setSaving(true);
+        try {
+            await UserloginService.changePassword({
+                currentPassword: form.currentPassword,
+                newPassword: form.newPassword,
+            });
+            setOk('Your password has been updated.');
+            setForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        } catch (e: any) {
+            setErr(e?.response?.data?.message || e?.message || 'Could not update your password.');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const details = [
+        { label: 'Full name', value: user?.name || '—', icon: User },
+        { label: 'Phone number', value: String(user?.phoneNumber || '—'), icon: Phone },
+        { label: 'Company', value: user?.companyName || '—', icon: Building2 },
+        { label: 'Role', value: user?.role || '—', icon: Shield },
+        { label: 'Group', value: user?.category || 'Standard', icon: LayoutGrid },
+        { label: 'Account ID', value: user?.userId ? `#${user.userId}` : '—', icon: BadgeCheck },
+    ];
 
     return (
-        <div style={{ padding: '0 0.5rem', maxWidth: '1000px', margin: '0 auto' }}>
-            {/* Header */}
-            <div style={{ marginBottom: '2.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <div style={{ padding: '0.75rem', backgroundColor: '#eff6ff', color: '#3b82f6', borderRadius: '12px' }}>
-                    <User size={24} />
-                </div>
-                <div>
-                    <h1 style={{ fontSize: '1.8rem', fontWeight: '600', color: '#0f172a', marginBottom: '0.4rem', letterSpacing: '-0.02em' }}>
-                        My Profile
-                    </h1>
-                    <p style={{ color: '#64748b', fontSize: '0.95rem' }}>
-                        Manage your personal account settings
+        <PageShell
+            title="My profile"
+            subtitle="Your account details as stored on the server, plus password management."
+            icon={<User size={22} />}
+            accent="emerald"
+            actions={<Link to="/settings" className="ui-btn ui-btn--secondary"><SettingsIcon size={16} /> Settings</Link>}
+        >
+            <div className="profile-banner">
+                <span className="profile-banner__glow" />
+                <div className="profile-banner__avatar">{initial}</div>
+                <div className="profile-banner__meta">
+                    <h2>{user?.name || 'Admin user'}</h2>
+                    <p>
+                        <span className="profile-chip">{user?.role || 'User'}</span>
+                        <span className="profile-chip profile-chip--ghost">
+                            <Building2 size={13} /> {user?.companyName || 'Company'}
+                        </span>
+                        <span className="profile-chip profile-chip--ok">
+                            <CheckCircle2 size={13} /> Active
+                        </span>
                     </p>
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 2fr)', gap: '2rem', alignItems: 'start' }}>
-                {/* Profile Card */}
-                <div style={{ backgroundColor: 'white', padding: '2rem', borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-                    <div style={{ width: '120px', height: '120px', borderRadius: '50%', backgroundColor: '#f8fafc', border: '4px solid #eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', color: '#cbd5e1' }}>
-                        <User size={64} />
+            <div className="profile-grid">
+                <SectionCard title="Account details" icon={<BadgeCheck size={15} />} accent="emerald">
+                    <div className="profile-details">
+                        {details.map((d) => {
+                            const Icon = d.icon;
+                            return (
+                                <div key={d.label} className="profile-detail">
+                                    <span className="profile-detail__icon"><Icon size={15} /></span>
+                                    <span>
+                                        <small>{d.label}</small>
+                                        <strong>{d.value}</strong>
+                                    </span>
+                                </div>
+                            );
+                        })}
                     </div>
-                    <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#0f172a', marginBottom: '0.25rem' }}>
-                        {user?.name || 'Admin User'}
-                    </h2>
-                    <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-                        {user?.role || 'Administrator'}
+                    <p className="profile-note">
+                        Name, phone and company are managed by your administrator. Ask them to update these values.
                     </p>
+                </SectionCard>
 
-                    <div style={{ width: '100%', borderTop: '1px solid #f8fafc', paddingTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', textAlign: 'left' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#475569', fontSize: '0.9rem' }}>
-                            <Mail size={16} color="#94a3b8" />
-                            <span>{(user as any)?.email || 'admin@buildnexdev.com'}</span>
+                <SectionCard title="Change password" icon={<Lock size={15} />} accent="rose">
+                    {ok && <div className="profile-alert profile-alert--ok"><CheckCircle2 size={16} /> {ok}</div>}
+                    {err && <div className="profile-alert profile-alert--err"><AlertTriangle size={16} /> {err}</div>}
+
+                    <form onSubmit={submit} style={{ display: 'grid', gap: '0.85rem' }}>
+                        <div>
+                            <label className="ui-label" htmlFor="p-cur">Current password</label>
+                            <input
+                                id="p-cur"
+                                className="ui-input"
+                                type="password"
+                                autoComplete="current-password"
+                                required
+                                value={form.currentPassword}
+                                onChange={(e) => setForm({ ...form, currentPassword: e.target.value })}
+                            />
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#475569', fontSize: '0.9rem' }}>
-                            <Phone size={16} color="#94a3b8" />
-                            <span>{(user as any)?.phone || '+1 (555) 000-0000'}</span>
+                        <div>
+                            <label className="ui-label" htmlFor="p-new">New password</label>
+                            <input
+                                id="p-new"
+                                className="ui-input"
+                                type="password"
+                                autoComplete="new-password"
+                                required
+                                value={form.newPassword}
+                                onChange={(e) => setForm({ ...form, newPassword: e.target.value })}
+                            />
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#475569', fontSize: '0.9rem' }}>
-                            <Home size={16} color="#94a3b8" />
-                            <span>{(user as any)?.category || 'General'}</span>
+                        <div>
+                            <label className="ui-label" htmlFor="p-cf">Confirm new password</label>
+                            <input
+                                id="p-cf"
+                                className="ui-input"
+                                type="password"
+                                autoComplete="new-password"
+                                required
+                                value={form.confirmPassword}
+                                onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
+                            />
                         </div>
-                    </div>
-                </div>
-
-                {/* Edit Form */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                    {/* Personal Details */}
-                    <div style={{ backgroundColor: 'white', padding: '2rem', borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
-                        <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#0f172a', marginBottom: '0.25rem' }}>Personal Information</h3>
-                        <p style={{ color: '#64748b', fontSize: '0.85rem', marginBottom: '1.5rem' }}>Update your personal details here</p>
-
-                        <form style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                    <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#334155' }}>Full Name</label>
-                                    <input type="text" defaultValue={user?.name || "Admin User"} style={{ padding: '0.75rem 1rem', borderRadius: '8px', border: 'none', backgroundColor: '#f8fafc', fontSize: '0.9rem', outline: 'none', color: '#334155' }} />
-                                </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                    <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#334155' }}>Phone Number</label>
-                                    <input type="text" defaultValue={(user as any)?.phone || ""} style={{ padding: '0.75rem 1rem', borderRadius: '8px', border: 'none', backgroundColor: '#f8fafc', fontSize: '0.9rem', outline: 'none', color: '#334155' }} />
-                                </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', gridColumn: 'span 2' }}>
-                                    <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#334155' }}>Email Address</label>
-                                    <input type="email" defaultValue={(user as any)?.email || "admin@buildnexdev.com"} style={{ padding: '0.75rem 1rem', borderRadius: '8px', border: 'none', backgroundColor: '#f8fafc', fontSize: '0.9rem', outline: 'none', color: '#334155' }} />
-                                </div>
-                            </div>
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
-                                <button type="button" style={{ padding: '0.75rem 1.5rem', backgroundColor: '#0f172a', color: 'white', border: 'none', borderRadius: '8px', fontWeight: '600', fontSize: '0.95rem', cursor: 'pointer' }}>
-                                    Save Changes
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-
-                    {/* Change Password */}
-                    <div style={{ backgroundColor: 'white', padding: '2rem', borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
-                            <Lock size={20} color="#0f172a" />
-                            <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#0f172a', margin: 0 }}>Change Password</h3>
-                        </div>
-                        <p style={{ color: '#64748b', fontSize: '0.85rem', marginBottom: '1.5rem', marginLeft: '2.25rem' }}>Ensure your account stays secure</p>
-
-                        <form style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#334155' }}>Current Password</label>
-                                <input type="password" placeholder="••••••••" style={{ padding: '0.75rem 1rem', borderRadius: '8px', border: 'none', backgroundColor: '#f8fafc', fontSize: '0.9rem', outline: 'none', color: '#334155' }} />
-                            </div>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                    <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#334155' }}>New Password</label>
-                                    <input type="password" placeholder="New password" style={{ padding: '0.75rem 1rem', borderRadius: '8px', border: 'none', backgroundColor: '#f8fafc', fontSize: '0.9rem', outline: 'none', color: '#334155' }} />
-                                </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                    <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#334155' }}>Confirm Password</label>
-                                    <input type="password" placeholder="Confirm new password" style={{ padding: '0.75rem 1rem', borderRadius: '8px', border: 'none', backgroundColor: '#f8fafc', fontSize: '0.9rem', outline: 'none', color: '#334155' }} />
-                                </div>
-                            </div>
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
-                                <button type="button" style={{ padding: '0.75rem 1.5rem', backgroundColor: '#eff6ff', color: '#3b82f6', border: '1px solid #bfdbfe', borderRadius: '8px', fontWeight: '600', fontSize: '0.95rem', cursor: 'pointer' }}>
-                                    Update Password
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                        <button className="ui-btn ui-btn--primary" type="submit" disabled={saving}>
+                            <Save size={16} /> {saving ? 'Updating…' : 'Update password'}
+                        </button>
+                    </form>
+                </SectionCard>
             </div>
-        </div>
+
+            <style>{`
+                .profile-banner {
+                    position: relative;
+                    overflow: hidden;
+                    display: flex;
+                    align-items: center;
+                    gap: 1.15rem;
+                    padding: 1.5rem 1.75rem;
+                    margin-bottom: 1.25rem;
+                    border-radius: var(--radius-xl);
+                    color: #fff;
+                    background: linear-gradient(120deg, #0A2214 0%, #0F2E1C 35%, var(--primary) 70%, #0E9F8E 100%);
+                    background-size: 180% 180%;
+                    animation: gradientShift 14s ease infinite, fadeInUp 0.45s var(--ease-out) both;
+                    box-shadow: 0 18px 44px rgba(27, 122, 78, 0.28);
+                }
+                .profile-banner__glow {
+                    position: absolute;
+                    width: 240px; height: 240px;
+                    border-radius: 50%;
+                    background: rgba(110, 231, 183, 0.35);
+                    filter: blur(55px);
+                    right: -50px; top: -90px;
+                    animation: floatY 9s ease-in-out infinite;
+                }
+                .profile-banner__avatar {
+                    position: relative;
+                    z-index: 1;
+                    width: 74px; height: 74px;
+                    flex-shrink: 0;
+                    border-radius: 50%;
+                    display: flex; align-items: center; justify-content: center;
+                    font-family: var(--font-display);
+                    font-size: 1.9rem;
+                    font-weight: 800;
+                    background: rgba(255,255,255,0.18);
+                    border: 2px solid rgba(255,255,255,0.35);
+                    backdrop-filter: blur(6px);
+                }
+                .profile-banner__meta { position: relative; z-index: 1; min-width: 0; }
+                .profile-banner__meta h2 {
+                    margin: 0 0 0.5rem;
+                    font-size: 1.4rem;
+                    font-weight: 800;
+                    color: #fff;
+                    letter-spacing: -0.02em;
+                }
+                .profile-banner__meta p { margin: 0; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+                .profile-chip {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.3rem;
+                    padding: 0.28rem 0.65rem;
+                    border-radius: 999px;
+                    font-size: 0.74rem;
+                    font-weight: 700;
+                    text-transform: capitalize;
+                    background: rgba(255,255,255,0.22);
+                    border: 1px solid rgba(255,255,255,0.3);
+                }
+                .profile-chip--ghost { background: rgba(255,255,255,0.12); }
+                .profile-chip--ok { background: rgba(74, 222, 128, 0.25); border-color: rgba(74, 222, 128, 0.45); }
+
+                .profile-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+                    gap: 1rem;
+                    align-items: start;
+                }
+                .profile-details { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+                .profile-detail { display: flex; align-items: flex-start; gap: 0.6rem; }
+                .profile-detail__icon {
+                    width: 30px; height: 30px;
+                    flex-shrink: 0;
+                    border-radius: 9px;
+                    display: flex; align-items: center; justify-content: center;
+                    background: var(--primary-light);
+                    color: var(--primary);
+                }
+                .profile-detail small {
+                    display: block;
+                    font-size: 0.7rem;
+                    font-weight: 800;
+                    text-transform: uppercase;
+                    letter-spacing: 0.06em;
+                    color: var(--text-muted);
+                }
+                .profile-detail strong {
+                    font-size: 0.92rem;
+                    color: var(--text-primary);
+                    text-transform: capitalize;
+                    word-break: break-word;
+                }
+                .profile-note {
+                    margin: 1.1rem 0 0;
+                    padding-top: 0.9rem;
+                    border-top: 1px dashed var(--border);
+                    font-size: 0.78rem;
+                    color: var(--text-muted);
+                }
+                .profile-alert {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    margin-bottom: 1rem;
+                    padding: 0.7rem 0.9rem;
+                    border-radius: var(--radius-md);
+                    font-size: 0.85rem;
+                    animation: fadeInDown 0.3s var(--ease-out) both;
+                }
+                .profile-alert--ok { background: var(--success-light); color: #047857; border: 1px solid #A7F3D0; }
+                .profile-alert--err { background: var(--danger-light); color: #BE123C; border: 1px solid #FECDD3; }
+
+                @media (max-width: 620px) {
+                    .profile-banner { flex-direction: column; text-align: center; padding: 1.35rem; }
+                    .profile-banner__meta p { justify-content: center; }
+                    .profile-details { grid-template-columns: 1fr; }
+                }
+            `}</style>
+        </PageShell>
     );
-};
-
-export default Profile;
+}

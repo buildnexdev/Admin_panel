@@ -1,49 +1,58 @@
 import axios from 'axios';
-// export const API_URL = 'http://localhost:3000/';
-export const API_URL = 'https://api.buildnexdev.in/';
-export const Img_Url = 'https://s3.eu-north-1.amazonaws.com/buildnex-dev-bucket/';
+import apiClient, { API_URL as CLIENT_API_URL, Img_Url as CLIENT_IMG_URL } from './apiClient';
+
+export const API_URL = CLIENT_API_URL;
+export const Img_Url = CLIENT_IMG_URL;
 
 // User login Service
 export const UserloginService = {
     login: async (credentials: { phone: string; password: string }) => {
-        const response = await axios.post(API_URL + 'users/login', credentials, { timeout: 15000 });
+        const response = await apiClient.post('users/login', credentials, { timeout: 15000 });
         return response.data;
     },
     logout: async () => {
         return Promise.resolve(true);
-    }
+    },
+    me: async () => {
+        const response = await apiClient.get('users/me');
+        return response.data;
+    },
+    changePassword: async (payload: { currentPassword: string; newPassword: string }) => {
+        const response = await apiClient.post('users/change-password', payload);
+        return response.data;
+    },
 };
 
 // SCHOOL SERVICE
 export const schoolService = {
     uploadContent: async (data: any) => {
-        const response = await axios.post(API_URL + 'school/upload-content', data); return response.data;
+        const response = await apiClient.post('school/upload-content', data); return response.data;
     },
     uploadImage: async (file: File, caption: string) => {
-        const response = await axios.post(API_URL + 'school/upload-image', { file, caption }); return response.data;
+        const response = await apiClient.post('school/upload-image', { file, caption }); return response.data;
     }
 };
 
 // PHOTO SERVICE
 export const photoService = {
     uploadGalleryItem: async (file: File, category: string) => {
-        const response = await axios.post(API_URL + 'photo/upload-gallery-item', { file, category }); return response.data;
+        const response = await apiClient.post('photo/upload-gallery-item', { file, category }); return response.data;
     }
 };
 
 // BUILDERS SERVICE
 export const buildersService = {
     uploadProject: async (data: any, file: File) => {
-        const response = await axios.post(API_URL + 'builders/upload-project', { data, file }); return response.data;
+        const response = await apiClient.post('builders/upload-project', { data, file }); return response.data;
     },
     uploadHomeBanners: async (userId: number, companyId: number, files: File[]) => {
-        const response = await axios.post(API_URL + 'builders/upload-home-banners', { userId, companyId, files }); return response.data;
+        const response = await apiClient.post('builders/upload-home-banners', { userId, companyId, files }); return response.data;
     }
 }
 
 // HOME PAGE IMAGE UPLOAD SERVICE
 export const homePageImageUpload = async (userId: number, companyId: number, category: string, file: File) => {
-    const response = await axios.post(API_URL + 'home-page/upload-image', {
+    const response = await apiClient.post('home-page/upload-image', {
         file,
         imageName: file.name,
         userId,
@@ -86,7 +95,7 @@ export const uploadHomeImage = async (imageData: FormData | { file?: File; image
         if (imageData instanceof FormData) {
             // FormData - append userId and send with multipart/form-data
             imageData.append('userId', userId.toString());
-            const result = await axios.post(`${API_URL}home-page/upload-image`, imageData, {
+            const result = await apiClient.post(`home-page/upload-image`, imageData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -98,7 +107,7 @@ export const uploadHomeImage = async (imageData: FormData | { file?: File; image
                 ...imageData,
                 userId: userId
             };
-            const result = await axios.post(`${API_URL}home-page/upload-image`, payload);
+            const result = await apiClient.post(`home-page/upload-image`, payload);
             return result.data;
         }
     } catch (error: any) {
@@ -155,7 +164,7 @@ export const uploadBuilderProjectApi = async (projectData: { data: any; file: Fi
             formData.append('category', authUser.category);
         }
 
-        const result = await axios.post(`${API_URL}builders/upload-project`, formData, {
+        const result = await apiClient.post(`builders/upload-project`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -168,7 +177,7 @@ export const uploadBuilderProjectApi = async (projectData: { data: any; file: Fi
 
 /** Get all categories (for project gallery etc.). Expects array in res.data or res.data.data or res. */
 export const getCategories = async () => {
-    const response = await axios.get(`${API_URL}category`);
+    const response = await apiClient.get(`category`);
     const raw = response?.data?.data ?? response?.data ?? response;
     return Array.isArray(raw) ? raw : [];
 };
@@ -176,116 +185,116 @@ export const getCategories = async () => {
 export const contentCMSService = {
     // Projects
     addProject: async (formData: FormData) => {
-        const response = await axios.post(`${API_URL}content/projects`, formData, {
+        const response = await apiClient.post(`content/projects`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
         return response.data;
     },
     getProjects: async (companyID: number, category?: string) => {
-        const url = category ? `${API_URL}content/projects/${companyID}?category=${encodeURIComponent(category)}` : `${API_URL}content/projects/${companyID}`;
-        const response = await axios.get(url);
+        const url = category ? `content/projects/${companyID}?category=${encodeURIComponent(category)}` : `content/projects/${companyID}`;
+        const response = await apiClient.get(url);
         return response.data;
     },
     updateProject: async (id: number, data: FormData | Record<string, unknown>) => {
         if (data instanceof FormData) {
-            const response = await axios.put(`${API_URL}content/projects/${id}`, data, {
+            const response = await apiClient.put(`content/projects/${id}`, data, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             return response.data;
         }
-        const response = await axios.put(`${API_URL}content/projects/${id}`, data);
+        const response = await apiClient.put(`content/projects/${id}`, data);
         return response.data;
     },
     deleteProject: async (id: number) => {
-        const response = await axios.delete(`${API_URL}content/projects/${id}`);
+        const response = await apiClient.delete(`content/projects/${id}`);
         return response.data;
     },
 
     // Banners - add uses POST /banners; get/update/delete use /content/banners
     addBanner: async (formData: FormData) => {
-        const response = await axios.post(`${API_URL}content/banners`, formData, {
+        const response = await apiClient.post(`content/banners`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
         return response.data;
     },
     getBanners: async (companyID: number, category?: string) => {
-        const url = category ? `${API_URL}content/banners/${companyID}?category=${category}` : `${API_URL}content/banners/${companyID}`;
-        const response = await axios.get(url);
+        const url = category ? `content/banners/${companyID}?category=${category}` : `content/banners/${companyID}`;
+        const response = await apiClient.get(url);
         return response.data;
     },
     updateBanner: async (id: number, data: FormData | Record<string, unknown>) => {
         if (data instanceof FormData) {
-            const response = await axios.put(`${API_URL}content/banners/${id}`, data, {
+            const response = await apiClient.put(`content/banners/${id}`, data, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             return response.data;
         }
-        const response = await axios.put(`${API_URL}content/banners/${id}`, data);
+        const response = await apiClient.put(`content/banners/${id}`, data);
         return response.data;
     },
     deleteBanner: async (id: number) => {
-        const response = await axios.delete(`${API_URL}content/banners/${id}`);
+        const response = await apiClient.delete(`content/banners/${id}`);
         return response.data;
     },
 
     // Services - add with payload: name, description, photo, category, userId (FormData or JSON)
     addService: async (data: FormData | { name?: string; title?: string; description?: string; imagePath?: string; category: string; userId: number; companyID?: number }) => {
         if (data instanceof FormData) {
-            const response = await axios.post(`${API_URL}content/services`, data, {
+            const response = await apiClient.post(`content/services`, data, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             return response.data;
         }
-        const response = await axios.post(`${API_URL}content/services`, data);
+        const response = await apiClient.post(`content/services`, data);
         return response.data;
     },
     getServices: async (companyID: number, category?: string) => {
-        const url = category ? `${API_URL}content/services/${companyID}?category=${encodeURIComponent(category)}` : `${API_URL}content/services/${companyID}`;
-        const response = await axios.get(url);
+        const url = category ? `content/services/${companyID}?category=${encodeURIComponent(category)}` : `content/services/${companyID}`;
+        const response = await apiClient.get(url);
         return response.data;
     },
     updateService: async (id: number, data: any) => {
-        const response = await axios.put(`${API_URL}content/services/${id}`, data);
+        const response = await apiClient.put(`content/services/${id}`, data);
         return response.data;
     },
     deleteService: async (id: number) => {
-        const response = await axios.delete(`${API_URL}content/services/${id}`);
+        const response = await apiClient.delete(`content/services/${id}`);
         return response.data;
     },
 
     // Blogs
     addBlog: async (formData: FormData) => {
-        const response = await axios.post(`${API_URL}content/blogs`, formData, {
+        const response = await apiClient.post(`content/blogs`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
         return response.data;
     },
     getBlogs: async (companyID: number, category?: string) => {
-        const url = category ? `${API_URL}content/blogs/${companyID}?category=${encodeURIComponent(category)}` : `${API_URL}content/blogs/${companyID}`;
-        const response = await axios.get(url);
+        const url = category ? `content/blogs/${companyID}?category=${encodeURIComponent(category)}` : `content/blogs/${companyID}`;
+        const response = await apiClient.get(url);
         return response.data;
     },
     updateBlog: async (id: number, data: FormData | Record<string, unknown>) => {
         if (data instanceof FormData) {
-            const response = await axios.put(`${API_URL}content/blogs/${id}`, data, {
+            const response = await apiClient.put(`content/blogs/${id}`, data, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             return response.data;
         }
-        const response = await axios.put(`${API_URL}content/blogs/${id}`, data);
+        const response = await apiClient.put(`content/blogs/${id}`, data);
         return response.data;
     },
     deleteBlog: async (id: number) => {
-        const response = await axios.delete(`${API_URL}content/blogs/${id}`);
+        const response = await apiClient.delete(`content/blogs/${id}`);
         return response.data;
     },
 
     addContact: async (data: any) => {
-        const response = await axios.post(`${API_URL}content/contact`, data);
+        const response = await apiClient.post(`content/contact`, data);
         return response.data;
     },
     getContactMessages: async (companyID: number) => {
-        const response = await axios.get(`${API_URL}content/contact/${companyID}`);
+        const response = await apiClient.get(`content/contact/${companyID}`);
         return response.data;
     }
 };
@@ -294,7 +303,7 @@ export const contentCMSService = {
 // Upload multiple banners and save to tblBannerImg
 export const uploadBannersToTable = async (formData: FormData) => {
     try {
-        const response = await axios.post(`${API_URL}banners/upload`, formData, {
+        const response = await apiClient.post(`banners/upload`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
@@ -308,7 +317,7 @@ export const uploadBannersToTable = async (formData: FormData) => {
 // Save banner paths to tblBannerImg (pass category and userId in payload)
 export const saveBannerPaths = async (data: { bannerPaths: string[]; companyID: number; userId: number; category: string }) => {
     try {
-        const response = await axios.post(`${API_URL}banners/save-paths`, data);
+        const response = await apiClient.post(`banners/save-paths`, data);
         return response.data;
     } catch (error: any) {
         throw new Error(error.response?.data?.message || error.message || 'Failed to save banner paths');
@@ -344,7 +353,7 @@ export const imageUploadToS3 = async (result: any, path: any, loginData: any, fi
 };
 
 export const fetchQuotationByToken = async (token: string) => {
-    const response = await axios.get(`${API_URL}quotation/${token}`);
+    const response = await apiClient.get(`quotation/${token}`);
     const raw = response?.data;
     const data = raw?.data ?? raw?.response ?? raw?.quotation ?? raw;
     if (data && typeof data === "object") {
@@ -361,7 +370,7 @@ export const fetchQuotationByToken = async (token: string) => {
 
 /** List all quotations for the current user (optional userId, category). Expects array in res.data or res.data.data */
 export const getQuotationList = async (params?: { userId?: number; category?: string | null }) => {
-    const response = await axios.get(`${API_URL}quotation`, { params: params ?? {} });
+    const response = await apiClient.get(`quotation`, { params: params ?? {} });
     const data = response?.data?.data ?? response?.data;
     return Array.isArray(data) ? data : [];
 };
@@ -375,14 +384,14 @@ export const createQuotation = async (data: {
     category?: string | null;
     company_name?: string | null;
 }) => {
-    const response = await axios.post(`${API_URL}quotation`, data);
+    const response = await apiClient.post(`quotation`, data);
     return response.data;
 };
 
 /** Call when client opens the quotation link – backend should increment view/click count */
 export const recordQuotationView = async (token: string) => {
     try {
-        await axios.post(`${API_URL}quotation/${token}/view`, {});
+        await apiClient.post(`quotation/${token}/view`, {});
         return true;
     } catch {
         return false;
@@ -392,12 +401,12 @@ export const recordQuotationView = async (token: string) => {
 /** Get view/click count for a quotation. Tries /stats first, then GET quotation (view_count in body). */
 export const getQuotationViewCount = async (token: string): Promise<number> => {
     try {
-        const res = await axios.get(`${API_URL}quotation/${token}/stats`);
+        const res = await apiClient.get(`quotation/${token}/stats`);
         const count = res?.data?.view_count ?? res?.data?.viewCount ?? res?.data?.clicks ?? 0;
         return Number(count);
     } catch {
         try {
-            const res = await axios.get(`${API_URL}quotation/${token}`);
+            const res = await apiClient.get(`quotation/${token}`);
             const data = res?.data?.data ?? res?.data;
             const count = data?.view_count ?? data?.viewCount ?? data?.clicks ?? 0;
             return Number(count);
@@ -408,19 +417,19 @@ export const getQuotationViewCount = async (token: string): Promise<number> => {
 };
 
 export const updateQuotation = async (token: string, data: { client_name?: string; project_details?: string; price?: number }) => {
-    const response = await axios.put(`${API_URL}quotation/${token}`, data);
+    const response = await apiClient.put(`quotation/${token}`, data);
     return response.data;
 };
 
 export const deleteQuotation = async (token: string) => {
-    const response = await axios.delete(`${API_URL}quotation/${token}`);
+    const response = await apiClient.delete(`quotation/${token}`);
     return response.data;
 };
 
 // ─── SRS Images ─────────────────────────────────────────────────────────────
 /** List SRS images for company. Expects array in res.data or res.data.data */
 export const getSrsImagesList = async (params?: { companyID?: number; userId?: number }) => {
-    const response = await axios.get(`${API_URL}srs-images`, { params: params ?? {} });
+    const response = await apiClient.get(`srs-images`, { params: params ?? {} });
     const data = response?.data?.data ?? response?.data;
     return Array.isArray(data) ? data : [];
 };
@@ -443,7 +452,7 @@ export const createSrsImages = async (payload: {
         companyID: payload.companyID,
         userId: payload.userId,
     };
-    const response = await axios.post(`${API_URL}srs-images`, body);
+    const response = await apiClient.post(`srs-images`, body);
     return response.data;
 };
 
@@ -455,12 +464,12 @@ export const updateSrsImage = async (
     const body: Record<string, unknown> = { ...payload };
     if (payload.description !== undefined && payload.disc === undefined) body.disc = payload.description;
     if (body.description !== undefined) delete body.description;
-    const response = await axios.put(`${API_URL}srs-images/${id}`, body);
+    const response = await apiClient.put(`srs-images/${id}`, body);
     return response.data;
 };
 
 /** Delete SRS image record by id */
 export const deleteSrsImage = async (id: number) => {
-    const response = await axios.delete(`${API_URL}srs-images/${id}`);
+    const response = await apiClient.delete(`srs-images/${id}`);
     return response.data;
 };
