@@ -91,7 +91,9 @@ const HomeBannerUpload = () => {
 
     const handleEditClick = (banner: any) => {
         setEditBannerId(banner.id);
-        setEditImagePreview(Img_Url + (banner.imageUrl || banner.image_url));
+        const raw = banner.imageUrl || banner.image_url || '';
+        const previewUrl = raw.startsWith('http') ? raw : (Img_Url + raw);
+        setEditImagePreview(previewUrl);
         setEditImageFile(null);
         setShowEditForm(true);
         setShowUpload(false);
@@ -404,7 +406,9 @@ const HomeBannerUpload = () => {
                         }}>
                             <div style={{ height: '200px', position: 'relative' }}>
                                 <img
-                                    src={Img_Url + (banner.imageUrl || banner.image_url)}
+                                    src={(banner.imageUrl || banner.image_url || '').startsWith('http')
+                                        ? (banner.imageUrl || banner.image_url)
+                                        : (Img_Url + (banner.imageUrl || banner.image_url || ''))}
                                     alt="Banner"
                                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 />

@@ -8,7 +8,7 @@ export const API_URL =
     (typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname)
         ? 'http://localhost:3000/'
         : 'https://api.buildnexdev.in/');
-export const Img_Url = import.meta.env.VITE_IMG_URL || 'https://s3.eu-north-1.amazonaws.com/buildnex-dev-bucket/';
+export const Img_Url = import.meta.env.VITE_IMG_URL || 'https://s3.ap-southeast-2.amazonaws.com/buildndexdev-bucket/';
 
 const apiClient = axios.create({
     baseURL: API_URL,
