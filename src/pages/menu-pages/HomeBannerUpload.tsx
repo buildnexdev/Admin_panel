@@ -410,7 +410,12 @@ const HomeBannerUpload = () => {
                 gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))',
                 gap: '1.5rem'
             }}>
-                {banners && banners.length > 0 ? (
+                {loading ? (
+                    <div style={{ gridColumn: '1 / -1', padding: '4rem 2rem', textAlign: 'center', backgroundColor: 'var(--background)', borderRadius: '16px', border: '1px dashed var(--border-strong)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        <Loader2 size={36} style={{ animation: 'spin 1s linear infinite', color: 'var(--primary)', marginBottom: '0.75rem' }} />
+                        <p style={{ color: 'var(--text-secondary)', fontWeight: '500', margin: 0 }}>Loading banners...</p>
+                    </div>
+                ) : banners && banners.length > 0 ? (
                     banners.map((banner: any, index: number) => (
                         <div key={banner.id} style={{
                             backgroundColor: 'white',
@@ -505,11 +510,6 @@ const HomeBannerUpload = () => {
                             </div>
                         </div>
                     ))
-                ) : loading ? (
-                    <div style={{ gridColumn: '1 / -1', padding: '4rem 2rem', textAlign: 'center', backgroundColor: 'var(--background)', borderRadius: '16px', border: '1px dashed var(--border-strong)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                        <Loader2 size={36} style={{ animation: 'spin 1s linear infinite', color: 'var(--primary)', marginBottom: '0.75rem' }} />
-                        <p style={{ color: 'var(--text-secondary)', fontWeight: '500', margin: 0 }}>Loading banners...</p>
-                    </div>
                 ) : (
                     <div style={{ gridColumn: '1 / -1', padding: '4rem 2rem', textAlign: 'center', backgroundColor: 'var(--background)', borderRadius: '16px', border: '1px dashed var(--border-strong)' }}>
                         <p style={{ color: 'var(--text-secondary)', fontWeight: '500' }}>No active banners found.</p>

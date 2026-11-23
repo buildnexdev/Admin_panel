@@ -537,8 +537,19 @@ const buildersSlice = createSlice({
                 state.loading = false;
                 state.projects = action.payload || [];
             })
-            // Individual fetch status handling
-            .addCase(fetchBanners.fulfilled, (state, action) => { state.banners = action.payload || []; })
+            // Banners fetch handling
+            .addCase(fetchBanners.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchBanners.fulfilled, (state, action) => {
+                state.loading = false;
+                state.banners = action.payload || [];
+            })
+            .addCase(fetchBanners.rejected, (state, action) => {
+                state.loading = false;
+                state.error = typeof action.payload === 'string' ? action.payload : 'Failed to fetch banners';
+            })
             .addCase(fetchServices.fulfilled, (state, action) => { state.services = action.payload || []; })
             .addCase(fetchBlogs.fulfilled, (state, action) => { state.blogs = action.payload || []; })
             // Upload & Delete Actions
