@@ -333,8 +333,15 @@ export const imageUploadToS3 = async (result: any, path: any, loginData: any, fi
     if (databaseName) formData.append('databaseName', databaseName);
     formData.append('fileFormat', fileType ? fileType : 'Image');
 
+    const token = localStorage.getItem('auth_token');
+    const headers: Record<string, string> = {};
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`${API_URL}uploadImageToServer`, {
         method: 'POST',
+        headers,
         body: formData,
     });
 
