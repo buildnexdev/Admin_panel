@@ -5,7 +5,7 @@ import { fetchBanners, updateBanner, addSingleBanner, deleteBanner } from '../..
 import { Img_Url, contentCMSService } from '../../services/api';
 import type { AppDispatch, RootState } from '../../store/store';
 import ConfirmModal from '../../components/ConfirmModal';
-import { Plus, Upload, X, Edit2, Trash2 } from 'lucide-react';
+import { Plus, Upload, X, Edit2, Trash2, Loader2 } from 'lucide-react';
 
 const MAX_PUBLISHED_BANNERS = 5;
 const CATEGORY = 'HomeBanner';
@@ -32,6 +32,7 @@ const HomeBannerUpload = () => {
     const [editImageFile, setEditImageFile] = useState<File | null>(null);
     const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
     const [confirmDelete, setConfirmDelete] = useState<{ open: boolean; banner: any }>({ open: false, banner: null });
+    const [deleteLoading, setDeleteLoading] = useState(false);
 
     useEffect(() => {
         if (showEditForm) {
@@ -103,11 +104,20 @@ const HomeBannerUpload = () => {
         if (!companyID) return;
         setConfirmDelete({ open: true, banner });
     };
-    const handleConfirmDelete = () => {
+    const handleConfirmDelete = async () => {
         if (confirmDelete.banner && companyID) {
-            dispatch(deleteBanner({ id: confirmDelete.banner.id, companyID, category: CATEGORY }));
+            setDeleteLoading(true);
+            try {
+                await dispatch(deleteBanner({ id: confirmDelete.banner.id, companyID, category: CATEGORY })).unwrap();
+            } catch (err) {
+                console.error('Delete error:', err);
+            } finally {
+                setDeleteLoading(false);
+                setConfirmDelete({ open: false, banner: null });
+            }
+        } else {
+            setConfirmDelete({ open: false, banner: null });
         }
-        setConfirmDelete({ open: false, banner: null });
     };
 
     const handleUpdateBanner = async (e: React.FormEvent) => {
@@ -135,8 +145,9 @@ const HomeBannerUpload = () => {
                 title="Delete banner"
                 message="Are you sure you want to delete this banner?"
                 confirmLabel="Delete"
+                loading={deleteLoading}
                 onConfirm={handleConfirmDelete}
-                onCancel={() => setConfirmDelete({ open: false, banner: null })}
+                onCancel={() => !deleteLoading && setConfirmDelete({ open: false, banner: null })}
             />
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
@@ -256,11 +267,16 @@ const HomeBannerUpload = () => {
                                             fontWeight: '600',
                                             fontSize: '0.95rem',
                                             cursor: loading ? 'not-allowed' : 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '0.5rem',
                                             boxShadow: '0 4px 12px rgba(15, 23, 42, 0.2)',
                                             transition: 'all 0.2s'
                                         }}
                                     >
-                                        {loading ? 'Saving...' : 'Save Changes'}
+                                        {loading && <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />}
+                                        {loading ? 'Saving Changes...' : 'Save Changes'}
                                     </button>
                                     <button
                                         type="button"
@@ -364,7 +380,8 @@ const HomeBannerUpload = () => {
                                     cursor: (loading || selectedFiles.length === 0) ? 'not-allowed' : 'pointer'
                                 }}
                             >
-                                {loading ? 'Uploading...' : 'Upload & Save Banners'}
+                                {loading && <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />}
+                                {loading ? 'Uploading Banners...' : 'Upload & Save Banners'}
                             </button>
                             <button
                                 type="button"
@@ -488,6 +505,11 @@ const HomeBannerUpload = () => {
                             </div>
                         </div>
                     ))
+                ) : loading ? (
+                    <div style={{ gridColumn: '1 / -1', padding: '4rem 2rem', textAlign: 'center', backgroundColor: 'var(--background)', borderRadius: '16px', border: '1px dashed var(--border-strong)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        <Loader2 size={36} style={{ animation: 'spin 1s linear infinite', color: 'var(--primary)', marginBottom: '0.75rem' }} />
+                        <p style={{ color: 'var(--text-secondary)', fontWeight: '500', margin: 0 }}>Loading banners...</p>
+                    </div>
                 ) : (
                     <div style={{ gridColumn: '1 / -1', padding: '4rem 2rem', textAlign: 'center', backgroundColor: 'var(--background)', borderRadius: '16px', border: '1px dashed var(--border-strong)' }}>
                         <p style={{ color: 'var(--text-secondary)', fontWeight: '500' }}>No active banners found.</p>

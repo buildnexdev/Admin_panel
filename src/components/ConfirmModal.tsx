@@ -1,21 +1,23 @@
 import { createPortal } from 'react-dom';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Loader2 } from 'lucide-react';
 
 interface ConfirmModalProps {
     open: boolean;
     title?: string;
     message: string;
     confirmLabel?: string;
+    loading?: boolean;
     onConfirm: () => void;
     onCancel: () => void;
 }
 
-const ConfirmModal = ({ open, title = 'Confirm', message, confirmLabel = 'Delete', onConfirm, onCancel }: ConfirmModalProps) => {
+const ConfirmModal = ({ open, title = 'Confirm', message, confirmLabel = 'Delete', loading = false, onConfirm, onCancel }: ConfirmModalProps) => {
     if (!open) return null;
 
     const handleConfirm = () => {
-        onConfirm();
-        onCancel();
+        if (!loading) {
+            onConfirm();
+        }
     };
 
     const modal = (
@@ -80,25 +82,41 @@ const ConfirmModal = ({ open, title = 'Confirm', message, confirmLabel = 'Delete
                             fontFamily: "'Plus Jakarta Sans', sans-serif",
                         }}>{title}</h3>
                         <p style={{ margin: '0.65rem 0 0', fontSize: '0.925rem', color: 'var(--text-secondary)', lineHeight: 1.55 }}>{message}</p>
-                        <div style={{ display: 'flex', gap: '0.65rem', marginTop: '1.25rem', justifyContent: 'flex-end' }}>
+                        <div style={{ display: 'flex', gap: '0.65rem', marginTop: '1.25rem', justifyContent: 'flex-end', alignItems: 'center' }}>
                             <button
                                 type="button"
                                 onClick={onCancel}
+                                disabled={loading}
                                 className="ui-btn ui-btn--secondary"
+                                style={{ opacity: loading ? 0.6 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
                             >
                                 Cancel
                             </button>
                             <button
                                 type="button"
                                 onClick={handleConfirm}
+                                disabled={loading}
                                 className="ui-btn"
                                 style={{
                                     background: 'var(--gradient-sunset)',
                                     color: 'white',
                                     boxShadow: '0 10px 22px rgba(225, 29, 72, 0.28)',
+                                    opacity: loading ? 0.7 : 1,
+                                    cursor: loading ? 'not-allowed' : 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem'
                                 }}
                             >
-                                {confirmLabel}
+                                {loading && (
+                                    <Loader2
+                                        size={16}
+                                        style={{
+                                            animation: 'spin 1s linear infinite'
+                                        }}
+                                    />
+                                )}
+                                {loading ? 'Deleting...' : confirmLabel}
                             </button>
                         </div>
                     </div>
