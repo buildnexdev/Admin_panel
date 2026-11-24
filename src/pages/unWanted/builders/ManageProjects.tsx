@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProjects, deleteProject, updateProject } from '../../../store/slices/buildersSlice';
 import type { AppDispatch, RootState } from '../../../store/store';
-import { Briefcase, Edit2, Trash2, X } from 'lucide-react';
+import { Briefcase, Edit2, Trash2, X, Upload, Plus, Loader2 } from 'lucide-react';
 import ConfirmModal from '../../../components/ConfirmModal';
 import { Img_Url } from '../../../services/api';
 
@@ -18,6 +18,8 @@ const ManageProjects = () => {
     });
     const [editOpen, setEditOpen] = useState(false);
     const [editId, setEditId] = useState<number | null>(null);
+    const [editImageFile, setEditImageFile] = useState<File | null>(null);
+    const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
     const [saving, setSaving] = useState(false);
     const [formError, setFormError] = useState<string | null>(null);
     const [form, setForm] = useState({
@@ -43,6 +45,9 @@ const ManageProjects = () => {
 
     const openEdit = (project: any) => {
         setEditId(project.id);
+        const img = getImageUrl(project);
+        setEditImagePreview(img || null);
+        setEditImageFile(null);
         setForm({
             title: project.title || '',
             description: project.description || '',
@@ -56,6 +61,8 @@ const ManageProjects = () => {
     const closeEdit = () => {
         setEditOpen(false);
         setEditId(null);
+        setEditImageFile(null);
+        setEditImagePreview(null);
         setFormError(null);
     };
 
@@ -79,6 +86,7 @@ const ManageProjects = () => {
                         category: form.category.trim(),
                         isActive: form.isActive,
                     },
+                    imageFile: editImageFile,
                 }) as any
             );
             if (updateProject.fulfilled.match(result)) {
@@ -276,7 +284,9 @@ const ManageProjects = () => {
                             onClick={(e) => e.stopPropagation()}
                             style={{
                                 width: '100%',
-                                maxWidth: 460,
+                                maxWidth: 480,
+                                maxHeight: '90vh',
+                                overflowY: 'auto',
                                 background: '#fff',
                                 borderRadius: 14,
                                 padding: '1.5rem',
@@ -293,6 +303,75 @@ const ManageProjects = () => {
                             {formError && (
                                 <p style={{ margin: '0 0 0.75rem', color: '#be123c', fontSize: '0.85rem' }}>{formError}</p>
                             )}
+
+                            {/* Project Image Preview & Upload */}
+                            <label className="ui-label" style={{ marginBottom: '0.4rem', display: 'block' }}>Project Image</label>
+                            <div style={{
+                                display: 'flex',
+                                gap: '1rem',
+                                alignItems: 'center',
+                                marginBottom: '1rem',
+                                padding: '0.75rem',
+                                borderRadius: '10px',
+                                border: '1px dashed var(--border)',
+                                backgroundColor: 'var(--background)'
+                            }}>
+                                <div style={{
+                                    width: '84px',
+                                    height: '64px',
+                                    borderRadius: '8px',
+                                    overflow: 'hidden',
+                                    backgroundColor: '#f1f5f9',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    flexShrink: 0,
+                                    border: '1px solid var(--border)'
+                                }}>
+                                    {editImagePreview ? (
+                                        <img src={editImagePreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    ) : (
+                                        <Upload size={22} style={{ color: 'var(--text-muted)' }} />
+                                    )}
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                    <label style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '0.4rem',
+                                        padding: '0.45rem 0.85rem',
+                                        backgroundColor: '#eff6ff',
+                                        color: 'var(--primary)',
+                                        borderRadius: '8px',
+                                        fontSize: '0.85rem',
+                                        fontWeight: '600',
+                                        cursor: 'pointer',
+                                        border: '1px solid var(--info-light)',
+                                        transition: 'all 0.2s'
+                                    }}>
+                                        <Plus size={16} />
+                                        {editImagePreview ? 'Change Image' : 'Upload Image'}
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(e) => {
+                                                const f = e.target.files?.[0];
+                                                if (f) {
+                                                    setEditImageFile(f);
+                                                    setEditImagePreview(URL.createObjectURL(f));
+                                                }
+                                            }}
+                                            style={{ display: 'none' }}
+                                        />
+                                    </label>
+                                    {editImageFile && (
+                                        <p style={{ margin: '0.35rem 0 0', fontSize: '0.75rem', color: '#16a34a', fontWeight: '500' }}>
+                                            Selected: {editImageFile.name}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+
                             <label className="ui-label" htmlFor="mp-title">Title</label>
                             <input
                                 id="mp-title"
@@ -334,10 +413,11 @@ const ManageProjects = () => {
                                 <option value={0}>Inactive</option>
                             </select>
                             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem', marginTop: '1.25rem' }}>
-                                <button type="button" className="ui-btn ui-btn--secondary" onClick={closeEdit}>
+                                <button type="button" className="ui-btn ui-btn--secondary" onClick={closeEdit} disabled={saving}>
                                     Cancel
                                 </button>
-                                <button type="submit" className="ui-btn ui-btn--primary" disabled={saving}>
+                                <button type="submit" className="ui-btn ui-btn--primary" disabled={saving} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                    {saving && <Loader2 size={16} className="animate-spin" />}
                                     {saving ? 'Saving…' : 'Save changes'}
                                 </button>
                             </div>
